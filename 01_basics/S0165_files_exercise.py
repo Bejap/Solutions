@@ -1,3 +1,4 @@
+
 def file_reading(filename):
     with open(filename, "r") as file:
         lines = file.readlines()
