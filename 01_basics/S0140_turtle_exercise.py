@@ -77,9 +77,18 @@ def square_pattern(spiral_turns, space, length, drawsize):
         Tom.forward(length)
         Tom.left(90)
         length += space
+
+
+
+        if visible(Tom) == True:
+            Tom.penup()
+            Tom.home()
+
+
+
     turtle.done()
 
-# square_pattern(10, 20, 20, 20)
+square_pattern(35, 20, 20, 2)
 
 def starforming(tacks, size):
 
