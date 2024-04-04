@@ -13,28 +13,25 @@ class Miner:
         self.miner["sleepiness"] -= 10
         self.miner["thirst"] += 1
         self.miner["hunger"] += 1
-        self.miner["whisky"] += 0
-        self.miner["gold"] += 0
+
 
     def _drink(self):
         self.miner["sleepiness"] += 5
         self.miner["thirst"] -= 15
         self.miner["hunger"] -= 1
         self.miner["whisky"] -= 1
-        self.miner["gold"] += 0
+
 
     def _eat(self):
         self.miner["sleepiness"] += 5
         self.miner["thirst"] -= 5
         self.miner["hunger"] -= 20
-        self.miner["whisky"] += 0
         self.miner["gold"] -= 2
 
     def _mine(self):
         self.miner["sleepiness"] += 5
         self.miner["thirst"] += 5
         self.miner["hunger"] += 5
-        self.miner["whisky"] += 0
         self.miner["gold"] += 5
 
     def _buy_whisky(self):
@@ -58,16 +55,18 @@ class Miner:
     def round(self):
         if self.miner["sleepiness"] >= 95:
             self._sleep()
-        elif self.miner["thirst"] >= 95:
-            self.miner["round"] += 1
+        elif self.miner["thirst"] >= 93:
             self._buy_whisky()
+            self.miner["round"] += 1
             if not self.dead():
+                print(self.miner)
                 self._drink()
             else:
                 print(self.miner)
                 quit()
-        elif self.miner["hunger"] >= 95:
+        elif self.miner["hunger"] >= 94:
             self._eat()
+            self.miner["round"] += 1
         else:
             self._mine()
         self.miner["round"] += 1
@@ -86,4 +85,3 @@ def the_miner():
 
 the_miner()
 
-# I've killed Morris in round 87, after mining approximitly 200 gold pieces. He died of thirst doing what he loved.
