@@ -74,14 +74,14 @@ class Miner:
         print(self.miner)
         return self.miner["round"]
 
-
-
 def the_miner():
     morris = Miner("Morris")
     turn = morris.getTurn()
     while not morris.dead() == True and turn < 1000:
         morris.round
         turn = morris.getTurn()
+
+
 
 the_miner()
 
