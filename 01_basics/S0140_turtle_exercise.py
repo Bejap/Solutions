@@ -88,14 +88,14 @@ def square_pattern(spiral_turns, space, length, drawsize):
 
     turtle.done()
 
-square_pattern(35, 20, 20, 2)
+#square_pattern(35, 20, 20, 2)
 
 def starforming(tacks, size):
 
     Tom.speed(10)
     if tacks % 2 == 0:
         for i in range(tacks):
-            tacks_degree =  1080/tacks
+            tacks_degree =  (1080/tacks)
             Tom.right(tacks_degree)
             Tom.forward(size)
     else:
@@ -110,6 +110,6 @@ def starforming(tacks, size):
 
 
 
-# starforming(26, 50)
+starforming(12, 50)
 
 
