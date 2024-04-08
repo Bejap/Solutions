@@ -46,27 +46,82 @@ Hunts sheep: {self.hunts_sheep}
     def wag_tail(self):
         print("The dog {0} is waging its {1} cm long tail!".format(self.name, self.tail_length))
 
-# Opgave 8
-    def mate(self, father, mother):
-        if type(father) == type(mother):
-            f_tail = father._getTail()
-            m_tail = mother._getTail()
-            c_tail = (f_tail + m_tail)/2 *( (random.randrange(6, 12)/10))
-
-
-
-
-
 # Opgave 9
+
+    def __add__(self, other):
+        if isinstance(other, Dog):
+            child = "something"
+            something = Mate(child, self, other)
+            return something
+        else:
+            return "Doesn't work like that."
+
+# Opgave 8
+
+class Mate(Dog):
+    def __init__(self, name, F, M):
+        if type(F) == type(M) and F.female != M.female:
+            fh, fw, ft, fhs = F.height, F.weight, F.tail_length, F.hunts_sheep
+            mh, mw, mt, mhs = M.height, M.weight, M.tail_length, M.hunts_sheep
+
+            if random.random() < 0.5:
+                gender = True
+            else:
+                gender = False
+
+            ch = (fh + mh) / 2 + random.random() / 4 if gender else (fh + mh) / 2 - random.random() / 4
+            cw = (fw + mw) / 2 + random.random() / 4 if gender else (fw + mw) / 2 - random.random() / 4
+            ct = (ft + mt) / 2 + random.random() / 4 if gender else (ft + mt) / 2 - random.random() / 4
+            chs = self._hunter(fhs, mhs)
+            super().__init__(name, "vov", ch, cw, 4, gender, ct, chs)
+        else:
+            print("The dogs cannot mate because they are of the same gender.")
+
+    def _hunter(self, f, m):
+        the_factor = random.random()
+        if f:
+            if m:
+                return the_factor < 0.95
+            else:
+                return the_factor < 0.65
+        else:
+            if m:
+                return the_factor < 0.4
+            else:
+                return the_factor < 0.05
+
+
+
+
+
+
+
+
+
 # Opgave 10
 
 
 
 
+
+def mating(name, F, M):
+
+    child = Mate(name, F, M)
+    return child
+
+
+
+
 def main():
-    M_dog = Dog( "Carl", "vov", 2, 45, 4, True, 15, True)
-    print(my_dog)
-    my_dog.wag_tail()
+    mother = Dog("hannah", "vov", 1.2, 32, 4, True, 15, True)
+    father = Dog("Carl", "vov", 0.7, 45, 4, False, 23, True)
+
+    cho = mating("charlie", mother, father)
+
+    fido = mother + father
+    print(fido)
+    print(cho)
+
 
 
 
