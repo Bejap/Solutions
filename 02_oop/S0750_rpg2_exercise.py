@@ -156,7 +156,7 @@ def main():
                 mwin += 1
             if not Horseman == type(winner):
                 hwin += 1
-    print("Character wins: {0}, Magician wins: {1}, Horseman wins: {2}".format(twin, mwin, hwin))
+    print(f"Character wins: {twin}, Magician wins: {mwin}, Horseman wins: {hwin}")
 
 main()
 
