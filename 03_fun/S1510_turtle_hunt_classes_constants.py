@@ -9,7 +9,7 @@ class Bejap(turtle.Turtle):
         super().__init__()
         self.orientation = 0
 
-    def rotate_prey(self, positions):  # turtle will be turned right <degree> degrees. Use negative values for left turns.
+    def rotate_prey(self, positions):
         # self: the turtle that shall be rotated
         # positions: a list of tuples. Each tuple is a pair of coordinates (x,y).
         # positions[0] is the coordinate tuple of the prey. positions[0][0] is the x-coordinate of the prey.
@@ -17,9 +17,11 @@ class Bejap(turtle.Turtle):
         # for example is positions[3][1] the y-coordinate of the third hunter.
 
         # Example for use of the service functions distance() and direction
-        print(f'{distance(positions[0], positions[1])=}   {direction(positions[0], positions[1])=}')  # print distance and direction from prey to hunter1
+        print(f'''  {distance(positions[0], positions[1])=}   {direction(positions[0], positions[1])=}
+                    {distance(positions[0], positions[2])=}   {direction(positions[0], positions[2])=}
+                    {distance(positions[0], positions[3])=}   {direction(positions[0], positions[3])=}''')
 
-        degree = 3  # When the turtle rotates the same amount each turn,  it will just run in a circle. Make this function smarter!
+        degree = (direction(positions[0], positions[1]) + direction(positions[0], positions[2]) + direction(positions[0], positions[3]))/3
         self.orientation += degree
         self.orientation %= 360
         print(self.orientation)
@@ -27,7 +29,7 @@ class Bejap(turtle.Turtle):
 
     def rotate_hunter(self, positions):  # turtle will be turned right <degree> degrees. Use negative values for left turns.
         # Example for use of the service functions distance() and direction
-        # print(f'{distance(self.position(), positions[0])=}   {direction(self.position(), positions[0])=}')  # print distance and direction from the current hunter to the prey
+        print(f'{distance(self.position(), positions[0])=}   {direction(self.position(), positions[0])=}')  # print distance and direction from the current hunter to the prey
         degree = -0.5  # When the turtle rotates the same amount each turn,  it will just run in a circle. Make this function smarter!
         self.orientation += degree
         self.orientation %= 360
@@ -53,5 +55,9 @@ CAUGHT_DISTANCE = 10  # Hunt is over, when a hunter is nearer to the prey than t
 random.seed(2)  # use seed() if you want reproducible random numbers for debugging purposes. You may change the argument of seed().
 
 
-class1 = Bejap  # (red prey) Replace PlayerName1 by your own class name here.
-class2 = Bejap  # (green prey) For testing your code, replace PlayerName1 by your own class name here. Later replace this by your sparring partner's class name.
+class1 = Bejap()  # (red prey) Replace PlayerName1 by your own class name here.
+class2 = Bejap()  # (green prey) For testing your code, replace PlayerName1 by your own class name here. Later replace this by your sparring partner's class name.
+
+posi = [(50, 50), (50, -50), (-50, 50), (-50, -50)]
+
+class1.rotate_hunter(posi)
