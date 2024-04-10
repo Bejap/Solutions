@@ -94,7 +94,7 @@ class Bejap(turtle.Turtle):
         # Example for use of the service functions distance() and direction
         print(f'{distance(positions[0], positions[1])=}   {direction(positions[0], positions[1])=}')  # print distance and direction from prey to hunter1
 
-        degree = 3  # When the turtle rotates the same amount each turn,  it will just run in a circle. Make this function smarter!
+        degree =   # When the turtle rotates the same amount each turn,  it will just run in a circle. Make this function smarter!
         self.orientation += degree
         self.orientation %= 360
         # print(self.orientation)
