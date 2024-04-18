@@ -33,21 +33,10 @@ Når dit program er færdigt, skal du skubbe det til dit github-repository.
 Send derefter denne Teams-meddelelse til din lærer: <filename> færdig
 Fortsæt derefter med den næste fil."""
 
-def pyramid(lines):
-    numbers = [1, 1]
-    print(numbers)
-    numbers2 = [i for i in numbers]
-    number_lists = [numbers]
-    for line in range(lines):
-        number_lists.append(number_lists[line].copy())
-        print("row " + str(line+1), end=": ")
-        print(number_lists[line])
-        index_shift = 0
-        for n in range(len(numbers) - 1):
-            if numbers[n] + numbers[n + 1] == line + 2:
-                numbers2.insert(n + index_shift + 1, line + 2)
-                index_shift += 1
-        numbers = [i for i in numbers2]
+def pyramid(row_amount):
+    row_0 = [1, 1]
+    for i in range(row_amount):
+
 
 
 
