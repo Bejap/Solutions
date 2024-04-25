@@ -33,40 +33,17 @@ Når dit program er færdigt, skal du skubbe det til dit github-repository.
 Send derefter denne Teams-meddelelse til din lærer: <filename> færdig
 Fortsæt derefter med den næste fil."""
 
-def next_number(row, i):
-    if i == 0:
-        k = row[i] + row[i+1]
-    else:
-        k = row[i] + row[i-1]
-    return k
-
-def old_number(row, x):
-    return row[x]
-
-
 def pyramid(row_amount):
     row = [1, 1]
-    print(row)
-    insertionrate = 1
-    for i in range(row_amount - 1):
-        cal = 1
-        new_row = [1]
-        for x in range(insertionrate):
-            if x % 2 == 0:
-                t = next_number(row, cal)
-                new_row.append(t)
-            else:
-                y = old_number(row, cal)
-                cal += 1
-                new_row.append(y)
-        new_row.append(1)
-        print(new_row)
-        row = new_row
-        if insertionrate >= 2:
-            insertionrate = 2 * insertionrate + 1
-        else:
-            insertionrate += 2
+    new_row = row
+    for i in range(1, row_amount):
+        u = 0
+        for j in range(len(row)):
+            if j < len(row) - 1 and row[j] + row[j + 1] == i:
+                new_row.insert(j + 1 + u, i)
+                u += 1
+        row = new_row.copy()
+        print(f"row {i}: {row}")
 
 
-
-pyramid(6)
+pyramid(7)
