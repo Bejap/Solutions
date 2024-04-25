@@ -36,14 +36,14 @@ Fortsæt derefter med den næste fil."""
 def pyramid(row_amount):
     row = [1, 1]
     new_row = row
-    for i in range(1, row_amount):
+    for i in range(1, row_amount + 1):
         u = 0
-        for j in range(len(row)):
-            if j < len(row) - 1 and row[j] + row[j + 1] == i:
+        for j in range(len(row) - 1):
+            if row[j] + row[j + 1] == i:
                 new_row.insert(j + 1 + u, i)
                 u += 1
         row = new_row.copy()
         print(f"row {i}: {row}")
 
 
-pyramid(7)
+pyramid(1000)

@@ -4,8 +4,8 @@ def pyramid(pyra_st, amount):
     new_row = row
     for i in range(1, amount + 1):  # initiates a loop for the amount of rows
         u = 0  # creates an index shift
-        for j in range(len(row)):
-            if j < len(row) - 1 and row[j] + row[j + 1] == i:
+        for j in range(len(row) - 1):
+            if row[j] + row[j + 1] == i:
                 new_row.insert(u + j + 1, i)
                 u += 1
 
