@@ -46,4 +46,5 @@ def pyramid(row_amount):
         row = new_row.copy()
         print(f"row {i}: {row}")
 
-pyramid(10)
+
+pyramid(100)

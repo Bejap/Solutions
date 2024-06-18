@@ -73,6 +73,7 @@ Kun hvis du er nysgerrig og elsker detaljer:
     Her er den fulde dokumentation for skildpaddegrafikken:
     https://docs.python.org/3.3/library/turtle.html"""
 
+import math
 import turtle  # this imports a library called "turtle". A library is (someone else's) python code, that you can use in your own program.
 import random
 from S1520_turtle_hunt_service import distance, direction
@@ -84,30 +85,73 @@ class Bejap(turtle.Turtle):
         super().__init__()  # Here, this is equivalent to turtle.Turtle.__init__(self)
         self.orientation = 0  # used to keep track of the turtle's current orientation (the direction it is heading)
 
-    def rotate_prey(self, positions):  # turtle will be turned right <degree> degrees. Use negative values for left turns.
-        # self: the turtle that shall be rotated
-        # positions: a list of tuples. Each tuple is a pair of coordinates (x,y).
-        # positions[0] is the coordinate tuple of the prey. positions[0][0] is the x-coordinate of the prey.
-        # positions[1], positions[2], positions[3] refer to the hunters.
-        # for example is positions[3][1] the y-coordinate of the third hunter.
+    def rotate_prey(self, positions):
+        prey_pos = positions[0]
+        hunters_pos = positions[1:]
 
-        # Example for use of the service functions distance() and direction
-        print(f'{distance(positions[0], positions[1])=}   {direction(positions[0], positions[1])=}')  # print distance and direction from prey to hunter1
 
-        degree = 2   # When the turtle rotates the same amount each turn,  it will just run in a circle. Make this function smarter!
-        self.orientation += degree
-        self.orientation %= 360
-        # print(self.orientation)
+        closest_hunter_pos = self.find_closest_hunter(prey_pos, hunters_pos)
+
+        # Calculate the direction away from the closest hunter
+        direction_away_from_hunter = self.calculate_direction_away_from_hunter(prey_pos, closest_hunter_pos)
+
+        # Calculate the rotation angle to face away from the closest hunter
+        degree = direction_away_from_hunter - self.orientation  + random.uniform(-5, 5)
+
+        # Update orientation and return rotation
+        self.orientation = direction_away_from_hunter
         return degree
 
-    def rotate_hunter(self, positions):  # turtle will be turned right <degree> degrees. Use negative values for left turns.
-        # Example for use of the service functions distance() and direction
-        # print(f'{distance(self.position(), positions[0])=}   {direction(self.position(), positions[0])=}')  # print distance and direction from the current hunter to the prey
-        degree = -0.5  # When the turtle rotates the same amount each turn,  it will just run in a circle. Make this function smarter!
-        self.orientation += degree + positions
-        self.orientation %= 360
-        # print(self.orientation)
-        return degree
+    def find_closest_hunter(self, prey_pos, hunters_pos):
+        # Calculate distances from prey to each hunter
+        distances_to_hunters = [distance(prey_pos, hunter_pos) for hunter_pos in hunters_pos]
+
+        # Find the index of the closest hunter
+        closest_hunter_index = distances_to_hunters.index(min(distances_to_hunters))
+
+        # Return the position of the closest hunter
+        return hunters_pos[closest_hunter_index]
+
+    def calculate_direction_away_from_hunter(self, prey_pos, hunter_pos):
+        # Calculate the direction from the prey to the hunter
+        direction_to_hunter = direction(prey_pos, hunter_pos)
+
+        # Calculate the opposite direction
+        opposite_direction = (direction_to_hunter + 180) % 360
+
+        return opposite_direction
+
+    def rotate_hunter(self, positions):
+        hunter_pos = self.position()
+        prey_pos = positions[0]
+
+        # Calculate angle to the prey
+        angle_to_prey = direction(hunter_pos, prey_pos)
+
+        # Find the direction that minimizes the angle to the prey
+        optimal_direction = self.find_optimal_direction(angle_to_prey)
+
+        # Calculate the rotation angle to face the optimal direction
+        rotation_angle = optimal_direction - self.orientation
+
+        # Update orientation and return rotation
+        self.orientation = optimal_direction
+        return rotation_angle
+
+    def find_optimal_direction(self, angle_to_prey):
+        # Define a range of angles
+        num_angles = 36  # Number of angles to consider
+        angle_step = 360 / num_angles
+        angles = [i * angle_step for i in range(num_angles)]
+
+        # Calculate absolute differences between angle to prey and each angle
+        angle_differences = [abs(angle - angle_to_prey) for angle in angles]
+
+        # Find the angle that minimizes the absolute difference
+        optimal_direction_index = angle_differences.index(min(angle_differences))
+        optimal_direction = angles[optimal_direction_index]
+
+        return optimal_direction
 
 
 #  Insert the code of your sparring partner's turtle class here:
