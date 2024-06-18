@@ -33,6 +33,7 @@ Når dit program er færdigt, skal du skubbe det til dit github-repository.
 Send derefter denne Teams-meddelelse til din lærer: <filename> færdig
 Fortsæt derefter med den næste fil."""
 
+
 def pyramid(row_amount):
     row = [1, 1]
     new_row = row
@@ -45,5 +46,4 @@ def pyramid(row_amount):
         row = new_row.copy()
         print(f"row {i}: {row}")
 
-
-pyramid(1000)
+pyramid(10)
