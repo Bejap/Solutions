@@ -51,6 +51,7 @@ def create_record(record):
         session.commit()
 
 
+
 # region customer
 def update_customer(customer):
     with Session(engine) as session:

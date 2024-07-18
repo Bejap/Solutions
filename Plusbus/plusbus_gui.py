@@ -200,6 +200,7 @@ def delete_booking(tree, record):
 
 # endregion
 
+
 # region customer widgets
 frame_customer = tk.LabelFrame(main_window, text="Customer")
 frame_customer.grid(row=0, column=0, padx=padx, pady=pady, sticky=tk.N)

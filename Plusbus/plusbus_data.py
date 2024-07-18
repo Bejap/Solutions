@@ -78,3 +78,4 @@ class Bookings(Base):
     def convert_from_tuple(tuple_):
         bookings = Bookings(id=tuple_[0], travel_id=tuple_[1], booked_seats=tuple_[2])
         return bookings
+
