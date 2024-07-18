@@ -9,7 +9,7 @@ class Customer(Base):
     __tablename__ = 'customer'
     id = Column(Integer, primary_key=True)
     last_name = Column(String)
-    phone_number = Column(Integer)
+    phone_number = Column(String)
 
     def __repr__(self):
         return f"Customer({self.id=},    {self.last_name=},      {self.phone_number=})"
@@ -19,7 +19,7 @@ class Customer(Base):
 
     def valid(self):
         try:
-            value = str(self.last_name)
+            value = int(self.phone_number)
         except ValueError:
             return False
         return value >= 0
@@ -78,4 +78,3 @@ class Bookings(Base):
     def convert_from_tuple(tuple_):
         bookings = Bookings(id=tuple_[0], travel_id=tuple_[1], booked_seats=tuple_[2])
         return bookings
-

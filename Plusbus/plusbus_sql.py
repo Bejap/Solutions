@@ -20,8 +20,8 @@ Database = 'sqlite:///plusbus.db'
 def create_test_data():
     with Session(engine) as session:
         new_item = []
-        new_item.append(Customer(last_name="Smith", phone_number=9876543210))
-        new_item.append(Customer(last_name="Larsson", phone_number=1234567890))
+        new_item.append(Customer(last_name="Smith", phone_number="98765432"))
+        new_item.append(Customer(last_name="Larsson", phone_number="12345678"))
         a_date = date(day=26, month=7, year=2023)
         new_item.append(Travels(route="Aab-Aar", date=a_date, capacity=48))
         new_item.append(Bookings(travel_id=1, booked_seats=5))
@@ -31,7 +31,7 @@ def create_test_data():
 
 def select_all(classparam):
     with Session(engine) as session:
-        records = session.scalart(select(classparam))
+        records = session.scalars(select(classparam))
         result = []
         for record in records:
             result.append(record)

@@ -15,5 +15,12 @@
       <jdbc-url>jdbc:sqlite:C:\Users\63814\Desktop\Python\Solutions\20_sql\S2311_my_second_sql_database.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="plusbus" uuid="e4f89ba3-12e2-4fb9-933f-ac92c5be2eaa">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:C:\Users\jorsc\PycharmProjects\Solutions\Solutions\Plusbus\plusbus.db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

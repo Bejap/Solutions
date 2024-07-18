@@ -19,12 +19,13 @@ evenrow = "#cccccc"
 # region common widgets
 main_window = tk.Tk()
 main_window.title("AspIT S2: Plusbus")
-main_window.geometry("1200x500")
+main_window.geometry("1350x500")
 
 style = ttk.Style()
 style.theme_use("default")
 
-style.configure("Treeview", background=treeview_background, foreground=treeview_foreground, rowheight=rowheight, fieldbackground=treeview_background)
+style.configure("Treeview", background=treeview_background, foreground=treeview_foreground, rowheight=rowheight,
+                fieldbackground=treeview_background)
 style.map("Treeview", background=[('selected', treeview_selected)])
 
 
@@ -73,7 +74,7 @@ def write_customer_entries(values):
 
 def edit_customer(event, tree):
     index_selected = tree.focus()
-    values = tree - item(index_selected, 'values')
+    values = tree.item(index_selected, 'values')
 
     clear_customer_entries()
     write_customer_entries(values)
@@ -216,8 +217,8 @@ tree_scroll_customer.config(command=tree_customer.yview)
 tree_customer['columns'] = ("id", "last name", "phone number")
 tree_customer.column("#0", width=0, stretch=tk.NO)
 tree_customer.column("id", anchor=tk.E, width=30)
-tree_customer.column("last name", anchor=tk.E, width=80)
-tree_customer.column("phone number", anchor=tk.W, width=200)
+tree_customer.column("last name", anchor=tk.E, width=100)
+tree_customer.column("phone number", anchor=tk.W, width=180)
 tree_customer.heading("#0", text="", anchor=tk.W)
 tree_customer.heading("id", text="ID", anchor=tk.CENTER)
 tree_customer.heading("last name", text="Last name", anchor=tk.CENTER)
@@ -237,12 +238,12 @@ label_customer_id.grid(row=0, column=0, padx=padx, pady=pady)
 entry_customer_id = tk.Entry(edit_frame_customer, width=4, justify="right")
 entry_customer_id.grid(row=1, column=0, padx=padx, pady=pady)
 
-label_customer_last_name = tk.Label(edit_frame_customer, text="Id")
+label_customer_last_name = tk.Label(edit_frame_customer, text="Last name")
 label_customer_last_name.grid(row=0, column=1, padx=padx, pady=pady)
 entry_customer_last_name = tk.Entry(edit_frame_customer, width=12, justify="right")
 entry_customer_last_name.grid(row=1, column=1, padx=padx, pady=pady)
 
-label_customer_phone_number = tk.Label(edit_frame_customer, text="Id")
+label_customer_phone_number = tk.Label(edit_frame_customer, text="Phone number")
 label_customer_phone_number.grid(row=0, column=2, padx=padx, pady=pady)
 entry_customer_phone_number = tk.Entry(edit_frame_customer, width=24, justify="right")
 entry_customer_phone_number.grid(row=1, column=2, padx=padx, pady=pady)
@@ -265,7 +266,7 @@ button_clear_boxes.grid(row=0, column=4, padx=padx, pady=pady)
 
 # region travel widgets
 frame_travel = tk.LabelFrame(main_window, text="Travel")
-frame_travel.grid(row=0, column=0, padx=padx, pady=pady, sticky=tk.N)
+frame_travel.grid(row=0, column=1, padx=padx, pady=pady, sticky=tk.N)
 
 tree_frame_travel = tk.Frame(frame_travel)
 tree_frame_travel.grid(row=0, column=0, padx=padx, pady=pady)
@@ -278,9 +279,9 @@ tree_scroll_travel.config(command=tree_travel.yview)
 tree_travel['columns'] = ("id", "route", "date", "capacity")
 tree_travel.column("#0", width=0, stretch=tk.NO)
 tree_travel.column("id", anchor=tk.E, width=30)
-tree_travel.column("route", anchor=tk.E, width=80)
-tree_travel.column("date", anchor=tk.W, width=200)
-tree_travel.column("capacity", anchor=tk.W, width=200)
+tree_travel.column("route", anchor=tk.E, width=150)
+tree_travel.column("date", anchor=tk.W, width=100)
+tree_travel.column("capacity", anchor=tk.W, width=130)
 tree_travel.heading("#0", text="", anchor=tk.W)
 tree_travel.heading("id", text="ID", anchor=tk.CENTER)
 tree_travel.heading("route", text="Route", anchor=tk.CENTER)
@@ -312,9 +313,9 @@ entry_travel_date = tk.Entry(edit_frame_travel, width=24, justify="right")
 entry_travel_date.grid(row=1, column=2, padx=padx, pady=pady)
 
 label_travel_capacity = tk.Label(edit_frame_travel, text="Capacity")
-label_travel_capacity.grid(row=0, column=2, padx=padx, pady=pady)
+label_travel_capacity.grid(row=0, column=3, padx=padx, pady=pady)
 entry_travel_capacity = tk.Entry(edit_frame_travel, width=24, justify="right")
-entry_travel_capacity.grid(row=1, column=2, padx=padx, pady=pady)
+entry_travel_capacity.grid(row=1, column=3, padx=padx, pady=pady)
 
 button_frame_travel = tk.Frame(controls_frame_travel)
 button_frame_travel.grid(row=1, column=0, padx=padx, pady=pady)
@@ -334,7 +335,7 @@ button_clear_boxes.grid(row=0, column=4, padx=padx, pady=pady)
 
 # region booking widgets
 frame_booking = tk.LabelFrame(main_window, text="Booking")
-frame_booking.grid(row=0, column=0, padx=padx, pady=pady, sticky=tk.N)
+frame_booking.grid(row=0, column=2, padx=padx, pady=pady, sticky=tk.N)
 
 tree_frame_booking = tk.Frame(frame_booking)
 tree_frame_booking.grid(row=0, column=0, padx=padx, pady=pady)
@@ -344,14 +345,16 @@ tree_booking = ttk.Treeview(tree_frame_booking, yscrollcommand=tree_scroll_booki
 tree_booking.grid(row=0, column=0, padx=0, pady=pady)
 tree_scroll_booking.config(command=tree_booking.yview)
 
-tree_booking['columns'] = ("id", "travel id", "booked seats")
+tree_booking['columns'] = ("id", "travel id", "booked seats", "phone number")
 tree_booking.column("#0", width=0, stretch=tk.NO)
 tree_booking.column("id", anchor=tk.E, width=30)
 tree_booking.column("travel id", anchor=tk.E, width=80)
-tree_booking.column("phone number", anchor=tk.W, width=200)
+tree_booking.column("booked seats", anchor=tk.E, width=80)
+tree_booking.column("phone number", anchor=tk.W, width=180)
 tree_booking.heading("#0", text="", anchor=tk.W)
 tree_booking.heading("id", text="ID", anchor=tk.CENTER)
-tree_booking.heading("travel id", text="travel id", anchor=tk.CENTER)
+tree_booking.heading("travel id", text="Travel id", anchor=tk.CENTER)
+tree_booking.heading("booked seats", text="Booked seats", anchor=tk.CENTER)
 tree_booking.heading("phone number", text="Phone number", anchor=tk.CENTER)
 tree_booking.tag_configure('oddrow', background=oddrow)
 tree_booking.tag_configure('evenrow', background=evenrow)
@@ -377,6 +380,11 @@ label_booking_phone_number = tk.Label(edit_frame_booking, text="Phone Number")
 label_booking_phone_number.grid(row=0, column=2, padx=padx, pady=pady)
 entry_booking_phone_number = tk.Entry(edit_frame_booking, width=24, justify="right")
 entry_booking_phone_number.grid(row=1, column=2, padx=padx, pady=pady)
+
+label_booking_booked_seats = tk.Label(edit_frame_booking, text="Booked seats")
+label_booking_booked_seats.grid(row=0, column=3, padx=padx, pady=pady)
+entry_booking_booked_seats = tk.Entry(edit_frame_booking, width=12, justify="right")
+entry_booking_booked_seats.grid(row=1, column=3, padx=padx, pady=pady)
 
 button_frame_booking = tk.Frame(controls_frame_booking)
 button_frame_booking.grid(row=1, column=0, padx=padx, pady=pady)
