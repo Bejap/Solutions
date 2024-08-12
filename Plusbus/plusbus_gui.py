@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter import messagebox
 import plusbus_data as pbd
 import plusbus_sql as pbsql
 import plusbus_func as pbf
@@ -139,14 +138,14 @@ def create_travel(tree, record):
 
 def update_travel(tree, record):
     travel = pbd.Travels.convert_from_tuple(record)
-    pbsql.update_travel(travel)
+    pbsql.update_travels(travel)
     clear_travel_entries()
     refresh_treeview(tree, pbd.Travels)
 
 
 def delete_travel(tree, record):
     travel = pbd.Travels.convert_from_tuple(record)
-    pbsql.delete_travel(travel)
+    pbsql.delete_travels(travel)
     clear_travel_entries()
     refresh_treeview(tree, pbd.Travels)
 
@@ -155,19 +154,21 @@ def delete_travel(tree, record):
 
 # region bookings fuctions
 def read_booking_entries():
-    return entry_booking_id.get(), entry_booking_travel_id.get(), entry_booking_booked_seats.get()
+    return entry_booking_id.get(), entry_booking_travel_id.get(), entry_booking_customer_id.get(), entry_booking_booked_seats.get()
 
 
 def clear_booking_entries():
     entry_booking_id.delete(0, tk.END)
     entry_booking_travel_id.delete(0, tk.END)
+    entry_booking_customer_id.delete(0, tk.END)
     entry_booking_booked_seats.delete(0, tk.END)
 
 
 def write_booking_entries(values):
     entry_booking_id.insert(0, values[0])
     entry_booking_travel_id.insert(0, values[1])
-    entry_booking_booked_seats.insert(0, values[2])
+    entry_booking_customer_id.insert(0, values[2])
+    entry_booking_booked_seats.insert(0, values[3])
 
 
 def edit_booking(event, tree):
@@ -187,14 +188,14 @@ def create_booking(tree, record):
 
 def update_booking(tree, record):
     booking = pbd.Bookings.convert_from_tuple(record)
-    pbsql.update_booking(booking)
+    pbsql.update_bookings(booking)
     clear_booking_entries()
     refresh_treeview(tree, pbd.Bookings)
 
 
 def delete_booking(tree, record):
     booking = pbd.Bookings.convert_from_tuple(record)
-    pbsql.delete_booking(booking)
+    pbsql.delete_bookings(booking)
     clear_booking_entries()
     refresh_treeview(tree, pbd.Bookings)
 
@@ -345,17 +346,17 @@ tree_booking = ttk.Treeview(tree_frame_booking, yscrollcommand=tree_scroll_booki
 tree_booking.grid(row=0, column=0, padx=0, pady=pady)
 tree_scroll_booking.config(command=tree_booking.yview)
 
-tree_booking['columns'] = ("id", "travel id", "booked seats", "phone number")
+tree_booking['columns'] = ("id", "travel id", "customer id", "booked seats")
 tree_booking.column("#0", width=0, stretch=tk.NO)
 tree_booking.column("id", anchor=tk.E, width=30)
 tree_booking.column("travel id", anchor=tk.E, width=80)
-tree_booking.column("booked seats", anchor=tk.E, width=80)
-tree_booking.column("phone number", anchor=tk.W, width=180)
+tree_booking.column("booked seats", anchor=tk.E, width=120)
+tree_booking.column("customer id", anchor=tk.E, width=80)
 tree_booking.heading("#0", text="", anchor=tk.W)
 tree_booking.heading("id", text="ID", anchor=tk.CENTER)
 tree_booking.heading("travel id", text="Travel id", anchor=tk.CENTER)
+tree_booking.heading("customer id", text="Customer id", anchor=tk.CENTER)
 tree_booking.heading("booked seats", text="Booked seats", anchor=tk.CENTER)
-tree_booking.heading("phone number", text="Phone number", anchor=tk.CENTER)
 tree_booking.tag_configure('oddrow', background=oddrow)
 tree_booking.tag_configure('evenrow', background=evenrow)
 tree_booking.bind("<ButtonRelease-1>", lambda event: edit_booking(event, tree_booking))
@@ -366,9 +367,9 @@ controls_frame_booking.grid(row=3, column=0, padx=padx, pady=pady)
 edit_frame_booking = tk.Frame(controls_frame_booking)
 edit_frame_booking.grid(row=0, column=0, padx=padx, pady=pady)
 
-label_booking_id = tk.Label(edit_frame_booking, text="Id")
+label_booking_id = tk.Label(edit_frame_booking, text="ID")
 label_booking_id.grid(row=0, column=0, padx=padx, pady=pady)
-entry_booking_id = tk.Entry(edit_frame_booking, width=4, justify="right")
+entry_booking_id = tk.Entry(edit_frame_booking, width=8)
 entry_booking_id.grid(row=1, column=0, padx=padx, pady=pady)
 
 label_booking_travel_id = tk.Label(edit_frame_booking, text="travel id")
@@ -376,10 +377,10 @@ label_booking_travel_id.grid(row=0, column=1, padx=padx, pady=pady)
 entry_booking_travel_id = tk.Entry(edit_frame_booking, width=12, justify="right")
 entry_booking_travel_id.grid(row=1, column=1, padx=padx, pady=pady)
 
-label_booking_phone_number = tk.Label(edit_frame_booking, text="Phone Number")
-label_booking_phone_number.grid(row=0, column=2, padx=padx, pady=pady)
-entry_booking_phone_number = tk.Entry(edit_frame_booking, width=24, justify="right")
-entry_booking_phone_number.grid(row=1, column=2, padx=padx, pady=pady)
+label_booking_customer_id = tk.Label(edit_frame_booking, text="customer id")
+label_booking_customer_id.grid(row=0, column=2, padx=padx, pady=pady)
+entry_booking_customer_id = tk.Entry(edit_frame_booking, width=24, justify="right")
+entry_booking_customer_id.grid(row=1, column=2, padx=padx, pady=pady)
 
 label_booking_booked_seats = tk.Label(edit_frame_booking, text="Booked seats")
 label_booking_booked_seats.grid(row=0, column=3, padx=padx, pady=pady)
@@ -405,6 +406,6 @@ button_clear_boxes.grid(row=0, column=4, padx=padx, pady=pady)
 
 if __name__ == '__main__':
     refresh_treeview(tree_customer, pbd.Customer)
-    # refresh_treeview(tree_travels, pbd.Travels)
-    # refresh_treeview(tree_bookings, pbd.Bookings)
+    refresh_treeview(tree_travel, pbd.Travels)
+    refresh_treeview(tree_booking, pbd.Bookings)
     main_window.mainloop()

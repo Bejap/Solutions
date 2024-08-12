@@ -22,5 +22,12 @@
       <jdbc-url>jdbc:sqlite:C:\Users\jorsc\PycharmProjects\Solutions\Solutions\Plusbus\plusbus.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="plusbus [2]" uuid="3f8f2ca3-a7b1-4a72-9dea-3539f3c559c6">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:C:\Users\63814\PycharmProjects\Solutions\Plusbus\plusbus.db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

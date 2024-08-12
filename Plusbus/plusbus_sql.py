@@ -24,8 +24,11 @@ def create_test_data():
         new_item.append(Customer(last_name="Larsson", phone_number="12345678"))
         a_date = date(day=26, month=7, year=2023)
         new_item.append(Travels(route="Aab-Aar", date=a_date, capacity=48))
-        new_item.append(Bookings(travel_id=1, booked_seats=5))
+        booking = (Bookings(travel_id=1, customer_id=1, booked_seats=5))
         session.add_all(new_item)
+        session.commit()
+
+        session.add(booking)
         session.commit()
 
 
@@ -85,13 +88,13 @@ def delete_travels(travels):
 # region bookings
 def update_bookings(bookings):
     with Session(engine) as session:
-        session.execute(update(Bookings).where(Bookings.id == bookings.id).values(travel_id=bookings.travel_id, booked_seats=bookings.booked_seats))
+        session.execute(update(Bookings).where(Bookings.id == bookings.id).values(travel_id=bookings.travel_id, customer_id=bookings.customer_id,  booked_seats=bookings.booked_seats))
         session.commit()
 
 
-def delete_bookings(bookings):
+def  delete_bookings(bookings):
     with Session(engine) as session:
-        session.delete(delete(Bookings).where(Bookings.id == bookings.id))
+        session.execute(delete(Bookings).where(Bookings.id == bookings.id))
         session.commit()
 
 
@@ -100,7 +103,7 @@ def delete_bookings(bookings):
 if __name__ == '__main__':
     engine = create_engine(Database, echo=False, future=True)
     Base.metadata.create_all(engine)
-    create_test_data()
+    # create_test_data()
     print(select_all(Customer))
     print(get_record(Customer, 2))
 else:

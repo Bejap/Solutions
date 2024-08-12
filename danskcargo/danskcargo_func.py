@@ -32,4 +32,3 @@ def capacity_available(aircraft, date_, new_container):
 def max_one_destination(aircraft, date_, new_container):
     destination = find_destination(aircraft, date_)
     return destination is None or destination == new_container.destination
-

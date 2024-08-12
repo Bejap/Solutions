@@ -5,6 +5,7 @@ from tkinter import messagebox
 
 Base = declarative_base()
 
+
 class Customer(Base):
     __tablename__ = 'customer'
     id = Column(Integer, primary_key=True)
@@ -38,10 +39,10 @@ class Travels(Base):
     capacity = Column(Integer)
 
     def __repr__(self):
-        return f"Travels({self.route=}, {self.date=}, {self.capacity=})"
+        return f"Travels({self.id=}, {self.route=}, {self.date=}, {self.capacity=})"
 
     def convert_to_tuple(self):
-        return self.route, self.date, self.capacity
+        return self.id, self.route, self.date, self.capacity
 
     def valid(self):
         try:
@@ -52,20 +53,32 @@ class Travels(Base):
 
     @staticmethod
     def convert_from_tuple(tuple_):
-        travels = Travels(route=tuple_[0], date=tuple_[1], capacity=tuple_[2])
-        return travels
+        try:
+            if tuple_[0] != "":
+                id_ = int(tuple_[0])
+            else:
+                id_ = 0
+            route = str(tuple_[1])
+            date = parser.parse(tuple_[2])
+            capacity = int(tuple_[3])
+            travel = Travels(id=id_, route=route, date=date, capacity=capacity)
+            return travel
+        except:
+            messagebox.showinfo("Error", "Please enter a valid date")
+
 
 class Bookings(Base):
     __tablename__ = 'bookings'
     id = Column(Integer, primary_key=True)
     travel_id = Column(Integer, ForeignKey('travels.id'), nullable=False)
+    customer_id = Column(Integer, ForeignKey('customer.id'), nullable=False)
     booked_seats = Column(Integer)
 
     def __repr__(self):
-        return f"Bookings({self.id=}, {self.travel_id=}, {self.booked_seats=}"
+        return f"Bookings({self.id=}, {self.travel_id=}, {self.customer_id=} {self.booked_seats=}"
 
     def convert_to_tuple(self):
-        return self.id, self.travel_id, self.booked_seats
+        return self.id, self.travel_id, self.customer_id, self.booked_seats
 
     def valid(self):
         try:
@@ -76,5 +89,5 @@ class Bookings(Base):
 
     @staticmethod
     def convert_from_tuple(tuple_):
-        bookings = Bookings(id=tuple_[0], travel_id=tuple_[1], booked_seats=tuple_[2])
-        return bookings
+        booking = Bookings(id=tuple_[0], travel_id=tuple_[1], customer_id=tuple_[2], booked_seats=tuple_[3])
+        return booking
