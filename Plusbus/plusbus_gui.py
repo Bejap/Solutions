@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import plusbus_data as pbd
 import plusbus_sql as pbsql
 import plusbus_func as pbf
@@ -97,7 +97,7 @@ def delete_customer(tree, record):
     customer = pbd.Customer.convert_from_tuple(record)
     pbsql.delete_customer(customer)
     clear_customer_entries()
-    refresh_treeview(tree, pbd.customer)
+    refresh_treeview(tree, pbd.Customer)
 
 
 # endregion
@@ -181,9 +181,26 @@ def edit_booking(event, tree):
 
 def create_booking(tree, record):
     booking = pbd.Bookings.convert_from_tuple(record)
+
+    travel = pbsql.get_record(pbd.Travels, booking.travel_id)
+    customer = pbsql.get_record(pbd.Customer, booking.customer_id)
+
+    if travel is None:
+        messagebox.showinfo('Error', 'Travel does not exist')
+        return
+
+    if customer is None:
+        messagebox.showinfo('Error', 'Customer does not exist')
+        return
+
+    if not pbf.capacity_available(travel, booking.booked_seats):
+        messagebox.showinfo('Error', 'Not enough capacity available')
+        return
+
     pbsql.create_record(booking)
     clear_booking_entries()
     refresh_treeview(tree, pbd.Bookings)
+
 
 
 def update_booking(tree, record):

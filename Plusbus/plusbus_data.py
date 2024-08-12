@@ -89,5 +89,4 @@ class Bookings(Base):
 
     @staticmethod
     def convert_from_tuple(tuple_):
-        booking = Bookings(id=tuple_[0], travel_id=tuple_[1], customer_id=tuple_[2], booked_seats=tuple_[3])
-        return booking
+        return Bookings(id=tuple_[0], travel_id=tuple_[1], customer_id=tuple_[2], booked_seats=tuple_[3])
