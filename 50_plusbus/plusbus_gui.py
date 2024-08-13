@@ -17,7 +17,7 @@ evenrow = "#cccccc"
 
 # region common widgets
 main_window = tk.Tk()
-main_window.title("AspIT S2: Plusbus")
+main_window.title("AspIT S2: 50_plusbus")
 main_window.geometry("1350x500")
 
 style = ttk.Style()
