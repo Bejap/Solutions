@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, Date, ForeignKey
 from dateutil import parser
 from tkinter import messagebox
 
-Base = declarative_base()
+Base = declarative_base() # Creating the registry and base classes
 
 
 class Customer(Base):

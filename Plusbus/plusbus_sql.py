@@ -10,7 +10,7 @@ from sqlalchemy import event
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.execute("PRAGMA foreign_keys=ON")  # prevents the code from deleting records that reference another record
     cursor.close()
 
 
@@ -54,7 +54,6 @@ def create_record(record):
         session.commit()
 
 
-
 # region customer
 def update_customer(customer):
     with Session(engine) as session:
@@ -88,11 +87,11 @@ def delete_travels(travels):
 # region bookings
 def update_bookings(bookings):
     with Session(engine) as session:
-        session.execute(update(Bookings).where(Bookings.id == bookings.id).values(travel_id=bookings.travel_id, customer_id=bookings.customer_id,  booked_seats=bookings.booked_seats))
+        session.execute(update(Bookings).where(Bookings.id == bookings.id).values(travel_id=bookings.travel_id, customer_id=bookings.customer_id, booked_seats=bookings.booked_seats))
         session.commit()
 
 
-def  delete_bookings(bookings):
+def delete_bookings(bookings):
     with Session(engine) as session:
         session.execute(delete(Bookings).where(Bookings.id == bookings.id))
         session.commit()
