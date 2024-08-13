@@ -202,7 +202,6 @@ def create_booking(tree, record):
     refresh_treeview(tree, pbd.Bookings)
 
 
-
 def update_booking(tree, record):
     booking = pbd.Bookings.convert_from_tuple(record)
 
