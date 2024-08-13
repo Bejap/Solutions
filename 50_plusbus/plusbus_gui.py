@@ -205,6 +205,22 @@ def create_booking(tree, record):
 
 def update_booking(tree, record):
     booking = pbd.Bookings.convert_from_tuple(record)
+
+    travel = pbsql.get_record(pbd.Travels, booking.travel_id)
+    customer = pbsql.get_record(pbd.Customer, booking.customer_id)
+
+    if travel is None:
+        messagebox.showinfo('Error', 'Travel does not exist')
+        return
+
+    if customer is None:
+        messagebox.showinfo('Error', 'Customer does not exist')
+        return
+
+    if not pbf.capacity_available(travel, booking.booked_seats):
+        messagebox.showinfo('Error', 'Not enough capacity available')
+        return
+
     pbsql.update_bookings(booking)
     clear_booking_entries()
     refresh_treeview(tree, pbd.Bookings)
