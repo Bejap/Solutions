@@ -13,7 +13,7 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor.close()
 
 
-Database = 'sqlite:///danskcargo.db'
+Database = 'sqlite:///29_danskcargo.db'
 
 
 def create_test_data():
