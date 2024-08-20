@@ -30,3 +30,4 @@ class GetData:
 
 
 data = GetData("https://dmigw.govcloud.dk/v2/lightningdata", "/collections", "1eb30e5a-fd28-4df4-85ad-0d14b2ad81b9")
+

@@ -35,3 +35,4 @@ print(f"Maximum Latitude (y): {max_latitude} found at {max_latitude_coord}")
 
 for i in created:
     print(i)
+
