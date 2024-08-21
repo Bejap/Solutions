@@ -14,10 +14,9 @@ class Data_Collection:
         date_precision = '-01-01T00:00:00%2B02:00'
         all_data = []
         offset = 0
+        url = f'{self.api_url}?bbox=12.75,55.75,13,56&datetime={str(self.year_to_collect)}{date_precision}/{str(self.year_to_collect + 1)}{date_precision}&api-key={self.api_key}&offset={offset}'
         while len(all_data) < self.limit:
-            response = requests.get(
-            f'{self.api_url}?bbox=7,54,16,58&datetime={str(self.year_to_collect)}{date_precision}/{str(self.year_to_collect + 1)}{date_precision}&api-key={self.api_key}&offset={offset}'
-        )
+            response = requests.get(url)
             data = response.json()
             features = data.get('features', [])
             if not features:
@@ -31,27 +30,13 @@ class Data_Collection:
 
 
 year_to_collect = 2010
-limit = 20000
+limit = 2000
 
 data = Data_Collection(limit, year_to_collect)
 features = data.fetch_data()
 
-coordinates = [feature['geometry']['coordinates'] for feature in features]
 years = [feature['properties']['observed'] for feature in features]
 id = [feature['id'] for feature in features]
 ID = np.unique(id)
 
 print(len(ID))
-
-# u = []
-# for i in range(len(years)):
-#     j = str([years[i], coordinates[i]])
-#     u.append(j)
-#
-# unique_data = set(u)
-# unique_id = set(id)
-#
-# for entry in unique_data:
-#     print(entry)
-#
-# print(f'Unique entries: {len(unique_data)}')
