@@ -1,45 +1,30 @@
-import tkinter as tk
-from tkinter import filedialog
-import geopandas as gpd
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import folium as fl
 
-class SimpleGISApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Simple GIS with Tkinter")
 
-        # Set up the main frame
-        self.frame = tk.Frame(root)
-        self.frame.pack(fill=tk.BOTH, expand=True)
+class DanishMap:
+    def __init__(self):
+        min_lat, max_lat = 52, 60
+        min_lon, max_lon = 6, 15
 
-        # Add a button to load shapefiles
-        self.load_button = tk.Button(self.frame, text="Load Shapefile", command=self.load_shapefile)
-        self.load_button.pack(side=tk.TOP)
+        self.DK_map = fl.Map(max_bounds=True,
+                             location=(55.58, 11.46),
+                             zoom_start=7,
+                             min_lat=min_lat,
+                             max_lat=max_lat,
+                             min_lon=min_lon,
+                             max_lon=max_lon)
+        self.DK_map.save('map.html')
 
-        # Set up the Matplotlib figure
-        self.fig, self.ax = plt.subplots()
-
-    def load_shapefile(self):
-        # Open a file dialog to select the shapefile
-        shapefile_path = filedialog.askopenfilename(title="Open Shapefile", filetypes=[("Shapefiles", "*.shp")])
-        if shapefile_path:
-            # Load the shapefile using GeoPandas
-            gdf = gpd.read_file(shapefile_path)
-
-            # Clear the existing plot
-            self.ax.clear()
-
-            # Plot the data
-            gdf.plot(ax=self.ax)
-
-            # Embed the plot in the Tkinter canvas
-            self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame)
-            self.canvas.draw()
-            self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = SimpleGISApp(root)
-    root.mainloop()
-
+    def create_markers(self, lon_lat_list):
+        for i in range(len(lon_lat_list)):
+            fl.Circle(radius=25,
+                      color="black",
+                      location=lon_lat_list[i],
+                      tooltip="Click me",
+                      popup=f"Lightning stroke here at some date",
+                      fill_color="black",
+                      opacity=1.2,
+                      fill_opacity=0.5,
+                      fill=False,
+                      weight=1).add_to(self.DK_map)
+        self.DK_map.save('map.html')

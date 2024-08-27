@@ -1,42 +1,35 @@
-import requests
+import dmi_GUI as dmg
+import dmi_get_data as dgd
+import webbrowser as wb
 import numpy as np
 
-class Data_Collection:
 
-    def __init__(self, limit, year_to_collect):
-        _base_url = 'https://dmigw.govcloud.dk/v2/lightningdata/collections/observation/items'
-        self.api_url = _base_url
-        self.api_key = '1eb30e5a-fd28-4df4-85ad-0d14b2ad81b9'
-        self.limit = limit
-        self.year_to_collect = year_to_collect
+def get_data():
+    start_date = (2000, 1, 1)
+    end_date = (2003, 12, 31)
+    south_west_corner = (11, 54)
+    north_east_corner = (14, 56)
+    data = dgd.DataCollection(20000, 1000)
+    records = data.fetch_data(start_date, end_date, south_west_corner, north_east_corner)
+    ids = [record['id'] for record in records]
+    print("found", len(np.unique(ids)), "unique strokes")
+    dates = [record['properties']['observed'] for record in records]
+    for date in sorted(dates):
+        print(date)
+    location = [record['geometry']['coordinates'] for record in records]
+    return location
 
-    def fetch_data(self):
-        date_precision = '-01-01T00:00:00%2B02:00'
-        all_data = []
-        offset = 0
-        url = f'{self.api_url}?bbox=12.75,55.75,13,56&datetime={str(self.year_to_collect)}{date_precision}/{str(self.year_to_collect + 1)}{date_precision}&api-key={self.api_key}&offset={offset}'
-        while len(all_data) < self.limit:
-            response = requests.get(url)
-            data = response.json()
-            features = data.get('features', [])
-            if not features:
-                break
-            all_data.extend(features)
-            offset += 1000
-            if len(all_data) >= self.limit:
-                break
-
-        return all_data[:self.limit]
+def transform_data(sublist):
+    new_list = sorted(sublist, reverse=True)
+    return new_list
 
 
-year_to_collect = 2010
-limit = 2000
+if __name__ == '__main__':
+    DK_map = dmg.DanishMap()
+    data_list = get_data()
+    lon_lat = [transform_data(data) for data in data_list]
+    DK_map.create_markers(lon_lat)
+    wb.open('map.html')
 
-data = Data_Collection(limit, year_to_collect)
-features = data.fetch_data()
 
-years = [feature['properties']['observed'] for feature in features]
-id = [feature['id'] for feature in features]
-ID = np.unique(id)
 
-print(len(ID))
