@@ -52,9 +52,9 @@ class TestEmptyEntries(unittest.TestCase):
         engine = create_engine(Database, echo=False, future=True)
         Base.metadata.create_all(engine)
         max = dcsql.max_id(dcd.Aircraft)
-        dcsql.delete_soft_aircraft(aircraft)
+        dcsql.delete_soft_aircraft(dcd.Aircraft)
 
-        self.assertEqual(-1, aircraft.max_cargo_weight)
+        self.assertEqual(dcd.Aircraft.max_cargo_weight, -1)
 
 
 if __name__ == '__main__':
