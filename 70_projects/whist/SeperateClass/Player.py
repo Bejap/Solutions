@@ -35,9 +35,6 @@ class Player:
             for card in playable_cards:
                 score = self.evaluate_card_strength(card, trump_suit, lead_suit)
 
-                if not lead_suit: # if lead_suit is None
-                    if card.suit != trump_suit:
-                        score += card.rank_value * 2
-                    else:
-                        score -= card.rank_value
+                if not lead_suit: # if player starts round assign scores to the cards.
+
 
