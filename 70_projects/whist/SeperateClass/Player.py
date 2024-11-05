@@ -1,15 +1,17 @@
-from Card import Card
+import Card as card
+import time
 
 class Player:
 
-    def __init__(self, name: str, is_human: bool):
+    def __init__(self, name: str, is_human: bool, team: int):
         self.name = name
         self.hand = []
         self.tricks_won = 0
         self.is_humna = is_human
         self.cards_seen = set()
+        self.team = team
 
-    def play_card(self, playable_cards: list[Card], trump_suit: str, lead_suit=None, played_cards=None):
+    def play_card(self, playable_cards: list[card.Card], trump_suit: str, lead_suit=None, played_cards=None):
         playable_cards.sort()
 
         while True:
@@ -24,9 +26,11 @@ class Player:
                     card = playable_cards[card_idx]
                     self.hand.remove(card)  # Remove card from hand
                     print(f"You played: {card.get_short_name()}")
-                    time.sleep(1)
                     return card
                 else:
                     print("Invalid card number. Please try again.")
             except ValueError:
                 print("Please enter a valid number.")
+
+    def sort_hand(self):
+        self.hand.sort()
