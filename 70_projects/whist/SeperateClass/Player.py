@@ -7,7 +7,7 @@ class Player:
         self.name = name
         self.hand = []
         self.tricks_won = 0
-        self.is_humna = is_human
+        self.is_human = is_human
         self.cards_seen = set()
         self.team = team
 

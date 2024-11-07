@@ -9,17 +9,12 @@ class Whist:
         self.count = 0
         self.trump_cycle = ["Hearts", "Spades", "Diamonds", "Clubs", None]
         self.team_scores = {0: 0, 1: 0}
-
-
-    def score_table(self, winner, points):
-        score_list = []
-        score_list.append((winner, points))
-        return score_list
-
+        self.winning_score = 0
+        self.winning_team = None
 
     def deal_cards(self):
         self.deck.shuffle()
-        cards_per_player = 13
+        cards_per_player = 3 # CHANGE THIS
         self.count += 1
 
         for player in self.players:
@@ -64,12 +59,11 @@ class Whist:
                     winning_player = current_player
 
         winning_player.tricks_won += 1
-        self.team_scores[winning_player.team] += 1 # need something else here
+        self.team_scores[winning_player.team] += 1
         print(f"\n{winning_player.name} wins the trick for Team {winning_player.team + 1}!")
         return self.players.index(winning_player)
 
-    def __play_round(self, ):
-
+    def __play_round(self):
         print(f"\nRound starts! Trump suit: {self.trump}")
         leading_player_index = 0
         total_tricks = len(self.players[0].hand)
@@ -82,37 +76,23 @@ class Whist:
             for player in self.players:
                 print(f"{player.name}: {player.tricks_won}/{round_num + 1} tricks ")
 
-        winning_team = max(self.team_scores, key=self.team_scores.get)
-        winning_score = self.team_scores[winning_team] - 6
-        score = self.score_table(winning_team, winning_score)
-        print(f"\nTeam {winning_team + 1} wins the round with a score of {winning_score}!")
-        print(score)
+        self.winning_team = max(self.team_scores, key=self.team_scores.get)
+        self.winning_score = self.team_scores[self.winning_team] - 1 # CHANGE HERE
+        print(f"\nTeam {self.winning_team + 1} wins the round with a score of {self.winning_score}!")
 
-        return winning_score
+    def play_game(self, i):
+        self.trump = self.trump_cycle[i]
+        print(f"\nStarting single round game with trump suit: {self.trump if self.trump else 'No Trump'}")
+        self.deck = dck.Deck()  # Initialize the deck
+        self.team_scores = {0: 0, 1: 0}  # Reset scores for each game
+        self.deal_cards()
+
+        self.__play_round()
 
 
-    def play_game(self):
-        for game_number in range(14):
-            self.trump = self.trump_cycle[game_number % len(self.trump_cycle)]
-            print(f"\nStarting Game {game_number + 1} with trump suit: {self.trump if self.trump else 'No Trump'}")
-            self.team_scores = {0: 0, 1: 0}  # Reset scores for the new game
-
-            self.deck = dck.Deck()
-            self.deal_cards()
-
-            while max(self.team_scores.values()) < 7:
-                self.__play_round()  # Play rounds until a team reaches 7 points
-
-            # Declare the winning team for the game
-            winning_team = max(self.team_scores, key=self.team_scores.get)
-            print(f"Game {game_number + 1} winner: Team {winning_team + 1} with score: {self.team_scores[winning_team]}")
-
+        return [self.winning_team, self.winning_score, self.team_scores]
 
 
 if __name__ == "__main__":
     game = Whist(['a', 'b', 'c', 'd'])
-    game.play_game()
-
-
-
-
+    game.play_game(0)
