@@ -8,7 +8,7 @@ def main(n):
     for _ in range(n):
         to_list = [0, 0]
         i = 0
-        while max(to_list) <= 2:
+        while max(to_list) <= 7:
             result = game.play_game(i)
             if result[0] == 0:
                 to_list[0] += result[1]
