@@ -125,7 +125,7 @@ class Whist:
                 print(f"{player.name}: {player.tricks_won}/{round_num + 1} tricks ")
 
         self.winning_team = max(self.team_scores, key=self.team_scores.get)
-        self.winning_score = self.team_scores[self.winning_team] - 6  # CHANGE HERE
+        self.winning_score = self.team_scores[self.winning_team]   # CHANGE HERE
         print(f"\nTeam {self.winning_team + 1} wins the round with a score of {self.winning_score}!")
 
     def play_game(self):
