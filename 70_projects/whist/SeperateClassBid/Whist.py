@@ -7,7 +7,7 @@ class Whist:
         # Assign players to teams
         self.players = [plr.Player(name, is_human=False, team=i % 2) for i, name in enumerate(player_names)]
         self.count = 0
-        self.trump_cycle = ["Hearts", "Spades", "Diamonds", "Clubs", None]
+        self.trump_opti = ["Hearts", "Spades", "Diamonds", "Clubs", None]
         self.team_scores = {0: 0, 1: 0}
         self.winning_score = 0
         self.winning_team = None
@@ -41,6 +41,10 @@ class Whist:
                 self.active_players = sum(not p.passed for p in self.players)
                 if self.active_players <= 1:
                     break
+
+        # Handle the case where all but one player have passed
+        if self.active_players == 1:
+            self.highest_bidder = next(p for p in self.players if not p.passed)
 
         if self.highest_bidder:
             print(f"Bidding ended. The winner is {self.highest_bidder.name} with a bid of {self.highest_bid}.")
@@ -93,6 +97,21 @@ class Whist:
     def __play_round(self):
         s = self.start_bidding()
         print(s.name, "won")
+        while True:
+            try:
+                # Ask for user input
+                j = int(input("Choose a trump suit: Hearts, Spades, Diamonds, Clubs, or None (0, 1, 2, 3, 4):\n"))
+                if j not in range(5):  # Valid options are 0-4
+                    raise ValueError("Invalid choice. Please choose a number between 0 and 4.")
+
+                # If valid, set the trump and break the loop
+                self.trump = self.trump_opti[j]
+                break
+            except ValueError as e:
+                print(f"Input error: {e}. Try again.")  # Catch and display input errors
+
+        print(f"\nStarting single-round game with trump suit: {self.trump if self.trump else 'No Trump'}")
+
         print(f"\nRound starts! Trump suit: {self.trump}")
         leading_player_index = 0
         total_tricks = len(self.players[0].hand)
@@ -109,12 +128,10 @@ class Whist:
         self.winning_score = self.team_scores[self.winning_team] - 6  # CHANGE HERE
         print(f"\nTeam {self.winning_team + 1} wins the round with a score of {self.winning_score}!")
 
-    def play_game(self, i):
-        self.trump = self.trump_cycle[i]
-        print(f"\nStarting single round game with trump suit: {self.trump if self.trump else 'No Trump'}")
+    def play_game(self):
+
         self.deck = dck.Deck()  # Initialize the deck
         self.deal_cards()
-
         self.__play_round()
 
         return [self.winning_team, self.winning_score]
@@ -122,4 +139,5 @@ class Whist:
 
 if __name__ == "__main__":
     game = Whist(['a', 'b', 'c', 'd'])
-    game.play_game(0)
+    game.play_game()
+

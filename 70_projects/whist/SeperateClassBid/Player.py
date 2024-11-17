@@ -39,6 +39,7 @@ class Player:
 
 
     def make_bid(self, current_highest_bid):
+        print(f"\nYour hand: {[card.get_short_name() for card in sorted(self.hand)]}")
         if self.passed:
             print(f"{self.name} has already passed.")
             return self.bid
