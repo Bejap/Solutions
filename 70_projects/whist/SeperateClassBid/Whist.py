@@ -11,9 +11,7 @@ class Whist:
         self.team_scores = {0: 0, 1: 0}
         self.winning_score = 0
         self.winning_team = None
-        self.highest_bid = 6
-        self.highest_bidder = None
-        self.active_players = len(self.players)
+        self.base_scores = {7: 1, 8: 3, 9: 6, 10: 10, 11: 15, 12: 22, 13: 30}
 
     def deal_cards(self):
         self.deck.shuffle()
@@ -24,9 +22,21 @@ class Whist:
             player.hand = self.deck.deal(cards_per_player)
             player.sort_hand()
 
+    def calculate_score(self, bid, tricks_won):
+        base_score = self.base_scores.get(bid, 0)
+        if base_score <= tricks_won:
+            extra_tricks = max(tricks_won - bid, 0)  # If tricks_won > bid, extra tricks count
+            score = base_score + extra_tricks  # Add extra tricks to the base score
+            return score
+        else:
+            print(f"You lost the round, and missed {bid - tricks_won} tricks")
+            return False
+
     def start_bidding(self):
         print("Starting the bidding process...")
-
+        self.highest_bid = 6
+        self.highest_bidder = None
+        self.active_players = len(self.players)
         while self.active_players > 1:  # Continue until only one player hasn't passed
             for player in self.players:
                 if player.passed:
@@ -100,15 +110,14 @@ class Whist:
         while True:
             try:
                 # Ask for user input
-                j = int(input("Choose a trump suit: Hearts, Spades, Diamonds, Clubs, or None (0, 1, 2, 3, 4):\n"))
-                if j not in range(5):  # Valid options are 0-4
+                j = int(input("Choose a trump suit: Hearts, Spades, Diamonds, Clubs, or None (1, 2, 3, 4, 5):\n"))
+                if j not in range(5):
                     raise ValueError("Invalid choice. Please choose a number between 0 and 4.")
 
-                # If valid, set the trump and break the loop
-                self.trump = self.trump_opti[j]
+                self.trump = self.trump_opti[j-1]
                 break
             except ValueError as e:
-                print(f"Input error: {e}. Try again.")  # Catch and display input errors
+                print(f"Input error: {e}. Try again.")
 
         print(f"\nStarting single-round game with trump suit: {self.trump if self.trump else 'No Trump'}")
 
@@ -116,17 +125,27 @@ class Whist:
         leading_player_index = 0
         total_tricks = len(self.players[0].hand)
 
+        tricks_won = 0
         for round_num in range(total_tricks):
             print(f"\nTricks {round_num + 1}/{total_tricks}")
             leading_player_index = self.play_trick(leading_player_index)
+            if self.players[leading_player_index] == self.highest_bidder:
+                tricks_won += 1
 
             print("\nCurrent score:")
             for player in self.players:
                 print(f"{player.name}: {player.tricks_won}/{round_num + 1} tricks ")
 
+
         self.winning_team = max(self.team_scores, key=self.team_scores.get)
-        self.winning_score = self.team_scores[self.winning_team]   # CHANGE HERE
-        print(f"\nTeam {self.winning_team + 1} wins the round with a score of {self.winning_score}!")
+        self.winning_score = self.calculate_score(self.highest_bid, tricks_won)
+        kaos = self.winning_score
+        if not self.winning_score:
+            print(f"\nTeam {self.winning_team + 1} loses the round with a score of {tricks_won}!")
+        else:
+            print(f"\nTeam {self.winning_team + 1} wins the round with a score of {tricks_won}!")
+
+
 
     def play_game(self):
 

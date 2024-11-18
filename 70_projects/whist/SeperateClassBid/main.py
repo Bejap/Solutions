@@ -7,16 +7,14 @@ def main(n):
 
     for _ in range(n):
         to_list = [0, 0]
-        i = 0
         while max(to_list) <= 7:
-            result = game.play_game(i)
+            result = game.play_game()
             if result[0] == 0:
                 to_list[0] += result[1]
             else:
                 to_list[1] += result[1]
 
             print(result[1], "Team 1: ", to_list[0],"Team 2:", to_list[1])
-            i += 1
 
         results.append(tuple(to_list))
 
