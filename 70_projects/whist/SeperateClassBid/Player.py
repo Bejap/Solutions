@@ -12,6 +12,7 @@ class Player:
         self.team = team
         self.passed = False
         self.bid = 0
+        self.points = 0
 
     def play_card(self, playable_cards: list[card.Card], trump_suit: str, lead_suit=None, played_cards=None):
         playable_cards.sort()

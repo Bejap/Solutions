@@ -14,7 +14,7 @@ def main(n):
             else:
                 to_list[1] += result[1]
 
-            print(result[1], "Team 1: ", to_list[0],"Team 2:", to_list[1])
+            print(f"Team 1: {to_list[0]}\n Team 2: {to_list[1]}")
 
         results.append(tuple(to_list))
 

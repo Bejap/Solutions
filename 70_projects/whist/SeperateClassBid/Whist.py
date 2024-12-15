@@ -106,7 +106,7 @@ class Whist:
 
     def __play_round(self):
         s = self.start_bidding()
-        print(s.name, "won")
+        print(s.name, "won, this is your hand", s.hand)
         while True:
             try:
                 # Ask for user input
@@ -134,16 +134,17 @@ class Whist:
 
             print("\nCurrent score:")
             for player in self.players:
-                print(f"{player.name}: {player.tricks_won}/{round_num + 1} tricks ")
+                print(f"{player.name}: {player.tricks_won}/{total_tricks} tricks ")
 
 
         self.winning_team = max(self.team_scores, key=self.team_scores.get)
         self.winning_score = self.calculate_score(self.highest_bid, tricks_won)
-        kaos = self.winning_score
         if not self.winning_score:
             print(f"\nTeam {self.winning_team + 1} loses the round with a score of {tricks_won}!")
+            self.team_scores[self.winning_team] += self.winning_score
         else:
             print(f"\nTeam {self.winning_team + 1} wins the round with a score of {tricks_won}!")
+            self.team_scores[self.winning_team] -= self.winning_score
 
 
 
