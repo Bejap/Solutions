@@ -1,10 +1,16 @@
 import Deck as dck
 import Player as plr
+import pandas as pd
 
 
 class Whist:
     def __init__(self, player_names: list[str]):
         # Assign players to teams
+        self.cards_played = None
+        self.highest_bidder = None
+        self.highest_bid = None
+        self.active_players = None
+        self.deck = None
         self.players = [plr.Player(name, is_human=False, team=i % 2) for i, name in enumerate(player_names)]
         self.count = 0
         self.trump_opti = ["Hearts", "Spades", "Diamonds", "Clubs", None]
@@ -12,6 +18,11 @@ class Whist:
         self.winning_score = 0
         self.winning_team = None
         self.base_scores = {7: 1, 8: 3, 9: 6, 10: 10, 11: 15, 12: 22, 13: 30}
+        self.file_name = "WhistData"
+
+    def csv_file(self):
+        df = pd.DataFrame(columns=["Player1Card", "Player2Card", "Player3Card", "Player4Card", "Winner"])
+        df.to_csv(self.file_name, index=False)
 
     def deal_cards(self):
         self.deck.shuffle()
@@ -102,6 +113,8 @@ class Whist:
         winning_player.tricks_won += 1
         self.team_scores[winning_player.team] += 1
         print(f"\n{winning_player.name} wins the trick for Team {winning_player.team + 1}!")
+        self.round2csv(trick_cards, self.trump, winning_player.name)
+
         return self.players.index(winning_player)
 
     def __play_round(self):
@@ -114,7 +127,7 @@ class Whist:
                 if j not in range(5):
                     raise ValueError("Invalid choice. Please choose a number between 0 and 4.")
 
-                self.trump = self.trump_opti[j-1]
+                self.trump = self.trump_opti[j - 1]
                 break
             except ValueError as e:
                 print(f"Input error: {e}. Try again.")
@@ -136,7 +149,6 @@ class Whist:
             for player in self.players:
                 print(f"{player.name}: {player.tricks_won}/{total_tricks} tricks ")
 
-
         self.winning_team = max(self.team_scores, key=self.team_scores.get)
         self.winning_score = self.calculate_score(self.highest_bid, tricks_won)
         if not self.winning_score:
@@ -146,7 +158,19 @@ class Whist:
             print(f"\nTeam {self.winning_team + 1} wins the round with a score of {tricks_won}!")
             self.team_scores[self.winning_team] -= self.winning_score
 
-
+    def round2csv(self, cards_played, trump, winner):
+        df = pd.read_csv(self.file_name)
+        new_data = {
+            "Trump": trump,
+            "Player1Card": cards_played[0],
+            "Player2Card": cards_played[1],
+            "Player3Card": cards_played[2],
+            "Player4Card": cards_played[3],
+            "Winner": winner,
+        }
+        df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
+        # Gem tilbage til CSV
+        df.to_csv(self.file_name, index=False)
 
     def play_game(self):
 
@@ -160,4 +184,3 @@ class Whist:
 if __name__ == "__main__":
     game = Whist(['a', 'b', 'c', 'd'])
     game.play_game()
-
