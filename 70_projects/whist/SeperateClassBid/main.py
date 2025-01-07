@@ -4,6 +4,7 @@ def main(n):
     players = ["Tommy", "Bobby", "Preo", "Mark"]
     game = whist.Whist(players)
     results = []
+    to_list = [0, 0]
 
     for _ in range(n):
         to_list = [0, 0]
@@ -20,4 +21,4 @@ def main(n):
 
     print(f"\nGame results: {to_list}")
 
-main(1)
+main(2)

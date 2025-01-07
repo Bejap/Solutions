@@ -1,7 +1,5 @@
 import Deck as dck
 import Player as plr
-import pandas as pd
-
 
 class Whist:
     def __init__(self, player_names: list[str]):
@@ -20,13 +18,9 @@ class Whist:
         self.base_scores = {7: 1, 8: 3, 9: 6, 10: 10, 11: 15, 12: 22, 13: 30}
         self.file_name = "WhistData"
 
-    def csv_file(self):
-        df = pd.DataFrame(columns=["Player1Card", "Player2Card", "Player3Card", "Player4Card", "Winner"])
-        df.to_csv(self.file_name, index=False)
-
     def deal_cards(self):
         self.deck.shuffle()
-        cards_per_player = 13  # CHANGE THIS
+        cards_per_player = 1  # CHANGE THIS
         self.count += 1
 
         for player in self.players:
@@ -48,6 +42,7 @@ class Whist:
         self.highest_bid = 6
         self.highest_bidder = None
         self.active_players = len(self.players)
+
         while self.active_players > 1:  # Continue until only one player hasn't passed
             for player in self.players:
                 if player.passed:
@@ -64,14 +59,20 @@ class Whist:
                     break
 
         # Handle the case where all but one player have passed
-        if self.active_players == 1:
-            self.highest_bidder = next(p for p in self.players if not p.passed)
+        if self.active_players == 1 and self.highest_bid == 6:
+            for player in self.players:
+                if not player.passed:
+                    bid = player.make_bid(self.highest_bid)
+                    if bid is not None and bid > self.highest_bid:
+                        self.highest_bid = bid
+                        self.highest_bidder = player
 
         if self.highest_bidder:
             print(f"Bidding ended. The winner is {self.highest_bidder.name} with a bid of {self.highest_bid}.")
             return self.highest_bidder
         else:
             print("No bids were placed. No winner.")
+            return None
 
     def play_trick(self, leading_player_index: int):
         trick_cards = []
@@ -113,17 +114,20 @@ class Whist:
         winning_player.tricks_won += 1
         self.team_scores[winning_player.team] += 1
         print(f"\n{winning_player.name} wins the trick for Team {winning_player.team + 1}!")
-        self.round2csv(trick_cards, self.trump, winning_player.name)
 
         return self.players.index(winning_player)
 
     def __play_round(self):
         s = self.start_bidding()
+        if not s:
+            print("No valid bids were placed. Skipping this round.")
+            return  # Exit the method if no bidding winner
+
         print(s.name, "won, this is your hand", s.hand)
         while True:
             try:
                 # Ask for user input
-                j = int(input("Choose a trump suit: Hearts, Spades, Diamonds, Clubs, or None (1, 2, 3, 4, 5):\n"))
+                j = int(input("Choose a trump suit: Hearts, Spades, Diamonds, Clubs, or None (1, 2, 3, 4, 0):\n"))
                 if j not in range(5):
                     raise ValueError("Invalid choice. Please choose a number between 0 and 4.")
 
@@ -158,27 +162,23 @@ class Whist:
             print(f"\nTeam {self.winning_team + 1} wins the round with a score of {tricks_won}!")
             self.team_scores[self.winning_team] -= self.winning_score
 
-    def round2csv(self, cards_played, trump, winner):
-        df = pd.read_csv(self.file_name)
-        new_data = {
-            "Trump": trump,
-            "Player1Card": cards_played[0],
-            "Player2Card": cards_played[1],
-            "Player3Card": cards_played[2],
-            "Player4Card": cards_played[3],
-            "Winner": winner,
-        }
-        df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
-        # Gem tilbage til CSV
-        df.to_csv(self.file_name, index=False)
-
     def play_game(self):
-
+        self.highest_bidder = None
+        self.highest_bid = None
         self.deck = dck.Deck()  # Initialize the deck
         self.deal_cards()
+        self.reset_game()
         self.__play_round()
 
+
         return [self.winning_team, self.winning_score]
+
+    def reset_game(self):
+        """Resets the game state for a new match."""
+        self.highest_bidder = None
+        self.highest_bid = None
+        for player in self.players:
+            player.reset_for_new_game()
 
 
 if __name__ == "__main__":

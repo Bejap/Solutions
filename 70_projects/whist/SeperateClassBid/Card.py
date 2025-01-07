@@ -1,5 +1,5 @@
 class Card:
-    '''
+    """
     A class representing a playing card.
 
     Each card has two attributes:
@@ -11,7 +11,7 @@ class Card:
 
     Example:
         card = Card("Hearts", "A")  # Creates the Ace of Hearts
-    '''
+    """
     # Define rank values as a class variable
     RANK_VALUES = {
         '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8,

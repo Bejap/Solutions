@@ -1,5 +1,4 @@
 import Card as card
-import time
 
 class Player:
 
@@ -40,26 +39,34 @@ class Player:
 
 
     def make_bid(self, current_highest_bid):
+        self.bid = 0
         print(f"\nYour hand: {[card.get_short_name() for card in sorted(self.hand)]}")
         if self.passed:
             print(f"{self.name} has already passed.")
             return self.bid
 
         while True:
-            action = int(input(f"{self.name}, do you want to bid or pass? (1/0): "))
-            if not action:
-                self.passed = True
-                print(f"{self.name} has passed.")
-                return None
-            elif action:
-                try:
-                    bid = int(input(f"Enter your bid (must be higher than {current_highest_bid}): "))
-                    if bid > current_highest_bid and bid <= 13:
-                        self.bid = bid
-                        return bid
-                    else:
-                        print(f"Bid must be higher than the current highest bid ({current_highest_bid}, but max 13).")
-                except ValueError:
-                    print("Please enter a valid number.")
-            else:
-                print("Invalid action. Please type 'bid' or 'pass'.")
+            try:
+                action = int(input(f"{self.name}, do you want to bid or pass? (1/0): "))
+                if not action:
+                    self.passed = True
+                    print(f"{self.name} has passed.")
+                    return None
+                elif action:
+                    try:
+                        bid = int(input(f"Enter your bid (must be higher than {current_highest_bid}): "))
+                        if bid > current_highest_bid and bid <= 13:
+                            self.bid = bid
+                            return bid
+                        else:
+                            print(f"Bid must be higher than the current highest bid ({current_highest_bid}, but max 13).")
+                    except ValueError:
+                        print("Please enter a valid number.")
+                else:
+                    print("Invalid action. Please type 'bid' or 'pass'.")
+            except ValueError as e:
+                print(f"Input error: {e}. Try again.")
+
+
+    def reset_for_new_game(self):
+        self.passed = False
