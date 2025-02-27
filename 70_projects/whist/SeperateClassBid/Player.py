@@ -70,3 +70,4 @@ class Player:
 
     def reset_for_new_game(self):
         self.passed = False
+        
