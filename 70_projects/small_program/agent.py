@@ -70,7 +70,17 @@ class DQNAgent:
         next_states = np.array(next_states)
 
         q_values_next = np.amax(self.target_model.predict(next_states), axis=1)
-        targets = rewards + (1 -np.array(dones)) *
+        targets = rewards + (1 -np.array(dones)) * self.gamma * q_values_next
+
+        q_values = self.model.predict(states)
+
+        for i in range(batch_size):
+            q_values[i][action[i]] = targets[i]
+
+        self.model.train_on_batch(states, q_values)
+
+    def update_target_network(self):
+        self.target_model.set_weights(self.model.get_weights())
 
 
 
@@ -85,8 +95,37 @@ def build_dqn_model(state_dim, action_dim):
     return model
 
 
-player1 = Agent([13, 10, 3])
-player2 = Agent([2, 6, 9])
-player3 = Agent([4, 7, 8])
-player4 = Agent([11, 12, 5])
+env = CardGameEnv()
+agent = DQNAgent(state_dim=10, action_dim=3)
 
+episodes = 500
+
+for episode in range(episodes):
+    state = env.reset()
+    total_reward = 0
+
+    while True:
+        action = agent.act(state)
+
+        next_state, reward, done = env.step(action)
+
+        agent.replay_buffer.add((state, action, reward, next_state, done))
+
+        agent.train(batch_size=32)
+
+        state = next_state
+        total_reward += reward
+
+        if done:
+            break
+
+    agent.update_target_network()
+
+    agent.epsilon = max(agent.epsilon * agent.epsilon_decay, agent.epsilon_min)
+
+    print(f"Episode {episode + 1}, Total Reward: {total_reward}")
+
+# player1 = Agent([13, 10, 3])
+# player2 = Agent([2, 6, 9])
+# player3 = Agent([4, 7, 8])
+# player4 = Agent([11, 12, 5])
