@@ -87,7 +87,7 @@ class DQNAgent:
 
 def build_dqn_model(state_dim, action_dim):
     model = Sequential([
-        layers.Dense(128, activation='relu', input_dim=state_dim),
+        layers.Dense(128, activation='relu', input_shape=state_dim),
         layers.Dense(64, activation='relu'),
         layers.Dense(action_dim, activation='linear'),
     ])
@@ -124,6 +124,7 @@ for episode in range(episodes):
     agent.epsilon = max(agent.epsilon * agent.epsilon_decay, agent.epsilon_min)
 
     print(f"Episode {episode + 1}, Total Reward: {total_reward}")
+
 
 # player1 = Agent([13, 10, 3])
 # player2 = Agent([2, 6, 9])
