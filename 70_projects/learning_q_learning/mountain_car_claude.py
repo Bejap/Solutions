@@ -2,23 +2,23 @@ import gym
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Initialize the environment with render_mode to avoid warning
-env = gym.make("MountainCar-v0")
+# Initialize the environment
+env = gym.make("MountainCar-v0", render_mode=None)  # Use render_mode=None for training speed
 
-LEARNING_RATE = 0.1
+LEARNING_RATE = 0.08
 DISCOUNT = 0.95
 EPISODES = 25000
 STATS_EVERY = 100
-SHOW_EVERY = 3000
+SHOW_EVERY = 1000
 ep_rewards = []
 aggr_ep_rewards = {'ep': [], 'avg': [], 'max': [], 'min': []}
 
 epsilon = 1
 START_EPSILON_DECAYING = 1
-END_EPSILON_DECAYING = EPISODES // 2
-epsilon_decay_value = epsilon/(END_EPSILON_DECAYING - START_EPSILON_DECAYING)
+END_EPSILON_DECAYING = EPISODES // 1.8
+epsilon_decay_value = epsilon / (END_EPSILON_DECAYING - START_EPSILON_DECAYING)
 
-DISCRETE_OS_SIZE = [40] * len(env.observation_space.high)
+DISCRETE_OS_SIZE = [20, 20]
 discrete_os_win_size = (env.observation_space.high - env.observation_space.low) / DISCRETE_OS_SIZE
 
 q_table = np.random.uniform(low=-2, high=0, size=(DISCRETE_OS_SIZE + [env.action_space.n]))
@@ -29,17 +29,17 @@ def get_discrete_state(state):
     return tuple(discrete_state.astype(np.int64))
 
 
-# Properly handle the tuple returned by reset()
-
 for episode in range(EPISODES):
-    initial_state, _ = env.reset()  # Unpack the tuple, ignoring the info dict
+    # Reset the environment at the start of each episode
+    initial_state, _ = env.reset()
     discrete_state = get_discrete_state(initial_state)
 
     episode_reward = 0
     done = False
     truncated = False
 
-    if episode % SHOW_EVERY == 0:  # Newer gym versions
+    # Set render mode for display episodes
+    if episode % SHOW_EVERY == 0:
         print(f"Episode: {episode}")
         # Only create render environment when needed
         render_env = gym.make("MountainCar-v0", render_mode="human")
@@ -55,18 +55,17 @@ for episode in range(EPISODES):
             render_discrete_state = get_discrete_state(render_state)
         render_env.close()
 
+    # Training loop
     while not done and not truncated:
+        # Epsilon-greedy action selection
         if np.random.random() > epsilon:
             action = np.argmax(q_table[discrete_state])
         else:
             action = np.random.randint(0, env.action_space.n)
 
-        new_state, reward, done, _, _ = env.step(action)
+        new_state, reward, done, truncated, _ = env.step(action)
         episode_reward += reward
         new_discrete_state = get_discrete_state(new_state)
-
-        if episode % SHOW_EVERY == 0:
-            env.render()
 
         # If simulation did not end yet after last step - update Q table
         if not done and not truncated:
@@ -88,9 +87,11 @@ for episode in range(EPISODES):
 
         discrete_state = new_discrete_state
 
+    # Decay epsilon
     if END_EPSILON_DECAYING >= episode >= START_EPSILON_DECAYING:
         epsilon -= epsilon_decay_value
 
+    # Track statistics
     ep_rewards.append(episode_reward)
     if not episode % STATS_EVERY:
         average_reward = sum(ep_rewards[-STATS_EVERY:]) / STATS_EVERY
@@ -104,9 +105,15 @@ for episode in range(EPISODES):
 
 env.close()
 
+# Create the plot
+plt.figure(figsize=(10, 6))
 plt.plot(aggr_ep_rewards['ep'], aggr_ep_rewards['avg'], label="average rewards")
 plt.plot(aggr_ep_rewards['ep'], aggr_ep_rewards['max'], label="max rewards")
 plt.plot(aggr_ep_rewards['ep'], aggr_ep_rewards['min'], label="min rewards")
 plt.legend(loc=4)
 plt.grid(True)
+plt.xlabel('Episode')
+plt.ylabel('Reward')
+plt.title('Mountain Car Q-Learning Performance')
+plt.savefig('mountain_car_rewards.png')  # Save the figure
 plt.show()
