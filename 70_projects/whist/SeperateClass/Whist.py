@@ -36,6 +36,9 @@ class Whist:
         print(f"--- New Trick ---")
         print(f"Trump suit: {self.trump}")
 
+        hand = self.players[leading_player_index].hand
+
+
         for i in range(len(self.players)):
             current_player = self.players[(leading_player_index + i) % len(self.players)]
             print(f"\n{current_player.name}'s turn:")

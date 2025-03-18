@@ -20,7 +20,7 @@ class Whist:
 
     def deal_cards(self):
         self.deck.shuffle()
-        cards_per_player = 13  # CHANGE THIS
+        cards_per_player = 1  # CHANGE THIS
         self.count += 1
 
         for player in self.players:

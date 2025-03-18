@@ -1,153 +1,76 @@
-import numpy as np
-import random
 import tensorflow as tf
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense
-from collections import deque
 
-
-# --- Definer kort, spiller og kortbunke ---
-class Card:
-    def __init__(self, suit, rank, rank_value):
-        self.suit = suit
-        self.rank = rank
-        self.rank_value = rank_value
-
-
-class Player:
-    def __init__(self, is_human=False):
-        self.hand = []
-        self.is_human = is_human
-
-
-class Deck:
-    def __init__(self):
-        suits = ['hearts', 'diamonds', 'clubs', 'spades']
-        ranks = list(range(2, 15))  # 2-14 (med 14 som es)
-        self.cards = [Card(suit, rank, rank) for suit in suits for rank in ranks]
-
-    def shuffle(self):
-        random.shuffle(self.cards)
-
-    def deal(self, num):
-        return [self.cards.pop() for _ in range(num)]
-
-
-# --- Whist-relaterede variabler ---
-players = [Player() for _ in range(4)]
-deck = Deck()
-deck.shuffle()
-lead_player = 0
-score_array = [0] * 4
-
-
-# --- Deep Q-Network Model ---
-def build_dqn():
+def build_model(state_size, action_size):
     model = Sequential([
-        Dense(128, activation='relu', input_shape=(52,)),
+        Dense(64, activation='relu', input_shape=(state_size,)),
         Dense(64, activation='relu'),
-        Dense(13, activation='linear')  # 13 mulige kortvalg
+        Dense(action_size, activation='linear')  # Output Q-values for each action
     ])
     model.compile(optimizer='adam', loss='mse')
     return model
 
+class DQNAgent:
+    def __init__(self, state_size, action_size):
+        self.state_size = state_size
+        self.action_size = action_size
+        self.model = build_model(state_size, action_size)
+        self.target_model = build_model(state_size, action_size)
+        self.memory = []  # Replay memory
+        self.gamma = 0.95  # Discount factor
+        self.epsilon = 1.0  # Exploration rate
+        self.epsilon_decay = 0.995
+        self.epsilon_min = 0.1
+        self.batch_size = 32
 
-dqn_model = build_dqn()
+    def remember(self, state, action, reward, next_state, done):
+        self.memory.append((state, action, reward, next_state, done))
 
+    def act(self, state):
+        if np.random.rand() < self.epsilon:
+            return random.choice(range(self.action_size))  # Explore
+        q_values = self.model.predict(state[np.newaxis, :])  # Exploit
+        return np.argmax(q_values[0])
 
-# --- Replay Buffer ---
-class ReplayBuffer:
-    def __init__(self, capacity=10000):
-        self.buffer = deque(maxlen=capacity)
+    def replay(self):
+        if len(self.memory) < self.batch_size:
+            return
+        batch = random.sample(self.memory, self.batch_size)
+        for state, action, reward, next_state, done in batch:
+            target = reward
+            if not done:
+                target += self.gamma * np.max(self.target_model.predict(next_state[np.newaxis, :]))
+            target_f = self.model.predict(state[np.newaxis, :])
+            target_f[0][action] = target
+            self.model.fit(state[np.newaxis, :], target_f, epochs=1, verbose=0)
 
-    def add(self, state, action, reward, next_state, done):
-        self.buffer.append((state, action, reward, next_state, done))
+    def update_target_model(self):
+        self.target_model.set_weights(self.model.get_weights())
 
-    def sample(self, batch_size):
-        return random.sample(self.buffer, batch_size)
-
-
-replay_buffer = ReplayBuffer()
-
-
-def get_whist_state():
-    """Returnerer en numerisk repræsentation af spilsituationen."""
-    state = np.zeros(52)  # Placeholder, skal opdateres med relevant tilstand
-    return state
-
-
-def reset_whist_game():
-    global players, deck, score_array, lead_player
-    deck = Deck()
-    deck.shuffle()
-    for player in players:
-        player.hand = deck.deal(13)
-    score_array = [0] * 4
-    lead_player = random.randint(0, 3)
-    return get_whist_state()
-
-
-def step_whist_game(action):
-    global lead_player, score_array, players
-    current_player = players[lead_player]
-    if action < 0 or action >= len(current_player.hand):
-        raise ValueError("Ugyldig handling: action uden for rækkevidde")
-    played_card = current_player.hand.pop(action)
-    lead_player = (lead_player + 1) % 4
-    reward = 0
-    done = False
-    if lead_player == 0:
-        winner_index = determine_winner()
-        score_array[winner_index] += 1
-        reward = 1 if winner_index == 0 else -1
-    if sum(score_array) >= 13:
-        done = True
-    return get_whist_state(), reward, done, {}
+    def decay_epsilon(self):
+        if self.epsilon > self.epsilon_min:
+            self.epsilon *= self.epsilon_decay
 
 
-def determine_winner():
-    """Bestemmer vinderen af en runde."""
-    return random.randint(0, 3)  # Placeholder-logik
+env = WhistEnv()
+agent = DQNAgent(state_size=10, action_size=len(env.action_space))
 
+episodes = 1000
+for e in range(episodes):
+    state = env.reset()
+    total_reward = 0
 
-def select_action(state, epsilon=0.1):
-    if np.random.rand() < epsilon:
-        return random.randint(0, 12)  # Tilfældig handling (udforskning)
-    q_values = dqn_model.predict(np.array([state]), verbose=0)[0]
-    return np.argmax(q_values)
+    for time in range(100):  # Limit each game to 100 steps
+        action = agent.act(state)
+        next_state, reward, done = env.step(action)
+        agent.remember(state, action, reward, next_state, done)
+        state = next_state
+        total_reward += reward
+        if done:
+            break
 
-
-def train_dqn(batch_size=32, gamma=0.99):
-    if len(replay_buffer.buffer) < batch_size:
-        return
-    batch = replay_buffer.sample(batch_size)
-    states, actions, rewards, next_states, dones = zip(*batch)
-    states = np.array(states)
-    next_states = np.array(next_states)
-    q_values = dqn_model.predict(states, verbose=0)
-    next_q_values = dqn_model.predict(next_states, verbose=0)
-    for i in range(batch_size):
-        target_q = rewards[i] if dones[i] else rewards[i] + gamma * np.max(next_q_values[i])
-        q_values[i][actions[i]] = target_q
-    dqn_model.fit(states, q_values, epochs=1, verbose=0)
-
-
-def train_agent(episodes=1000, epsilon_decay=0.995, epsilon_min=0.01):
-    epsilon = 1.0
-    for episode in range(episodes):
-        state = reset_whist_game()
-        done = False
-        total_reward = 0
-        while not done:
-            action = select_action(state, epsilon)
-            next_state, reward, done, _ = step_whist_game(action)
-            replay_buffer.add(state, action, reward, next_state, done)
-            state = next_state
-            total_reward += reward
-            train_dqn()
-        epsilon = max(epsilon_min, epsilon * epsilon_decay)
-        if episode % 100 == 0:
-            print(f"Episode {episode}: Total reward {total_reward}, Epsilon {epsilon:.3f}")
-
-
-train_agent()
+    agent.replay()
+    agent.update_target_model()
+    agent.decay_epsilon()
+    print(f"Episode {e + 1}/{episodes}, Total Reward: {total_reward}")
