@@ -1,0 +1,3573 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    
+        <script>
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        </script>
+    
+    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_61b012341743b904830791fde882cf10 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_61b012341743b904830791fde882cf10" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_61b012341743b904830791fde882cf10 = L.map(
+                "map_61b012341743b904830791fde882cf10",
+                {
+                    center: [55.64628487394958, 12.26746050420168],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 14,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+            L.control.scale().addTo(map_61b012341743b904830791fde882cf10);
+
+            
+
+        
+    
+            var tile_layer_af9b67d82d7ff5c0054234bef645f1dd = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_af9b67d82d7ff5c0054234bef645f1dd.addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var rectangle_0d6bf96ba8576b93ec1b9d9a41ce377b = L.rectangle(
+                [[55.6295, 12.245], [55.6645, 12.295]],
+                {"bubblingMouseEvents": true, "color": "darkgreen", "dashArray": "4, 8", "dashOffset": null, "fill": true, "fillColor": "lightgrey", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 2}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var marker_a146215846ab5ae2193edbe645f790d0 = L.marker(
+                [55.647, 12.27],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_5e44b10d66b3179cd5063071a0b05c5d = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "red",
+  "iconColor": "white",
+  "icon": "home",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_a146215846ab5ae2193edbe645f790d0.setIcon(icon_5e44b10d66b3179cd5063071a0b05c5d);
+        
+    
+            marker_a146215846ab5ae2193edbe645f790d0.bindTooltip(
+                `<div>
+                     Center of area with data
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_689778a06302305c00943ae204c870ae = L.marker(
+                [55.6393, 12.2461],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_25d74c42b1e867f8662d5d224c8c69a1 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_689778a06302305c00943ae204c870ae.setIcon(icon_25d74c42b1e867f8662d5d224c8c69a1);
+        
+    
+            marker_689778a06302305c00943ae204c870ae.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-07-02 15:19:01.266
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_474810502f38d0dc694562f02efd503f = L.marker(
+                [55.6459, 12.2828],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_c36a630732316989f24a1844d7f6c179 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_474810502f38d0dc694562f02efd503f.setIcon(icon_c36a630732316989f24a1844d7f6c179);
+        
+    
+            marker_474810502f38d0dc694562f02efd503f.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 04:16:45.795
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_d14c4f6ef71e79cdb6f646da42412375 = L.marker(
+                [55.6314, 12.293],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_1297cb7039b3689186b5a36ff9c9446b = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_d14c4f6ef71e79cdb6f646da42412375.setIcon(icon_1297cb7039b3689186b5a36ff9c9446b);
+        
+    
+            marker_d14c4f6ef71e79cdb6f646da42412375.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 04:23:35.150
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_ff3ce7d192c7af2ca20f784550ff25ea = L.marker(
+                [55.6368, 12.2516],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_7e07931b75d85b247465711ea2e091e6 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_ff3ce7d192c7af2ca20f784550ff25ea.setIcon(icon_7e07931b75d85b247465711ea2e091e6);
+        
+    
+            marker_ff3ce7d192c7af2ca20f784550ff25ea.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 04:27:00.400
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_df4fd0ff73388ec28524b4cd2674f048 = L.marker(
+                [55.6314, 12.2519],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_881008ff122c2bee2354a4dcf16eadfa = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_df4fd0ff73388ec28524b4cd2674f048.setIcon(icon_881008ff122c2bee2354a4dcf16eadfa);
+        
+    
+            marker_df4fd0ff73388ec28524b4cd2674f048.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 04:29:00.775
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_66015c73c098f9eff1c663d6770291e5 = L.marker(
+                [55.6329, 12.2659],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_0e2f2ce8deb92a2087e0ad64e8c98889 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_66015c73c098f9eff1c663d6770291e5.setIcon(icon_0e2f2ce8deb92a2087e0ad64e8c98889);
+        
+    
+            marker_66015c73c098f9eff1c663d6770291e5.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 04:30:15.640
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_8684a788a389cf0b7306f796c10e067b = L.marker(
+                [55.6315, 12.2599],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_6e2471556d559e35fd9a18cb3c8248de = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_8684a788a389cf0b7306f796c10e067b.setIcon(icon_6e2471556d559e35fd9a18cb3c8248de);
+        
+    
+            marker_8684a788a389cf0b7306f796c10e067b.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 04:33:51.298
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_3bc9afbbcf80bb6a69e2b83b7d63eef9 = L.marker(
+                [55.6522, 12.2509],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_55f1384c71db3535f9457fb109090c23 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_3bc9afbbcf80bb6a69e2b83b7d63eef9.setIcon(icon_55f1384c71db3535f9457fb109090c23);
+        
+    
+            marker_3bc9afbbcf80bb6a69e2b83b7d63eef9.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 04:43:16.707
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_8e04233d4976763143411fd71e3c574c = L.marker(
+                [55.6304, 12.2671],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_d01dc769046a18f7dad458a20c28a284 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_8e04233d4976763143411fd71e3c574c.setIcon(icon_d01dc769046a18f7dad458a20c28a284);
+        
+    
+            marker_8e04233d4976763143411fd71e3c574c.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 04:46:50.470
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_8d785db15f7ab63f9fe8fb0645eadba1 = L.marker(
+                [55.6629, 12.2637],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_f70e0f6458bf601366e165ecb9cbed2f = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_8d785db15f7ab63f9fe8fb0645eadba1.setIcon(icon_f70e0f6458bf601366e165ecb9cbed2f);
+        
+    
+            marker_8d785db15f7ab63f9fe8fb0645eadba1.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 04:47:05.143
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_4bcc6674d7c0d2d51014994cc506406a = L.marker(
+                [55.6441, 12.2773],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_48e604c900469b4abcc0fd0a0840c43c = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_4bcc6674d7c0d2d51014994cc506406a.setIcon(icon_48e604c900469b4abcc0fd0a0840c43c);
+        
+    
+            marker_4bcc6674d7c0d2d51014994cc506406a.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 04:47:43.888
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_312a69903ee84e2d1b93d8408fd6b043 = L.marker(
+                [55.6353, 12.2879],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_72a5fd4f46bd7a87fb43a6ea20d104ed = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_312a69903ee84e2d1b93d8408fd6b043.setIcon(icon_72a5fd4f46bd7a87fb43a6ea20d104ed);
+        
+    
+            marker_312a69903ee84e2d1b93d8408fd6b043.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 04:48:03.838
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_54610cd2e82e2f9314df0f17564d0693 = L.marker(
+                [55.6566, 12.2596],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_9c36e716d612bafaac045a18c6e4134c = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_54610cd2e82e2f9314df0f17564d0693.setIcon(icon_9c36e716d612bafaac045a18c6e4134c);
+        
+    
+            marker_54610cd2e82e2f9314df0f17564d0693.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 04:48:25.542
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_7c01520ad61bea6f26ed03a1cbb51a5e = L.marker(
+                [55.6557, 12.2507],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_8fc37ba4a5039e78f0b685abf2bfe226 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_7c01520ad61bea6f26ed03a1cbb51a5e.setIcon(icon_8fc37ba4a5039e78f0b685abf2bfe226);
+        
+    
+            marker_7c01520ad61bea6f26ed03a1cbb51a5e.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 04:49:25.222
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_177f2543ed5825531b258089958ce6ca = L.marker(
+                [55.6558, 12.2762],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_31676872518ea8ea1f73102d07731a89 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_177f2543ed5825531b258089958ce6ca.setIcon(icon_31676872518ea8ea1f73102d07731a89);
+        
+    
+            marker_177f2543ed5825531b258089958ce6ca.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 04:53:20.222
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_1f957a0e75bbf56fcb1013e92185a9d9 = L.marker(
+                [55.6632, 12.2463],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_2ff185dc1a91e959787b9e0616cde6f9 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_1f957a0e75bbf56fcb1013e92185a9d9.setIcon(icon_2ff185dc1a91e959787b9e0616cde6f9);
+        
+    
+            marker_1f957a0e75bbf56fcb1013e92185a9d9.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 04:53:55.412
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_b24fada24dd5aa1b00ba7addbe47b7f8 = L.marker(
+                [55.6378, 12.248],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_bc1df63d49df4f366d7866a831d040d6 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_b24fada24dd5aa1b00ba7addbe47b7f8.setIcon(icon_bc1df63d49df4f366d7866a831d040d6);
+        
+    
+            marker_b24fada24dd5aa1b00ba7addbe47b7f8.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 04:58:23.401
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_2ad9b099e30ca1b62f0921705d102f21 = L.marker(
+                [55.6613, 12.247],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_c27e250ca28575613a2bc7df533e0018 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_2ad9b099e30ca1b62f0921705d102f21.setIcon(icon_c27e250ca28575613a2bc7df533e0018);
+        
+    
+            marker_2ad9b099e30ca1b62f0921705d102f21.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 05:00:23.980
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_0362e29a507f2aecdd31083563e9ac04 = L.marker(
+                [55.6604, 12.2477],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_616de9c89e48c81c51e97948539bfa85 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_0362e29a507f2aecdd31083563e9ac04.setIcon(icon_616de9c89e48c81c51e97948539bfa85);
+        
+    
+            marker_0362e29a507f2aecdd31083563e9ac04.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 05:02:27.553
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_077bbd04f452577f33488d214f99fc46 = L.marker(
+                [55.6443, 12.255],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_b668768d70c18138cb86356a358d48f8 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_077bbd04f452577f33488d214f99fc46.setIcon(icon_b668768d70c18138cb86356a358d48f8);
+        
+    
+            marker_077bbd04f452577f33488d214f99fc46.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 05:04:17.600
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_1ac4c4f15207cf37fcafa7036b669ef2 = L.marker(
+                [55.6598, 12.2701],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_57df20d0f52e4d95fda524376817c88e = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_1ac4c4f15207cf37fcafa7036b669ef2.setIcon(icon_57df20d0f52e4d95fda524376817c88e);
+        
+    
+            marker_1ac4c4f15207cf37fcafa7036b669ef2.bindTooltip(
+                `<div>
+                     Lightning Strike at 2002-08-01 05:20:45.721
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_2df929ffe4e177106f81a853e656b7e6 = L.marker(
+                [55.6333, 12.2671],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_9dc60d57b9eade7e391229b66db681ad = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_2df929ffe4e177106f81a853e656b7e6.setIcon(icon_9dc60d57b9eade7e391229b66db681ad);
+        
+    
+            marker_2df929ffe4e177106f81a853e656b7e6.bindTooltip(
+                `<div>
+                     Lightning Strike at 2003-05-24 19:26:31.399
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_5c9c1a2b302d7c926bc3da36b37de958 = L.marker(
+                [55.6599, 12.2617],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_04859c2773f143bc1c9f2f241a5d0101 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_5c9c1a2b302d7c926bc3da36b37de958.setIcon(icon_04859c2773f143bc1c9f2f241a5d0101);
+        
+    
+            marker_5c9c1a2b302d7c926bc3da36b37de958.bindTooltip(
+                `<div>
+                     Lightning Strike at 2003-06-08 17:50:54.211
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_96a9ec13eb47128bcd5579cf8a726745 = L.marker(
+                [55.6304, 12.2873],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_cc0643e643e5366b934e6b05e2aaec56 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_96a9ec13eb47128bcd5579cf8a726745.setIcon(icon_cc0643e643e5366b934e6b05e2aaec56);
+        
+    
+            marker_96a9ec13eb47128bcd5579cf8a726745.bindTooltip(
+                `<div>
+                     Lightning Strike at 2003-06-08 18:27:35.412
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_5af73a526a87e99d7628f859322fd46e = L.marker(
+                [55.6419, 12.2578],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_3e3f4bd7b2eca4ba2253f75043a4fb9d = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_5af73a526a87e99d7628f859322fd46e.setIcon(icon_3e3f4bd7b2eca4ba2253f75043a4fb9d);
+        
+    
+            marker_5af73a526a87e99d7628f859322fd46e.bindTooltip(
+                `<div>
+                     Lightning Strike at 2003-06-23 18:59:32.138
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_2ee312b9958250c404c6e1a275651fca = L.marker(
+                [55.6438, 12.2914],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_d3428216cde783b4f622dfbb85b87335 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_2ee312b9958250c404c6e1a275651fca.setIcon(icon_d3428216cde783b4f622dfbb85b87335);
+        
+    
+            marker_2ee312b9958250c404c6e1a275651fca.bindTooltip(
+                `<div>
+                     Lightning Strike at 2003-06-23 19:06:54.543
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_93aee8d04929320a72d233ab0d019e22 = L.marker(
+                [55.6508, 12.2621],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_341427c0e453574117bc24fa2a570f66 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_93aee8d04929320a72d233ab0d019e22.setIcon(icon_341427c0e453574117bc24fa2a570f66);
+        
+    
+            marker_93aee8d04929320a72d233ab0d019e22.bindTooltip(
+                `<div>
+                     Lightning Strike at 2003-06-27 16:28:30.330
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_c211990ec6134a4dba164b4f5daea9e2 = L.marker(
+                [55.6314, 12.2703],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_f3a717169dd2d6ff79273b8be90f00c6 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_c211990ec6134a4dba164b4f5daea9e2.setIcon(icon_f3a717169dd2d6ff79273b8be90f00c6);
+        
+    
+            marker_c211990ec6134a4dba164b4f5daea9e2.bindTooltip(
+                `<div>
+                     Lightning Strike at 2003-06-27 16:29:57.894
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_01bf2dd7b514ca6a0acb90a0113b57dd = L.marker(
+                [55.6605, 12.2922],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_7d5c4bcb2bcd658f3ae13281b1f9bfe8 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_01bf2dd7b514ca6a0acb90a0113b57dd.setIcon(icon_7d5c4bcb2bcd658f3ae13281b1f9bfe8);
+        
+    
+            marker_01bf2dd7b514ca6a0acb90a0113b57dd.bindTooltip(
+                `<div>
+                     Lightning Strike at 2003-06-27 16:33:30.794
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_ca629223f7dccdf645135132b2eba4ce = L.marker(
+                [55.6302, 12.2859],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_4567c12cec3350c4a23c07246abc1998 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_ca629223f7dccdf645135132b2eba4ce.setIcon(icon_4567c12cec3350c4a23c07246abc1998);
+        
+    
+            marker_ca629223f7dccdf645135132b2eba4ce.bindTooltip(
+                `<div>
+                     Lightning Strike at 2003-07-02 17:13:56.858
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_eaafa4f34f700010fa3a4f6f8ad5034c = L.marker(
+                [55.6449, 12.2834],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_dded853ca89dd701d99e0fd9196f3edc = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_eaafa4f34f700010fa3a4f6f8ad5034c.setIcon(icon_dded853ca89dd701d99e0fd9196f3edc);
+        
+    
+            marker_eaafa4f34f700010fa3a4f6f8ad5034c.bindTooltip(
+                `<div>
+                     Lightning Strike at 2003-07-02 17:15:07.554
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_2461ea3cb9554e01c1d2b5ce92b6a1dc = L.marker(
+                [55.6445, 12.2889],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_55d49c32384743b78e875c700c458302 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_2461ea3cb9554e01c1d2b5ce92b6a1dc.setIcon(icon_55d49c32384743b78e875c700c458302);
+        
+    
+            marker_2461ea3cb9554e01c1d2b5ce92b6a1dc.bindTooltip(
+                `<div>
+                     Lightning Strike at 2003-08-14 11:55:29.436
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_b8ef33ebdad10998b678740d4d736c9e = L.marker(
+                [55.6338, 12.2465],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_11006060eeb99ebff0092e22ef9d49c6 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_b8ef33ebdad10998b678740d4d736c9e.setIcon(icon_11006060eeb99ebff0092e22ef9d49c6);
+        
+    
+            marker_b8ef33ebdad10998b678740d4d736c9e.bindTooltip(
+                `<div>
+                     Lightning Strike at 2004-07-01 13:03:50.272
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_56e1b2ef4af5b5c4930aa95a7eecaf20 = L.marker(
+                [55.6587, 12.2716],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_a1e5b25044252d710b157c3257d94a25 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_56e1b2ef4af5b5c4930aa95a7eecaf20.setIcon(icon_a1e5b25044252d710b157c3257d94a25);
+        
+    
+            marker_56e1b2ef4af5b5c4930aa95a7eecaf20.bindTooltip(
+                `<div>
+                     Lightning Strike at 2004-07-01 13:05:06.648
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_879e70aed00364a3d7d89521488fe594 = L.marker(
+                [55.6477, 12.2451],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_032839b657b0eca8c10c0f86314a34dc = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_879e70aed00364a3d7d89521488fe594.setIcon(icon_032839b657b0eca8c10c0f86314a34dc);
+        
+    
+            marker_879e70aed00364a3d7d89521488fe594.bindTooltip(
+                `<div>
+                     Lightning Strike at 2004-07-01 13:10:53.902
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_f684b43c42e0d6b6999042dfde1795cd = L.marker(
+                [55.6595, 12.2651],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_fe668bafd6d3596d787f5e05d7e11660 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_f684b43c42e0d6b6999042dfde1795cd.setIcon(icon_fe668bafd6d3596d787f5e05d7e11660);
+        
+    
+            marker_f684b43c42e0d6b6999042dfde1795cd.bindTooltip(
+                `<div>
+                     Lightning Strike at 2004-07-01 13:13:15.584
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_dd37da9686e1062e1fc31abb0bbefa64 = L.marker(
+                [55.6542, 12.2855],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_7623b6e936f762c85974fdce35b64aca = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_dd37da9686e1062e1fc31abb0bbefa64.setIcon(icon_7623b6e936f762c85974fdce35b64aca);
+        
+    
+            marker_dd37da9686e1062e1fc31abb0bbefa64.bindTooltip(
+                `<div>
+                     Lightning Strike at 2004-07-01 13:15:49.580
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_454fca158bdf4f5800f6f5a05757e0ed = L.marker(
+                [55.6432, 12.287],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_c640cf089ebf6d3fec22b72f25d195a1 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_454fca158bdf4f5800f6f5a05757e0ed.setIcon(icon_c640cf089ebf6d3fec22b72f25d195a1);
+        
+    
+            marker_454fca158bdf4f5800f6f5a05757e0ed.bindTooltip(
+                `<div>
+                     Lightning Strike at 2004-07-01 13:16:44.622
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_9b72549de0c40d3b7dc8b7081d319231 = L.marker(
+                [55.6645, 12.288],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_770f17256225c72472c5001d68d016ec = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_9b72549de0c40d3b7dc8b7081d319231.setIcon(icon_770f17256225c72472c5001d68d016ec);
+        
+    
+            marker_9b72549de0c40d3b7dc8b7081d319231.bindTooltip(
+                `<div>
+                     Lightning Strike at 2004-08-20 13:43:54.623
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_0ed19974781c8d97dc7ffcfcfbd91533 = L.marker(
+                [55.6422, 12.2596],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_3cb8fbdc376b6bbbb71a926dc506f7cd = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_0ed19974781c8d97dc7ffcfcfbd91533.setIcon(icon_3cb8fbdc376b6bbbb71a926dc506f7cd);
+        
+    
+            marker_0ed19974781c8d97dc7ffcfcfbd91533.bindTooltip(
+                `<div>
+                     Lightning Strike at 2004-09-22 14:49:17.794
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_bf746e6e15e40ddc1d3b6098e84017d7 = L.marker(
+                [55.646, 12.273],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_389b603e1d551701f638f6524088c8d6 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_bf746e6e15e40ddc1d3b6098e84017d7.setIcon(icon_389b603e1d551701f638f6524088c8d6);
+        
+    
+            marker_bf746e6e15e40ddc1d3b6098e84017d7.bindTooltip(
+                `<div>
+                     Lightning Strike at 2005-06-21 16:09:43.565
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_4ab0a737fd3334a9579411baa98ae97f = L.marker(
+                [55.6322, 12.2723],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_b7657ddabe9889475c01a02d962ba18a = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_4ab0a737fd3334a9579411baa98ae97f.setIcon(icon_b7657ddabe9889475c01a02d962ba18a);
+        
+    
+            marker_4ab0a737fd3334a9579411baa98ae97f.bindTooltip(
+                `<div>
+                     Lightning Strike at 2006-05-22 23:06:59.102
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_d47b07a23f086d862a8cae45d9aa4ac3 = L.marker(
+                [55.6426, 12.2526],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_8670eb0f1cd81857b8e2cc347c971aa3 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_d47b07a23f086d862a8cae45d9aa4ac3.setIcon(icon_8670eb0f1cd81857b8e2cc347c971aa3);
+        
+    
+            marker_d47b07a23f086d862a8cae45d9aa4ac3.bindTooltip(
+                `<div>
+                     Lightning Strike at 2006-07-23 18:29:56.625
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_df5f7fffb513a76ffef1262825124a52 = L.marker(
+                [55.6504, 12.2759],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_9659b1c819bb70fe63a06d1ff7154d00 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_df5f7fffb513a76ffef1262825124a52.setIcon(icon_9659b1c819bb70fe63a06d1ff7154d00);
+        
+    
+            marker_df5f7fffb513a76ffef1262825124a52.bindTooltip(
+                `<div>
+                     Lightning Strike at 2006-08-26 15:43:28.972
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_7fa95289616cc6bb5f6e6798449b7dca = L.marker(
+                [55.6373, 12.2672],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_99a781e649deda4b3f4ddf1030c8391f = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_7fa95289616cc6bb5f6e6798449b7dca.setIcon(icon_99a781e649deda4b3f4ddf1030c8391f);
+        
+    
+            marker_7fa95289616cc6bb5f6e6798449b7dca.bindTooltip(
+                `<div>
+                     Lightning Strike at 2006-08-27 12:31:21.455
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_7dfa1e7c8110687ce3e20efe1b927572 = L.marker(
+                [55.6412, 12.2572],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_175dd20e9aa433d304020f742757ab54 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_7dfa1e7c8110687ce3e20efe1b927572.setIcon(icon_175dd20e9aa433d304020f742757ab54);
+        
+    
+            marker_7dfa1e7c8110687ce3e20efe1b927572.bindTooltip(
+                `<div>
+                     Lightning Strike at 2006-10-01 20:31:12.862
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_6f9341f30af4f18761f3cb0e179e9990 = L.marker(
+                [55.6305, 12.2881],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_9910c252155ae75efb4b4f6f0e818e81 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_6f9341f30af4f18761f3cb0e179e9990.setIcon(icon_9910c252155ae75efb4b4f6f0e818e81);
+        
+    
+            marker_6f9341f30af4f18761f3cb0e179e9990.bindTooltip(
+                `<div>
+                     Lightning Strike at 2007-07-10 15:02:35.914
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_e474bb2a42e4a070ad41f0b34b558f34 = L.marker(
+                [55.6418, 12.2505],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_8c9d68080c3385d695747fa61102f3ef = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_e474bb2a42e4a070ad41f0b34b558f34.setIcon(icon_8c9d68080c3385d695747fa61102f3ef);
+        
+    
+            marker_e474bb2a42e4a070ad41f0b34b558f34.bindTooltip(
+                `<div>
+                     Lightning Strike at 2007-07-10 15:05:16.803
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_4c4fe242340708d662131a7b445c03fb = L.marker(
+                [55.6302, 12.2765],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_d232bdad3e13e7899dfea2328c6cf748 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_4c4fe242340708d662131a7b445c03fb.setIcon(icon_d232bdad3e13e7899dfea2328c6cf748);
+        
+    
+            marker_4c4fe242340708d662131a7b445c03fb.bindTooltip(
+                `<div>
+                     Lightning Strike at 2007-07-10 15:06:22.319
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_ee07533e2f613b4a871fd9f4ad46a12c = L.marker(
+                [55.6341, 12.2623],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_98de1bcdfaf4cf4d0f65871cad738b35 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_ee07533e2f613b4a871fd9f4ad46a12c.setIcon(icon_98de1bcdfaf4cf4d0f65871cad738b35);
+        
+    
+            marker_ee07533e2f613b4a871fd9f4ad46a12c.bindTooltip(
+                `<div>
+                     Lightning Strike at 2007-07-10 15:07:16.454
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_751c90cae11d85437464290d8fa25b54 = L.marker(
+                [55.6329, 12.252],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_55e3606c73a79c1d8446ed09068fa6c1 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_751c90cae11d85437464290d8fa25b54.setIcon(icon_55e3606c73a79c1d8446ed09068fa6c1);
+        
+    
+            marker_751c90cae11d85437464290d8fa25b54.bindTooltip(
+                `<div>
+                     Lightning Strike at 2007-08-10 02:17:52.135
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_0655189d51f561b1f2ad44dc68713717 = L.marker(
+                [55.6506, 12.2462],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_56e3618bdae133fd633a61dfed90e8a5 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_0655189d51f561b1f2ad44dc68713717.setIcon(icon_56e3618bdae133fd633a61dfed90e8a5);
+        
+    
+            marker_0655189d51f561b1f2ad44dc68713717.bindTooltip(
+                `<div>
+                     Lightning Strike at 2008-06-27 09:39:33.329
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_b462951917629b7005b947d7b2cb3889 = L.marker(
+                [55.6393, 12.2776],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_b472c85072025a6fee14f777d82d3a3b = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_b462951917629b7005b947d7b2cb3889.setIcon(icon_b472c85072025a6fee14f777d82d3a3b);
+        
+    
+            marker_b462951917629b7005b947d7b2cb3889.bindTooltip(
+                `<div>
+                     Lightning Strike at 2009-05-20 01:01:44.236
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_e5d67078cbf71c55cdd19b8f5b67386e = L.marker(
+                [55.6382, 12.2513],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_8ed4814715e79ce7af8f594610946746 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_e5d67078cbf71c55cdd19b8f5b67386e.setIcon(icon_8ed4814715e79ce7af8f594610946746);
+        
+    
+            marker_e5d67078cbf71c55cdd19b8f5b67386e.bindTooltip(
+                `<div>
+                     Lightning Strike at 2010-05-28 16:40:10.714
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_4423be064cef82440e966edc3dabb321 = L.marker(
+                [55.653, 12.2912],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_d09dfe16144ebddb3b22d25418db27bd = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_4423be064cef82440e966edc3dabb321.setIcon(icon_d09dfe16144ebddb3b22d25418db27bd);
+        
+    
+            marker_4423be064cef82440e966edc3dabb321.bindTooltip(
+                `<div>
+                     Lightning Strike at 2010-07-11 16:43:43.584
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_87126038835db5292346e5088c2e0be3 = L.marker(
+                [55.6624, 12.2765],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_4407f1e45591e1a8b96d182d9368fc03 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_87126038835db5292346e5088c2e0be3.setIcon(icon_4407f1e45591e1a8b96d182d9368fc03);
+        
+    
+            marker_87126038835db5292346e5088c2e0be3.bindTooltip(
+                `<div>
+                     Lightning Strike at 2010-07-11 16:48:09.386
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_997a8d1fa10509396f8acebb2d05a663 = L.marker(
+                [55.6588, 12.2549],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_65344e922cd13c1d9bbd9c7888bc6620 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_997a8d1fa10509396f8acebb2d05a663.setIcon(icon_65344e922cd13c1d9bbd9c7888bc6620);
+        
+    
+            marker_997a8d1fa10509396f8acebb2d05a663.bindTooltip(
+                `<div>
+                     Lightning Strike at 2010-07-12 21:55:14.621
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_0477d14ee3a6d7cf3ebf5642f8d83cdf = L.marker(
+                [55.6424, 12.245],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_f49017c35e8bf8947a998fd8b2b3fea4 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_0477d14ee3a6d7cf3ebf5642f8d83cdf.setIcon(icon_f49017c35e8bf8947a998fd8b2b3fea4);
+        
+    
+            marker_0477d14ee3a6d7cf3ebf5642f8d83cdf.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-05-22 14:18:21.221
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_a5bf2c0a5dc98fae40c7ce60bb544e1f = L.marker(
+                [55.6519, 12.2819],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_fb98970e1ca1ae2a3353f73960fbded1 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_a5bf2c0a5dc98fae40c7ce60bb544e1f.setIcon(icon_fb98970e1ca1ae2a3353f73960fbded1);
+        
+    
+            marker_a5bf2c0a5dc98fae40c7ce60bb544e1f.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 17:55:55.809
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_625d98c8d4f65861fbc12cf27681fe03 = L.marker(
+                [55.6598, 12.2695],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_5a1eee2cc221af8c96fb0701216f9cd1 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_625d98c8d4f65861fbc12cf27681fe03.setIcon(icon_5a1eee2cc221af8c96fb0701216f9cd1);
+        
+    
+            marker_625d98c8d4f65861fbc12cf27681fe03.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 18:26:49.219
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_c9a02c5132803205750d54aa9dbd39ef = L.marker(
+                [55.6631, 12.269],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_58399aeae9ee7da17093d455c83c9fa7 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_c9a02c5132803205750d54aa9dbd39ef.setIcon(icon_58399aeae9ee7da17093d455c83c9fa7);
+        
+    
+            marker_c9a02c5132803205750d54aa9dbd39ef.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 18:28:45.930
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_46305e45634731e067094bab63c50ba6 = L.marker(
+                [55.6633, 12.2871],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_ff499ef00c46fc664b3d0df8aa91bcce = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_46305e45634731e067094bab63c50ba6.setIcon(icon_ff499ef00c46fc664b3d0df8aa91bcce);
+        
+    
+            marker_46305e45634731e067094bab63c50ba6.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 18:33:08.953
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_7fc1c71a32d08c185f56085624fe3e0c = L.marker(
+                [55.6481, 12.2815],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_496f3ffe1bbe2a9af6ac2a5f00df1a76 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_7fc1c71a32d08c185f56085624fe3e0c.setIcon(icon_496f3ffe1bbe2a9af6ac2a5f00df1a76);
+        
+    
+            marker_7fc1c71a32d08c185f56085624fe3e0c.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 18:33:09.303
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_03b777e7724b86da76a29b409d53ce14 = L.marker(
+                [55.6498, 12.2506],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_980e492a29a52ee6e04194494d0d82ce = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_03b777e7724b86da76a29b409d53ce14.setIcon(icon_980e492a29a52ee6e04194494d0d82ce);
+        
+    
+            marker_03b777e7724b86da76a29b409d53ce14.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 18:36:07.208
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_e944d99050a8d2cdd6610af881a35eca = L.marker(
+                [55.6361, 12.2849],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_2387e96ca40d3733ac4b38b75da342a2 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_e944d99050a8d2cdd6610af881a35eca.setIcon(icon_2387e96ca40d3733ac4b38b75da342a2);
+        
+    
+            marker_e944d99050a8d2cdd6610af881a35eca.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 18:36:19.547
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_457df72029e7da272e56b5665d34a076 = L.marker(
+                [55.6389, 12.2849],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_b0e15c99c98a0af539ceb9c03a227aaa = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_457df72029e7da272e56b5665d34a076.setIcon(icon_b0e15c99c98a0af539ceb9c03a227aaa);
+        
+    
+            marker_457df72029e7da272e56b5665d34a076.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 18:36:31.612
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_e50320a3926deee2cde77b747ddadb89 = L.marker(
+                [55.6392, 12.2707],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_b8fcd3f53704b1b0254da2cad487624b = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_e50320a3926deee2cde77b747ddadb89.setIcon(icon_b8fcd3f53704b1b0254da2cad487624b);
+        
+    
+            marker_e50320a3926deee2cde77b747ddadb89.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 18:36:49.560
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_2015c65df40c80e41ddca1118c691ebc = L.marker(
+                [55.6549, 12.2597],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_a99f738d1e33e67a5c3905cd9590f78c = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_2015c65df40c80e41ddca1118c691ebc.setIcon(icon_a99f738d1e33e67a5c3905cd9590f78c);
+        
+    
+            marker_2015c65df40c80e41ddca1118c691ebc.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 18:37:31.816
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_1bd9049ae610d84b542f9ba2d183a985 = L.marker(
+                [55.6314, 12.2887],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_a62da5ab357f6698468b9bb76b768e75 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_1bd9049ae610d84b542f9ba2d183a985.setIcon(icon_a62da5ab357f6698468b9bb76b768e75);
+        
+    
+            marker_1bd9049ae610d84b542f9ba2d183a985.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 18:37:36.255
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_6dcee7613c77358387a65f00ae032985 = L.marker(
+                [55.6477, 12.2669],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_8153e9f7492fd4ff36f82bb8ff1e14f0 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_6dcee7613c77358387a65f00ae032985.setIcon(icon_8153e9f7492fd4ff36f82bb8ff1e14f0);
+        
+    
+            marker_6dcee7613c77358387a65f00ae032985.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 18:41:29.665
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_b7b1fc5e3c013149068c4c1930a75f75 = L.marker(
+                [55.6435, 12.2528],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_612c8f0f864f636f1eebe05cc0df62c3 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_b7b1fc5e3c013149068c4c1930a75f75.setIcon(icon_612c8f0f864f636f1eebe05cc0df62c3);
+        
+    
+            marker_b7b1fc5e3c013149068c4c1930a75f75.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 18:44:43.539
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_61c754654fa43a1270fc11e42c1b1039 = L.marker(
+                [55.642, 12.2932],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_632a20a3f932a83703aefdd94539b6f9 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_61c754654fa43a1270fc11e42c1b1039.setIcon(icon_632a20a3f932a83703aefdd94539b6f9);
+        
+    
+            marker_61c754654fa43a1270fc11e42c1b1039.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 18:52:55.380
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_dea46ad6c70795cdd8cae85743dda92a = L.marker(
+                [55.6603, 12.2728],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_7f40d51740784857c53ef959483e6824 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_dea46ad6c70795cdd8cae85743dda92a.setIcon(icon_7f40d51740784857c53ef959483e6824);
+        
+    
+            marker_dea46ad6c70795cdd8cae85743dda92a.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 19:07:58.617
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_b11a10cdaae3180a43d10c2912b73b8a = L.marker(
+                [55.6406, 12.2667],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_67f1b1d964418b5236c1db3b0304634c = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_b11a10cdaae3180a43d10c2912b73b8a.setIcon(icon_67f1b1d964418b5236c1db3b0304634c);
+        
+    
+            marker_b11a10cdaae3180a43d10c2912b73b8a.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 19:18:28.963
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_c53454c041567149206b58a954c2988a = L.marker(
+                [55.6551, 12.2918],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_c1d580ec7103aa16ce7d21ebfa86988d = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_c53454c041567149206b58a954c2988a.setIcon(icon_c1d580ec7103aa16ce7d21ebfa86988d);
+        
+    
+            marker_c53454c041567149206b58a954c2988a.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 19:39:49.853
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_d31a281bdcc8a8a9c48e7e798fb00712 = L.marker(
+                [55.6589, 12.2725],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_ed12de44b397e2bea3c3b4c6da6e524a = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_d31a281bdcc8a8a9c48e7e798fb00712.setIcon(icon_ed12de44b397e2bea3c3b4c6da6e524a);
+        
+    
+            marker_d31a281bdcc8a8a9c48e7e798fb00712.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 19:45:01.551
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_2efca2475b792ca3cb65b2deabc0daf1 = L.marker(
+                [55.6352, 12.2648],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_dd2985dbf5e9fac0ed267e076a0fad21 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_2efca2475b792ca3cb65b2deabc0daf1.setIcon(icon_dd2985dbf5e9fac0ed267e076a0fad21);
+        
+    
+            marker_2efca2475b792ca3cb65b2deabc0daf1.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-07-02 19:47:29.912
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_dfd1ccb89d2fba78654dd0b0463eab60 = L.marker(
+                [55.6529, 12.2553],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_4af55584b7a5e5b394949a1a8126932e = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_dfd1ccb89d2fba78654dd0b0463eab60.setIcon(icon_4af55584b7a5e5b394949a1a8126932e);
+        
+    
+            marker_dfd1ccb89d2fba78654dd0b0463eab60.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-08-08 14:01:49.340
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_089cb378dfad4de084703296c3726fc7 = L.marker(
+                [55.6486, 12.262],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_8a17a4e105a36b34e93179cc328e5f33 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_089cb378dfad4de084703296c3726fc7.setIcon(icon_8a17a4e105a36b34e93179cc328e5f33);
+        
+    
+            marker_089cb378dfad4de084703296c3726fc7.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-08-27 04:14:30.715
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_2ba76f98a2c6181229c3f3e8b7d42d1f = L.marker(
+                [55.657, 12.2705],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_da7099957d6bd1676565e34ef49c214b = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_2ba76f98a2c6181229c3f3e8b7d42d1f.setIcon(icon_da7099957d6bd1676565e34ef49c214b);
+        
+    
+            marker_2ba76f98a2c6181229c3f3e8b7d42d1f.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-08-27 04:28:06.996
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_ce75e8bc283488deb5fe0f7c76ec6732 = L.marker(
+                [55.6541, 12.269],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_2d2e1c0598c3302cc435f9a800c9aa64 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_ce75e8bc283488deb5fe0f7c76ec6732.setIcon(icon_2d2e1c0598c3302cc435f9a800c9aa64);
+        
+    
+            marker_ce75e8bc283488deb5fe0f7c76ec6732.bindTooltip(
+                `<div>
+                     Lightning Strike at 2011-08-27 04:28:07.628
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_60cabf58ac6b833f39f6aa3a4a446a62 = L.marker(
+                [55.6544, 12.2478],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_279978d3eb0971ef4a83d7d7b18b3378 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_60cabf58ac6b833f39f6aa3a4a446a62.setIcon(icon_279978d3eb0971ef4a83d7d7b18b3378);
+        
+    
+            marker_60cabf58ac6b833f39f6aa3a4a446a62.bindTooltip(
+                `<div>
+                     Lightning Strike at 2012-07-30 13:20:50.986
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_a2b1ffb9968deeac121d98cb0a5faa93 = L.marker(
+                [55.6444, 12.2595],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_c26b5645b4b29a5678e8650cc9f5d7b9 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_a2b1ffb9968deeac121d98cb0a5faa93.setIcon(icon_c26b5645b4b29a5678e8650cc9f5d7b9);
+        
+    
+            marker_a2b1ffb9968deeac121d98cb0a5faa93.bindTooltip(
+                `<div>
+                     Lightning Strike at 2013-06-19 15:00:05.834
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_2c85e6d2635c089692e909cc854d1ebb = L.marker(
+                [55.6498, 12.2948],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_9dd498136b1187cf385d215353ad2a5f = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_2c85e6d2635c089692e909cc854d1ebb.setIcon(icon_9dd498136b1187cf385d215353ad2a5f);
+        
+    
+            marker_2c85e6d2635c089692e909cc854d1ebb.bindTooltip(
+                `<div>
+                     Lightning Strike at 2014-06-26 10:20:04.905
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_300f92eb9e5304b2f30ebd310f38dd6d = L.marker(
+                [55.6516, 12.2862],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_af90ad796c9f4402a26537ef337d6281 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_300f92eb9e5304b2f30ebd310f38dd6d.setIcon(icon_af90ad796c9f4402a26537ef337d6281);
+        
+    
+            marker_300f92eb9e5304b2f30ebd310f38dd6d.bindTooltip(
+                `<div>
+                     Lightning Strike at 2014-06-26 10:23:37.801
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_9538461f317999b13e29872ec4a06892 = L.marker(
+                [55.6549, 12.2475],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_dd65487857b76d36da9c1d74b4b5166b = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_9538461f317999b13e29872ec4a06892.setIcon(icon_dd65487857b76d36da9c1d74b4b5166b);
+        
+    
+            marker_9538461f317999b13e29872ec4a06892.bindTooltip(
+                `<div>
+                     Lightning Strike at 2014-06-26 10:38:57.455
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_f90da1a72f5deaac90279d92551bb2d7 = L.marker(
+                [55.6546, 12.2509],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_583465198dc3ae6cdd2d80195cf65cbf = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_f90da1a72f5deaac90279d92551bb2d7.setIcon(icon_583465198dc3ae6cdd2d80195cf65cbf);
+        
+    
+            marker_f90da1a72f5deaac90279d92551bb2d7.bindTooltip(
+                `<div>
+                     Lightning Strike at 2014-06-27 11:32:03.173
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_c0a310ec1304a723762cb372b47d6f81 = L.marker(
+                [55.6451, 12.2531],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_4a87b1c2c74331b23b91b27c39f42724 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_c0a310ec1304a723762cb372b47d6f81.setIcon(icon_4a87b1c2c74331b23b91b27c39f42724);
+        
+    
+            marker_c0a310ec1304a723762cb372b47d6f81.bindTooltip(
+                `<div>
+                     Lightning Strike at 2014-07-07 07:36:46.984
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_51e4d036c05cfb9022083d55cbef1313 = L.marker(
+                [55.6559, 12.2758],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_4519b8789a0e20cc9f901e50bcdfeef6 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_51e4d036c05cfb9022083d55cbef1313.setIcon(icon_4519b8789a0e20cc9f901e50bcdfeef6);
+        
+    
+            marker_51e4d036c05cfb9022083d55cbef1313.bindTooltip(
+                `<div>
+                     Lightning Strike at 2014-08-10 22:31:27.896
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_43b82d4b47b4ce6257ea0906ac0ed334 = L.marker(
+                [55.6392, 12.2687],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_3edc4ce22ccbd13d5bd08c67c151450f = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_43b82d4b47b4ce6257ea0906ac0ed334.setIcon(icon_3edc4ce22ccbd13d5bd08c67c151450f);
+        
+    
+            marker_43b82d4b47b4ce6257ea0906ac0ed334.bindTooltip(
+                `<div>
+                     Lightning Strike at 2016-06-23 19:07:30.940
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_7997ab24387803dec54d8bbd4e46a62b = L.marker(
+                [55.6339, 12.2468],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_d35ca0e46ae762c5ea240808ce193fa2 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_7997ab24387803dec54d8bbd4e46a62b.setIcon(icon_d35ca0e46ae762c5ea240808ce193fa2);
+        
+    
+            marker_7997ab24387803dec54d8bbd4e46a62b.bindTooltip(
+                `<div>
+                     Lightning Strike at 2016-06-23 19:16:27.793
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_6d1e3ea1296b3ca309b7c2c053fcf0bf = L.marker(
+                [55.6607, 12.2762],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_6f3b84705f633a2ed1010043e255ec26 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_6d1e3ea1296b3ca309b7c2c053fcf0bf.setIcon(icon_6f3b84705f633a2ed1010043e255ec26);
+        
+    
+            marker_6d1e3ea1296b3ca309b7c2c053fcf0bf.bindTooltip(
+                `<div>
+                     Lightning Strike at 2016-06-23 19:22:38.385
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_9ea26bf311e4fe958cdf7b65c43dcb00 = L.marker(
+                [55.639, 12.2542],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_865d420bd1f1687348d401d04092012c = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_9ea26bf311e4fe958cdf7b65c43dcb00.setIcon(icon_865d420bd1f1687348d401d04092012c);
+        
+    
+            marker_9ea26bf311e4fe958cdf7b65c43dcb00.bindTooltip(
+                `<div>
+                     Lightning Strike at 2016-06-23 20:24:31.201
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_6474c984d687b5dc1d938f74c9a72a94 = L.marker(
+                [55.6505, 12.2474],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_9f7bc6f22f44ec0630431236067f3ce0 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_6474c984d687b5dc1d938f74c9a72a94.setIcon(icon_9f7bc6f22f44ec0630431236067f3ce0);
+        
+    
+            marker_6474c984d687b5dc1d938f74c9a72a94.bindTooltip(
+                `<div>
+                     Lightning Strike at 2016-06-23 20:35:15.986
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_779637b286c1e61df33560669ddcc2cd = L.marker(
+                [55.6551, 12.2774],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_05cb86bf1d77f7860a85ea9782fdf0d3 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_779637b286c1e61df33560669ddcc2cd.setIcon(icon_05cb86bf1d77f7860a85ea9782fdf0d3);
+        
+    
+            marker_779637b286c1e61df33560669ddcc2cd.bindTooltip(
+                `<div>
+                     Lightning Strike at 2016-06-23 20:48:34.377
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_3a0e30076255bcf077f30529908e0a96 = L.marker(
+                [55.6581, 12.2773],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_ff3b33c72c81ee3e013874e6c712878f = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_3a0e30076255bcf077f30529908e0a96.setIcon(icon_ff3b33c72c81ee3e013874e6c712878f);
+        
+    
+            marker_3a0e30076255bcf077f30529908e0a96.bindTooltip(
+                `<div>
+                     Lightning Strike at 2016-08-28 20:25:34.538
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_d4b71712acea7545ab81b1e827864c84 = L.marker(
+                [55.6521, 12.2628],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_3e15b1d76258bcda18f58f499cae52ae = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_d4b71712acea7545ab81b1e827864c84.setIcon(icon_3e15b1d76258bcda18f58f499cae52ae);
+        
+    
+            marker_d4b71712acea7545ab81b1e827864c84.bindTooltip(
+                `<div>
+                     Lightning Strike at 2017-09-17 04:38:07.311
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_5a4ecc18c263452c9d3bc835059a658e = L.marker(
+                [55.6471, 12.2521],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_1ae566a5fe0d493929f4926760426cb5 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_5a4ecc18c263452c9d3bc835059a658e.setIcon(icon_1ae566a5fe0d493929f4926760426cb5);
+        
+    
+            marker_5a4ecc18c263452c9d3bc835059a658e.bindTooltip(
+                `<div>
+                     Lightning Strike at 2018-04-26 12:38:58.985
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_80e473123a04266a6538657a03b88fc2 = L.marker(
+                [55.6378, 12.2683],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_ce98e16e4ba4412e1acd67178456812a = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_80e473123a04266a6538657a03b88fc2.setIcon(icon_ce98e16e4ba4412e1acd67178456812a);
+        
+    
+            marker_80e473123a04266a6538657a03b88fc2.bindTooltip(
+                `<div>
+                     Lightning Strike at 2018-07-28 19:58:22.613
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_2c73b962bfeb6dc54b39ae43b28e1fdc = L.marker(
+                [55.6301, 12.2583],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_d34654d100c5e1f84a9b677a5ac2300c = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_2c73b962bfeb6dc54b39ae43b28e1fdc.setIcon(icon_d34654d100c5e1f84a9b677a5ac2300c);
+        
+    
+            marker_2c73b962bfeb6dc54b39ae43b28e1fdc.bindTooltip(
+                `<div>
+                     Lightning Strike at 2018-08-14 01:54:43.763
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_79cfc6922e2abee236392c079626c632 = L.marker(
+                [55.6439, 12.2496],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_015d3b42af5a67e986d50741e95236e8 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_79cfc6922e2abee236392c079626c632.setIcon(icon_015d3b42af5a67e986d50741e95236e8);
+        
+    
+            marker_79cfc6922e2abee236392c079626c632.bindTooltip(
+                `<div>
+                     Lightning Strike at 2018-08-14 01:57:12.411
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_5ad4535101581f1258ef89f5769e6074 = L.marker(
+                [55.6476, 12.287],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_42ac159d23fb3ac16f8637866dbbb81b = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_5ad4535101581f1258ef89f5769e6074.setIcon(icon_42ac159d23fb3ac16f8637866dbbb81b);
+        
+    
+            marker_5ad4535101581f1258ef89f5769e6074.bindTooltip(
+                `<div>
+                     Lightning Strike at 2019-05-21 00:47:53.956
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_77c54419743f00c38edf124f22497db8 = L.marker(
+                [55.6311, 12.2554],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_2a8e84c8984870d4ffc34a677cc3143b = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_77c54419743f00c38edf124f22497db8.setIcon(icon_2a8e84c8984870d4ffc34a677cc3143b);
+        
+    
+            marker_77c54419743f00c38edf124f22497db8.bindTooltip(
+                `<div>
+                     Lightning Strike at 2019-06-06 17:15:53.837
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_97a40b19e04296ef52551c474c182451 = L.marker(
+                [55.6429, 12.2713],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_7ee383a469630deef93edce60d99843d = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_97a40b19e04296ef52551c474c182451.setIcon(icon_7ee383a469630deef93edce60d99843d);
+        
+    
+            marker_97a40b19e04296ef52551c474c182451.bindTooltip(
+                `<div>
+                     Lightning Strike at 2019-06-06 17:16:41.459
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_e5ffb7e18ba7aa8b11e15548b876d88f = L.marker(
+                [55.6322, 12.2579],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_46052931b24fde891b8f9def04c9da5a = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_e5ffb7e18ba7aa8b11e15548b876d88f.setIcon(icon_46052931b24fde891b8f9def04c9da5a);
+        
+    
+            marker_e5ffb7e18ba7aa8b11e15548b876d88f.bindTooltip(
+                `<div>
+                     Lightning Strike at 2019-06-06 17:46:27.565
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_9a60f808718b959e8fefe6c26f7a85f3 = L.marker(
+                [55.6466, 12.2522],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_341485d764041020cd7ea9ff837e43fa = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_9a60f808718b959e8fefe6c26f7a85f3.setIcon(icon_341485d764041020cd7ea9ff837e43fa);
+        
+    
+            marker_9a60f808718b959e8fefe6c26f7a85f3.bindTooltip(
+                `<div>
+                     Lightning Strike at 2019-06-06 17:47:15.980
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_64132424f49e509d004d422d72769653 = L.marker(
+                [55.6474, 12.2706],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_eb976d61355dc2dd2a92768e50999012 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_64132424f49e509d004d422d72769653.setIcon(icon_eb976d61355dc2dd2a92768e50999012);
+        
+    
+            marker_64132424f49e509d004d422d72769653.bindTooltip(
+                `<div>
+                     Lightning Strike at 2020-06-19 05:42:18.299
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_e0a731ff0996c75d9bbc428641b8d5c3 = L.marker(
+                [55.6347, 12.2767],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_cfb72bd1baeab1715ae27aa102b31f61 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_e0a731ff0996c75d9bbc428641b8d5c3.setIcon(icon_cfb72bd1baeab1715ae27aa102b31f61);
+        
+    
+            marker_e0a731ff0996c75d9bbc428641b8d5c3.bindTooltip(
+                `<div>
+                     Lightning Strike at 2020-06-19 06:05:24.352
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_9c990cacb02a30e0a48fb1a5bbd4386a = L.marker(
+                [55.6325, 12.2478],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_a37ca6e5da31f745930cc269cdff17c4 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_9c990cacb02a30e0a48fb1a5bbd4386a.setIcon(icon_a37ca6e5da31f745930cc269cdff17c4);
+        
+    
+            marker_9c990cacb02a30e0a48fb1a5bbd4386a.bindTooltip(
+                `<div>
+                     Lightning Strike at 2020-06-19 06:40:21.336
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_8bfa0cc8e49c579c1cfb997d8ba5e0d1 = L.marker(
+                [55.651, 12.2533],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_50edaf65c73247ccd04cd9650983633c = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_8bfa0cc8e49c579c1cfb997d8ba5e0d1.setIcon(icon_50edaf65c73247ccd04cd9650983633c);
+        
+    
+            marker_8bfa0cc8e49c579c1cfb997d8ba5e0d1.bindTooltip(
+                `<div>
+                     Lightning Strike at 2020-08-19 13:07:37.742
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_ba7aaef81c7919bd93f9752baf998de2 = L.marker(
+                [55.6636, 12.2626],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_a8e43d5626185dd28f1354f7ee977b31 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_ba7aaef81c7919bd93f9752baf998de2.setIcon(icon_a8e43d5626185dd28f1354f7ee977b31);
+        
+    
+            marker_ba7aaef81c7919bd93f9752baf998de2.bindTooltip(
+                `<div>
+                     Lightning Strike at 2020-08-19 13:09:24.177
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_48b63357d3ca11d030b0b1c63ba98869 = L.marker(
+                [55.6483, 12.2935],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_0a572b0028627d9feceba0554738976f = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_48b63357d3ca11d030b0b1c63ba98869.setIcon(icon_0a572b0028627d9feceba0554738976f);
+        
+    
+            marker_48b63357d3ca11d030b0b1c63ba98869.bindTooltip(
+                `<div>
+                     Lightning Strike at 2021-07-27 11:27:36.771
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_e8b73315f3efcfea26cefb263b89578d = L.marker(
+                [55.6517, 12.2908],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_9493dc9fed97db36a36605b25824f08b = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_e8b73315f3efcfea26cefb263b89578d.setIcon(icon_9493dc9fed97db36a36605b25824f08b);
+        
+    
+            marker_e8b73315f3efcfea26cefb263b89578d.bindTooltip(
+                `<div>
+                     Lightning Strike at 2021-07-27 11:47:11.805
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_554968a52e9afa970cda2e889898ffc6 = L.marker(
+                [55.6579, 12.2945],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_a0c115704936c6b1bec776368132fcb6 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_554968a52e9afa970cda2e889898ffc6.setIcon(icon_a0c115704936c6b1bec776368132fcb6);
+        
+    
+            marker_554968a52e9afa970cda2e889898ffc6.bindTooltip(
+                `<div>
+                     Lightning Strike at 2021-08-17 13:11:34.545
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_bd1daedb307dd53db66fcc1e8c3f1ac1 = L.marker(
+                [55.6554, 12.2648],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_b7148d6aceac53aacf3492dfea1441f3 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_bd1daedb307dd53db66fcc1e8c3f1ac1.setIcon(icon_b7148d6aceac53aacf3492dfea1441f3);
+        
+    
+            marker_bd1daedb307dd53db66fcc1e8c3f1ac1.bindTooltip(
+                `<div>
+                     Lightning Strike at 2021-08-17 14:17:37.725
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_25b034db5b8aab388223e43c92282bc3 = L.marker(
+                [55.6472, 12.2632],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_768b4ee1817eda44531cd7bee1b85712 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_25b034db5b8aab388223e43c92282bc3.setIcon(icon_768b4ee1817eda44531cd7bee1b85712);
+        
+    
+            marker_25b034db5b8aab388223e43c92282bc3.bindTooltip(
+                `<div>
+                     Lightning Strike at 2023-07-16 00:45:48.536
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_0839c2b23ed5445669d319c673ac4b5c = L.marker(
+                [55.6439, 12.2622],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_6e2b91787fbca81dee7cd104fafd41fe = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_0839c2b23ed5445669d319c673ac4b5c.setIcon(icon_6e2b91787fbca81dee7cd104fafd41fe);
+        
+    
+            marker_0839c2b23ed5445669d319c673ac4b5c.bindTooltip(
+                `<div>
+                     Lightning Strike at 2024-09-03 21:40:04.504
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_a1b3d588a428724d179fae7a2cb8d489 = L.marker(
+                [55.6387, 12.2653],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_b8bd77a60074db06dbea2cdfe2a4d18e = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_a1b3d588a428724d179fae7a2cb8d489.setIcon(icon_b8bd77a60074db06dbea2cdfe2a4d18e);
+        
+    
+            marker_a1b3d588a428724d179fae7a2cb8d489.bindTooltip(
+                `<div>
+                     Lightning Strike at 2024-09-03 21:42:24.800
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_863204163c313ee886cf61dbcfb5dd11 = L.marker(
+                [55.6363, 12.2717],
+                {
+}
+            ).addTo(map_61b012341743b904830791fde882cf10);
+        
+    
+            var icon_d0daed08bac0e15370ccec61a3a42aac = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "darkblue",
+  "iconColor": "#eeee44",
+  "icon": "bolt",
+  "prefix": "fa",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+            marker_863204163c313ee886cf61dbcfb5dd11.setIcon(icon_d0daed08bac0e15370ccec61a3a42aac);
+        
+    
+            marker_863204163c313ee886cf61dbcfb5dd11.bindTooltip(
+                `<div>
+                     Lightning Strike at 2024-09-04 02:43:18.210
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+</script>
+</html>
