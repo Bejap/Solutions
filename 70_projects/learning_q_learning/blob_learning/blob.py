@@ -10,15 +10,15 @@ style.use("ggplot")
 
 SIZE = 10
 
-HM_EPISODES = 300000
-MOVE_PENALTY = 20
-ENEMY_PENALTY = 300
-FOOD_REWARD = 35
-epsilon = 0.9
-EPS_DECAY = 0.99995  # Every episode will be epsilon*EPS_DECAY
+HM_EPISODES = 50000
+MOVE_PENALTY = 5
+ENEMY_PENALTY = 100
+FOOD_REWARD = 10
+epsilon = 1
+EPS_DECAY = 0.9995  # Every episode will be epsilon*EPS_DECAY
 SHOW_EVERY = 5000  # how often to play through env visually.
 
-start_q_table = None  # None or Filename
+start_q_table = "qtable-1742381370.pickle"  # None or Filename
 
 LEARNING_RATE = 0.1
 DISCOUNT = 0.95
@@ -123,8 +123,8 @@ for episode in range(HM_EPISODES):
         player.action(action)
 
         # MAYBE
-        # enemy.move()
-        # food.move()
+        enemy.move()
+        food.move()
         ##############
 
         if player.x == enemy.x and player.y == enemy.y:
@@ -154,10 +154,10 @@ for episode in range(HM_EPISODES):
             img = img.resize((500, 500))  # resizing so we can see our agent in all its glory.
             cv2.imshow("image", np.array(img))  # show it!
             if reward == FOOD_REWARD or reward == -ENEMY_PENALTY:  # crummy code to hang at the end if we reach abrupt end for good reasons or not.
-                if cv2.waitKey(500) & 0xFF == ord('q'):
+                if cv2.waitKey(250) & 0xFF == ord('q'):
                     break
             else:
-                if cv2.waitKey(1) & 0xFF == ord('q'):
+                if cv2.waitKey(120) & 0xFF == ord('q'):
                     break
 
         episode_reward += reward
