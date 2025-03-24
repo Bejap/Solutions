@@ -1,8 +1,8 @@
 import tensorflow as tf
 from tensorflow.keras import Sequential
-from tensorflow.keras import Dense, Dropout, Conv2D, MaxPooling2D, Activation, Flatten
-from tensorflow.keras import TensorBoard
-from tensorflow.keras import Adam
+from tensorflow.keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, Activation, Flatten
+from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.keras.optimizers import Adam
 from collections import deque
 import numpy as np
 from tqdm import tqdm
@@ -15,24 +15,24 @@ from PIL import Image
 
 DISCOUNT = 0.99
 REPLAY_MEMORY_SIZE = 50_000  # How many last steps to keep for model training
-MIN_REPLAY_MEMORY_SIZE = 1_000  # Minimum number of steps in a memory to start training
+MIN_REPLAY_MEMORY_SIZE = 100  # Minimum number of steps in a memory to start training
 MINIBATCH_SIZE = 64  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 MODEL_NAME = '2x256'
 MIN_REWARD = -200  # For model save
-MEMORY_FRACTION = 0.20
+MEMORY_FRACTION = 0.35
 
 # Environment settings
-EPISODES = 20_000
+EPISODES = 500
 
 # Exploration settings
 epsilon = 1  # not a constant, going to be decayed
-EPSILON_DECAY = 0.99975
+EPSILON_DECAY = 0.9985
 MIN_EPSILON = 0.001
 
 #  Stats settings
-AGGREGATE_STATS_EVERY = 50  # episodes
-SHOW_PREVIEW = False
+AGGREGATE_STATS_EVERY = 30  # episodes
+SHOW_PREVIEW = 9
 
 
 class Blob:
@@ -185,7 +185,7 @@ ep_rewards = [-200]
 # For more repetitive results
 random.seed(1)
 np.random.seed(1)
-tf.set_random_seed(1)
+tf.random.set_seed(1)
 
 # Memory fraction, used mostly when trai8ning multiple agents
 #gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=MEMORY_FRACTION)
@@ -197,37 +197,39 @@ if not os.path.isdir('models'):
 
 
 # Own Tensorboard class
-class ModifiedTensorBoard(TensorBoard):
-
-    # Overriding init to set initial step and writer (we want one log file for all .fit() calls)
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+class ModifiedTensorBoard(tf.keras.callbacks.Callback):
+    def __init__(self, log_dir):
+        super().__init__()
+        self.log_dir = log_dir
         self.step = 1
-        self.writer = tf.summary.FileWriter(self.log_dir)
+        self.writer = tf.summary.create_file_writer(self.log_dir)
+        self._model = None
 
-    # Overriding this method to stop creating default log writer
-    def set_model(self, model):
-        pass
+    # Define a custom model property
+    @property
+    def model(self):
+        return self._model
 
-    # Overrided, saves logs with our step number
-    # (otherwise every .fit() will start writing from 0th step)
+    @model.setter
+    def model(self, model):
+        self._model = model
+
     def on_epoch_end(self, epoch, logs=None):
-        self.update_stats(**logs)
+        if logs is not None:
+            self.update_stats(**logs)
 
-    # Overrided
-    # We train for one batch only, no need to save anything at epoch end
     def on_batch_end(self, batch, logs=None):
         pass
 
-    # Overrided, so won't close writer
     def on_train_end(self, _):
         pass
 
-    # Custom method for saving own metrics
-    # Creates writer, writes custom metrics and closes writer
     def update_stats(self, **stats):
-        self._write_logs(stats, self.step)
-
+        with self.writer.as_default():
+            for key, value in stats.items():
+                tf.summary.scalar(key, value, step=self.step)
+            self.writer.flush()
+        self.step += 1
 
 # Agent class
 class DQNAgent:
@@ -245,6 +247,7 @@ class DQNAgent:
 
         # Custom tensorboard object
         self.tensorboard = ModifiedTensorBoard(log_dir="logs/{}-{}".format(MODEL_NAME, int(time.time())))
+
 
         # Used to count when to update target network with main network's weights
         self.target_update_counter = 0
@@ -266,7 +269,7 @@ class DQNAgent:
         model.add(Dense(64))
 
         model.add(Dense(env.ACTION_SPACE_SIZE, activation='linear'))  # ACTION_SPACE_SIZE = how many choices (9)
-        model.compile(loss="mse", optimizer=Adam(lr=0.001), metrics=['accuracy'])
+        model.compile(loss="mse", optimizer=Adam(learning_rate=0.001), metrics=['accuracy'])
         return model
 
     # Adds step's data to a memory replay array
@@ -334,7 +337,9 @@ class DQNAgent:
 
 agent = DQNAgent()
 
-for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
+for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes', desc="Training Progress"):
+    print(f"Episode: {episode + 1}/{EPISODES}")
+    print(epsilon)
     agent.tensorboard.step = episode
 
     episode_reward = 0
@@ -368,7 +373,8 @@ for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
         agent.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=epsilon)
 
         if average_reward >= MIN_REWARD:
-            agent.model.save(f'models/{MODEL_NAME}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.model')
+            agent.model.save(f'models/{MODEL_NAME}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.keras')
+
 
     if epsilon > MIN_EPSILON:
         epsilon *= EPSILON_DECAY
