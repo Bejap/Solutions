@@ -179,9 +179,6 @@ class WhistGame:
             if not self.current_trick or card.rank_value > max(c.rank_value for c in self.current_trick):
                 base_reward += 0.5
 
-        # Penalty for having fewer cards (encouraging playing cards)
-        base_reward -= (1 / len(player.hand)) * 0.1
-
         return base_reward
 
     def play_round(self, agent):
