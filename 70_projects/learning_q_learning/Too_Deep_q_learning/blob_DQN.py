@@ -159,6 +159,9 @@ class BlobEnv:
         if reward == self.FOOD_REWARD or reward == -self.ENEMY_PENALTY or self.episode_step >= 200:
             done = True
 
+        kato = new_observation, reward, done
+        print(kato)
+
         return new_observation, reward, done
 
     def render(self):

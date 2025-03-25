@@ -44,20 +44,15 @@ class Deck:
 
 
 class Player:
-    ACTION_SPACE = 3
-
     def __init__(self, name):
         self.name = name
         self.hand = []
         self.tricks_won = 0
 
     def action(self, choice):
-        if choice == 0:
-            self.hand.pop(0)
-        elif choice == 1:
-            self.hand.pop(1)
-        elif choice == 2:
-            self.hand.pop(2)
+        self._sort_hand()
+        if 0 <= choice < len(self.hand):
+            return self.hand[choice]
 
     def _sort_hand(self):
         self.hand.sort(key=lambda card: (card.suit_value, card.rank_value))

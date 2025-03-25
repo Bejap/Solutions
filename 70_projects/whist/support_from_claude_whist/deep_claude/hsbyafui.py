@@ -200,10 +200,12 @@ class WhistGame:
                 if action < len(player.hand):
                     card = player.action(action)
                     self.current_trick.append(card)
+                    print("card", card)
 
                 # Calculate reward
                 reward = self.calculate_reward(player, action)
                 total_reward += reward
+                print("reward",reward)
 
                 # Get next state
                 next_state = self._get_game_state()
@@ -219,6 +221,7 @@ class WhistGame:
                 self.trick_winner = max(self.current_trick, key=lambda c: c.rank_value)
                 self.current_trick = []
 
+        print("tot_reward", total_reward)
         return total_reward
 
 
@@ -236,6 +239,7 @@ def main():
 
     for episode in tqdm(range(episodes), desc="Training"):
         # Play a round
+        print(episode)
         reward = game.play_round(agent)
 
         # Train the agent
