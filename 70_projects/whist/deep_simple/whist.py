@@ -159,13 +159,16 @@ for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
             print(valid_actions)
 
             if np.random.random() > epsilon:
-                # Choose the best action among valid actions
                 qs = agent.get_qs(current_state)
-                for valid in range(len(valid_actions)):
-                    action = max(valid, key=lambda x: qs[x]) if valid_actions else 0
+                if valid_actions:
+                    action = max(valid_actions, key=lambda x: qs[x])
+                else:
+                    action = 0
             else:
-                # Choose a random valid action
-                action = np.random.choice(len(valid_actions)) if valid_actions else 0
+                if valid_actions:
+                    action = np.random.choice(valid_actions)
+                else:
+                    action = 0
 
 
             new_state, reward, done = game.step(action)
