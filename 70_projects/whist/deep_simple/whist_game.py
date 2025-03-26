@@ -45,6 +45,7 @@ class Deck:
 
 class Player:
     def __init__(self, name):
+        self.last_played_card = None
         self.name = name
         self.hand = []
         self.tricks_won = 0
@@ -53,6 +54,8 @@ class Player:
         self._sort_hand()
         if 0 <= choice < len(self.hand):
             return self.hand[choice]
+
+        # self.last_played_card = self.hand[choice]
 
     def _sort_hand(self):
         self.hand.sort(key=lambda card: (card.suit_value, card.rank_value))

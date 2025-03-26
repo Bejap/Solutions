@@ -79,4 +79,12 @@ class DQNAgent:
             self.target_update_counter = 0
 
     def get_qs(self, state):
-        return self.model.predict(np.array(state).reshape(-1, *state.shape))[0]
+        # Flatten state to a single list
+        flattened_state = [item for sublist in state for item in (sublist if isinstance(sublist, list) else [sublist])]
+
+        # Debugging: Print flattened state to check if it looks right
+        print("Flattened state:", flattened_state)
+
+        # Convert to NumPy array and predict
+        return self.model.predict(np.array(flattened_state).reshape(1, -1))[0]
+
