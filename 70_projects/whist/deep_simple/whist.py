@@ -24,20 +24,23 @@ class Whist:
         self.round_list = []
 
     def deal_cards(self):
-        # self.deck.shuffle()
-        # cards_per_player = len(self.deck.get_deck()) // len(self.players)  # CHANGE THIS
-        #
-        # for player in self.players:
-        #     player.hand = self.deck.deal(cards_per_player)
-        self.deck = [
-            wg.Card('Hearts', 'Jack'), wg.Card('Hearts', '3'), wg.Card('Hearts', '4'),
-            wg.Card('Hearts', '5'), wg.Card('Hearts', '6'), wg.Card('Hearts', '10'),
-            wg.Card('Hearts', '8'), wg.Card('Hearts', 'Queen'), wg.Card('Hearts', '7'),
-            wg.Card('Hearts', '2'), wg.Card('Hearts', '9'), wg.Card('Hearts', 'King')
-        ]
+        self.deck.shuffle()
+        cards_per_player = len(self.deck.get_deck()) // len(self.players)  # CHANGE THIS
 
-        for i, player in enumerate(self.players):
-            player.hand = self.deck[i * 3:(i + 1) * 3]
+        for player in self.players:
+            player.hand = self.deck.deal(cards_per_player)
+
+
+        # self.deck = [
+        #     wg.Card('Hearts', 'Jack'), wg.Card('Hearts', '3'), wg.Card('Hearts', '4'),
+        #     wg.Card('Hearts', '5'), wg.Card('Hearts', '6'), wg.Card('Hearts', '10'),
+        #     wg.Card('Hearts', '8'), wg.Card('Hearts', 'Queen'), wg.Card('Hearts', '7'),
+        #     wg.Card('Hearts', '2'), wg.Card('Hearts', '9'), wg.Card('Hearts', 'King')
+        # ]
+        #
+        #
+        # for i, player in enumerate(self.players):
+        #     player.hand = self.deck[i * 3:(i + 1) * 3]
 
     def play(self):
         global game_state

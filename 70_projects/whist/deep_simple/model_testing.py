@@ -3,7 +3,7 @@ import tensorflow as tf
 from tensorflow import keras
 
 # For .keras models
-model = keras.models.load_model('full_agent_player_3.keras')
+model = keras.models.load_model('full_agent_player_2.keras')
 model.summary()
 
 # For .h5 weights files (you'll need the model architecture first)
@@ -12,18 +12,24 @@ model.summary()
 model.load_weights('agent_player_3.weights.h5')
 
 
+# self.deck = [
+#             wg.Card('Hearts', 'Jack'), wg.Card('Hearts', '3'), wg.Card('Hearts', '4'),
+#             wg.Card('Hearts', '5'), wg.Card('Hearts', '6'), wg.Card('Hearts', '10'),
+#             wg.Card('Hearts', '8'), wg.Card('Hearts', 'Queen'), wg.Card('Hearts', '7'),
+#             wg.Card('Hearts', '2'), wg.Card('Hearts', '9'), wg.Card('Hearts', 'King')
+#         ]
 
 def prepare_test_input():
     # Example state - all zeros with some test values
-    cards_array = [0] * 13  # No cards played yet
-    round_array = [0] * 13  # No cards in current round
-    hand_array = [0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0]  # Player has first 3 cards
+    cards_array = [0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0]  # No cards played yet
+    round_array = [0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0]  # No cards in current round
+    hands_array = [0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0]  # Player has first 3 cards
     player_array = [1, 0, 0, 0]  # First player's turn
-    score_array = [0, 0, 0, 0]  # No scores yet
+    score_array = [0, 0, 1, 0]  # No scores yet
     reward_array = [0, 0, 0, 0]  # No rewards yet
 
     # Combine all arrays into a single game state
-    game_state = cards_array + round_array + hand_array + player_array + score_array + reward_array
+    game_state = cards_array + round_array + hands_array + player_array + score_array + reward_array
 
     # Convert to numpy array and reshape for the model
     return np.array([game_state])  # Batch size of 1
@@ -40,7 +46,7 @@ for layer in model.layers:
 config = model.get_config()
 
 predictions = model.predict(test_input)
-print(predictions)
+# print(predictions)
 
 print(f"Model output shape: {predictions.shape}")
 print(f"Predicted Q-values: {predictions[0]}")  # Show Q-values for each action
