@@ -3,10 +3,10 @@ from tqdm import tqdm
 import numpy as np
 from simple_whist_DQN import DQNAgent
 
-EPISODES = 250
+EPISODES = 100
 
 epsilon = 1
-EPSILON_DECAY = 0.9965
+EPSILON_DECAY = 0.98
 MIN_EPSILON = 0.001
 
 
@@ -22,6 +22,10 @@ class Whist:
         self.count = 0
         self.step_count = 0
         self.round_list = []
+        self.player1_cards = [0] * 13
+        self.player2_cards = [0] * 13
+        self.player3_cards = [0] * 13
+        self.player4_cards = [0] * 13
 
     def deal_cards(self):
         self.deck.shuffle()
@@ -29,7 +33,6 @@ class Whist:
 
         for player in self.players:
             player.hand = self.deck.deal(cards_per_player)
-
 
         # self.deck = [
         #     wg.Card('Hearts', 'Jack'), wg.Card('Hearts', '3'), wg.Card('Hearts', '4'),
@@ -70,15 +73,42 @@ class Whist:
         self.hand_array = self._player_hand(current_player)
         self.player_array = [0] * 4
         self.player_array[(self.count % 4) - 1] = 1
-        reward_array = [0] * 4
+
+        self._initialize_player_card_tracking()
 
         game_state = ([self.cards_array] + [self.round_array] + [self.hand_array]
-                      + [self.player_array] + [self.score_array] + reward_array)
+                      + [self.player_array] + [self.score_array]
+                      + [self.player1_cards] + [self.player2_cards]
+                      + [self.player3_cards] + [self.player4_cards])
 
         return game_state
 
     def get_player_hand(self):
         return {player.name: player.get_hand() for player in self.players}
+
+    def _initialize_player_card_tracking(self):
+        # Reset all player card arrays
+        player_card_arrays = [self.player1_cards, self.player2_cards,
+                              self.player3_cards, self.player4_cards]
+
+        for arr in player_card_arrays:
+            for i in range(13):
+                arr[i] = 0
+
+        # For the current player, we know their hand exactly
+        current_player_idx = self.count % 4
+        current_player = self.players[current_player_idx]
+        current_player_array = player_card_arrays[current_player_idx]
+
+        for card in current_player.hand:
+            card_position = card.rank_value - 2
+            current_player_array[card_position] = 1
+
+        # For cards that have been played, mark them as impossible (0)
+        for i, played in enumerate(self.cards_array):
+            if played == 1:
+                for arr in player_card_arrays:
+                    arr[i] = 0
 
     def step(self, action):
         done = False
@@ -93,7 +123,7 @@ class Whist:
         # print(f"Player {current_player.name} played {card}. Count: {self.count}")
 
         reward = [0] * 4  # Track rewards for all players
-        print(f"{current_player} played {card}")
+        # print(f"{current_player} played {card}")
         # print(game_state)
 
         if len(self.round_list) == 4:
@@ -108,20 +138,20 @@ class Whist:
                 else:
                     reward[i] -= 5  # Penalty for losing the trick
 
-
-            print(f"Trick completed. Winner: Player {winner_index}. Rewards: {reward}")
+            # print(f"Trick completed. Winner: Player {winner_index}. Rewards: {reward}")
 
             # Reset round list for next trick
             self.round_list = []
 
-        game_state = self._get_game_state(card, reward)
+        game_state = self._get_game_state(card)
         if all(len(player.hand) == 0 for player in self.players):
             done = True
         self.step_count += 1
         # agent.train(terminal, self.step_count)
-        return game_state, reward[self.count % 4], done
 
-    def _get_game_state(self, card: wg.Card, reward_array):
+        return game_state, reward, done
+
+    def _get_game_state(self, card: wg.Card):
         self.count += 1
 
         # Reset round_array every 4th card
@@ -136,11 +166,25 @@ class Whist:
         self.hand_array = self._player_hand(current_player)
         self.player_array = [0] * 4
         self.player_array[(self.count % 4) - 1] = 1
+        self._update_player_card_tracking(card)
 
         game_state = ([self.cards_array] + [self.round_array] + [self.hand_array]
-                      + [self.player_array] + [self.score_array] + [reward_array])
+                      + [self.player_array] + [self.score_array]
+                      + [self.player1_cards] + [self.player2_cards]
+                      + [self.player3_cards] + [self.player4_cards])
 
         return game_state
+
+    def _update_player_card_tracking(self, card: wg.Card):
+        player_idx = (self.count - 1) % 4
+        card_position = card.rank_value - 2
+
+        # Mark the card as played (impossible) for all players
+        player_card_arrays = [self.player1_cards, self.player2_cards,
+                              self.player3_cards, self.player4_cards]
+
+        for arr in player_card_arrays:
+            arr[card_position] = 0
 
     def _cards_played(self, card_s: wg.Card):
         # print(self.count)
@@ -154,7 +198,6 @@ class Whist:
             print(f"Index {card_position_s} er uden for grænserne for cards_array.")
         except TypeError:
             print(f"Ugyldig type for rank_value: {type(card_s.rank_value)}")
-
 
         return self.cards_array
 
@@ -188,6 +231,7 @@ class Whist:
 
         return winner
 
+
 player_names = ['1', '2', '3', '4']
 game = Whist(player_names)
 # game.play()
@@ -195,7 +239,7 @@ game = Whist(player_names)
 
 # for name, hand in game.get_player_hand().items():
 #     print(name, hand)
-agents = [DQNAgent(13 + 13 + 13 + 4 + 4 + 4) for _ in range(4)]
+agents = [DQNAgent(13 + 13 + 13 + (13 * 4) + 4 + 4) for _ in range(4)]
 
 for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
     print(f'Episode: {episode + 1}/{EPISODES}')
@@ -205,9 +249,11 @@ for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
     game.reset()
     episode_rewards = [0, 0, 0, 0]
     done = False
+
     while count <= 12:
+        pending_transitions = []
         for _ in range(4):
-            current_player_index = game.count % 4
+            current_player_index = count % 4
             current_player = game.players[current_player_index]
             agent = agents[current_player_index]  # Hent den rigtige agent
 
@@ -240,21 +286,38 @@ for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
                 else:
                     action = 0  # Default action
 
-            new_state, reward, done = game.step(action)
-            episode_rewards[current_player_index] += reward  # Track total reward
+            new_state, rewards, done = game.step(action)
+            if rewards != 0:  # Check if rewards is not None
+                episode_rewards[current_player_index] += rewards[current_player_index]
 
             # Optionally train after each step
 
             if new_state is not None:
                 current_state = new_state  # Update state
+            pending_transitions.append((current_state, action, None, new_state, False))
+            # print(pending_transitions)
 
-            transition = (current_state, action, reward, new_state, done)
-            agent.update_replay_memory(transition)
-            agent.train(terminal_state=done, step=game.step_count)
-            # print("transition", transition)
+            if len(game.round_list) == 0:  # Trick is complete
+                for i, (s, a, _, ns, _) in enumerate(pending_transitions):
+                    if rewards != 0:
+                        reward_value = rewards[i]  # Get reward for this player
+                        # Now add to replay memory with correct reward
+                        agents[i].update_replay_memory((s, a, reward_value, ns, done))
+
+                for agent_idx, agent in enumerate(agents):
+                    agent.train(done, count)
+
+                pending_transitions = []
+
             count += 1
 
+            if done:
+                break
+
     epsilon = max(MIN_EPSILON, epsilon * EPSILON_DECAY)  # Decay epsilon
+
+    for agent in agents:
+        agent.train(True, count)
 
 for i, agent in enumerate(agents):
     agent.save_agent(f"agent_player_{i}.weights.h5")

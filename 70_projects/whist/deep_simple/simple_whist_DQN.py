@@ -1,4 +1,3 @@
-import keras
 import numpy as np
 import tensorflow as tf
 from collections import deque
@@ -6,8 +5,8 @@ import random
 
 GAMMA = 0.99
 REPLAY_MEMORY_SIZE = 500  # How many last steps to keep for model training
-MIN_REPLAY_MEMORY_SIZE = 500  # Minimum number of steps in a memory to start training
-MINIBATCH_SIZE = 64  # How many steps (samples) to use for training
+MIN_REPLAY_MEMORY_SIZE = 150  # Minimum number of steps in a memory to start training
+MINIBATCH_SIZE = 6  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 MODEL_NAME = 'smalle'
 MIN_REWARD = -200  # For model save
@@ -39,46 +38,46 @@ class DQNAgent:
     def update_replay_memory(self, transition: list):
         if transition[4] is True:  # Ensure state is valid
             return
-        # print(transition)
+        # print("Added to replay memory:", transition)
         self.replay_memory.append(transition)
+
     def train(self, terminal_state: list, step):
         if len(self.replay_memory) < MIN_REPLAY_MEMORY_SIZE:
             return
 
+        # print(f"Replay Memory Size: {len(self.replay_memory)}")
+        # print("Replay Memory Sample:", list(self.replay_memory)[:5])  # Viser de første 5 elementer
         # Sample a single transition
-        minibatch = random.sample(self.replay_memory, MINIBATCH_SIZE)[0]
+        minibatch = random.sample(self.replay_memory, MINIBATCH_SIZE)
+        # print("Minibatch sample:")
+        # for transition in minibatch:
+        #     print(transition)
 
         # Unpack the single transition
-        current_state, action, reward, new_current_state, done = minibatch
+        for state, action, reward, next_state, done in minibatch:
 
-        # Flatten and prepare states
-        flat_current_state = self._flat_the_state(current_state)
-        flat_current_state = np.array(flat_current_state, dtype=np.float32).reshape(1, -1)
+            # Flatten and prepare states
+            flat_current_state = self._flat_the_state(state)
+            flat_current_state = np.array(flat_current_state, dtype=np.float32).reshape(1, -1)
 
-        flat_new_current_state = self._flat_the_state(new_current_state)
-        flat_new_current_state = np.array(flat_new_current_state, dtype=np.float32).reshape(1, -1)
+            if next_state is not None:
+                flat_new_current_state = self._flat_the_state(next_state)
+                flat_new_current_state = np.array(flat_new_current_state, dtype=np.float32).reshape(1, -1)
 
-        # Predict Q-values
-        current_qs_list = self.model.predict(flat_current_state)
-        future_qs_list = self.target_model.predict(flat_new_current_state)
+                # Predict Q-values
+                current_qs = self.model.predict(flat_current_state, verbose=0)[0]
+                future_qs = self.target_model.predict(flat_new_current_state, verbose=0)[0]
 
-        # Calculate new Q-value
-        if not done:
-            max_future_q = np.max(future_qs_list[0])
-            new_q = reward + GAMMA * max_future_q
-        else:
-            new_q = reward
+                # Calculate new Q-value
+                if not done:
+                    max_future_q = np.max(future_qs[0])
+                    new_q = reward + GAMMA * max_future_q
+                else:
+                    new_q = reward
 
-        # Update Q-values
-        current_qs = current_qs_list[0]
-        current_qs[action] = new_q
+                current_qs[action] = new_q
 
-        # Prepare training data
-        x = flat_current_state
-        y = current_qs.reshape(1, -1)
-
-        # Train the model
-        self.model.fit(x, y, epochs=1, verbose=0)
+                self.model.fit(flat_current_state, np.array([current_qs]), epochs=1, verbose=0)
 
         # Update target model periodically
         if terminal_state:
