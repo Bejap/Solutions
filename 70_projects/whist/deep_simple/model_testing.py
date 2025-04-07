@@ -1,60 +1,48 @@
 import numpy as np
-import tensorflow as tf
 from tensorflow import keras
+from simple_whist_DQN import DQNAgent as Dq
 
-# For .keras models
-model = keras.models.load_model('full_agent_player_1.keras')
+# Load the full model
+model = keras.models.load_model('full_agent_player_0.keras')
 model.summary()
 
-# For .h5 weights files (you'll need the model architecture first)
-# Load a pre-defined model architecture
-# You need to define this based on your model
-model.load_weights('agent_player_1.weights.h5')
+# Opret en dummy-agent og erstat dens model med den indlæste model
+dummy_agent = Dq(input_size=None)  # Du behøver ikke input_size her
+dummy_agent.model = model  # Udskift modellen
+dummy_agent.target_model = model  # Sørg for at target_model matcher også
 
 
-# self.deck = [
-#             wg.Card('Hearts', 'Jack'), wg.Card('Hearts', '3'), wg.Card('Hearts', '4'),
-#             wg.Card('Hearts', '5'), wg.Card('Hearts', '6'), wg.Card('Hearts', '10'),
-#             wg.Card('Hearts', '8'), wg.Card('Hearts', 'Queen'), wg.Card('Hearts', '7'),
-#             wg.Card('Hearts', '2'), wg.Card('Hearts', '9'), wg.Card('Hearts', 'King')
-#         ]
-
+# Forbered en test-state i korrekt format
 def prepare_test_input():
-    # Example state - all zeros with some test values
-    cards_array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # No cards played yet
-    round_array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # No cards in current round
-    hands_array = [0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0]  # Player has first 3 cards
-    player_array = [1, 0, 0, 0]  # First player's turn
-    score_array = [0, 0, 0, 0]
-    player_1_array = [0] * 13
-    player_2_array = [0] * 13
-    player_3_array = [0] * 13
-    player_4_array = [0] * 13
+    cards_array = [0, 0, 1, 1, 1, 1, 0, 1]
+    round_array = [0, 0, 0, 0, 1, 0, 0, 0]
+    hands_array = [0, 0, 0, 0, 0, 0, 1, 0]
+    player_array = [0, 1, 0, 0]
+    score_array = [0, 0, 1, 0]
+    player_1_array = [0, 0, 0, 0, 0, 1, 0, 0]
+    player_2_array = [0, 0, 0, 1, 0, 0, 1, 0]
+    player_3_array = [0, 0, 0, 0, 0, 0, 0, 0]
+    player_4_array = [0, 0, 0, 0, 0, 0, 0, 0]
+
+    # Formatér som den forventede state-struktur
+    game_state = [
+        np.array(cards_array),
+        np.array(round_array),
+        np.array(hands_array),
+        np.array(player_array),
+        np.array(player_1_array),
+        np.array(player_2_array),
+        np.array(player_3_array),
+        np.array(player_4_array),
+        np.array(score_array)
+    ]
+
+    return game_state
 
 
-    # Combine all arrays into a single game state
-    game_state = cards_array + round_array + hands_array+ player_array + score_array + player_1_array + player_2_array + player_3_array + player_4_array
+# Brug agentens get_qs til at hente Q-værdier
+state = prepare_test_input()
+q_values = dummy_agent.get_qs(state)
 
-    # Convert to numpy array and reshape for the model
-    return np.array([game_state])  # Batch size of 1
-
-
-# Test the model with some input
-test_input = prepare_test_input()  # Create appropriate test input
-
-# for layer in model.layers:
-#     weights = layer.get_weights()
-#     print(f"Layer {layer.name} weights shapes: {[w.shape for w in weights]}")
-
-# Get the model's configuration
-config = model.get_config()
-
-predictions = model.predict(test_input)
-# print(predictions)
-
-# print(f"Model output shape: {predictions.shape}")
-print(f"Predicted Q-values: {predictions[0]}")  # Show Q-values for each action
-
-# Find the highest Q-value action
-best_action = np.argmax(predictions[0])
-print(f"Best action according to the model: {best_action}")
+print(f"Predicted Q-values: {q_values}")
+print(f"Best action according to the model: {np.argmax(q_values)}")

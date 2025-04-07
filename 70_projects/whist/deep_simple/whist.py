@@ -3,30 +3,31 @@ from tqdm import tqdm
 import numpy as np
 from simple_whist_DQN import DQNAgent
 
-EPISODES = 10
+EPISODES = 250
 
 epsilon = 1
-EPSILON_DECAY = 0.98
+EPSILON_DECAY = 0.99
 MIN_EPSILON = 0.001
-
+ARRAY_LENGTH = 8
 
 class Whist:
     def __init__(self, player_names: list):
         self.deck = wg.Deck()
         self.players = [wg.Player(name) for name in player_names]
-        self.cards_array = [0] * 13
-        self.round_array = [0] * 13
-        self.hand_array = [0] * 13
+        self.cards_array = [0] * ARRAY_LENGTH
+        self.round_array = [0] * ARRAY_LENGTH
+        self.hand_array = [0] * ARRAY_LENGTH
         self.player_array = [0] * 4
         self.score_array = [0] * 4
         self.count = 0
         self.step_count = 0
         self.round_list = []
         self.static_hand = self.hand_array
-        self.player1_cards = [0] * 13
-        self.player2_cards = [0] * 13
-        self.player3_cards = [0] * 13
-        self.player4_cards = [0] * 13
+        self.player1_cards = [0] * ARRAY_LENGTH
+        self.player2_cards = [0] * ARRAY_LENGTH
+        self.player3_cards = [0] * ARRAY_LENGTH
+        self.player4_cards = [0] * ARRAY_LENGTH
+        self.another_count = 0
 
     def deal_cards(self):
         self.deck.shuffle()
@@ -66,15 +67,16 @@ class Whist:
             player.hand = []
 
         self.deal_cards()
+        self.count = np.random.randint(0, 4)
 
         init_state = self._get_init_state()
         return init_state
 
     def _get_init_state(self):
-        current_player = self.players[(self.count - 1) % 4]
+        current_player = self.players[(self.another_count - 1) % 4]
         self.hand_array = self._player_hand(current_player)
         self.player_array = [0] * 4
-        self.player_array[(self.count % 4) - 1] = 1
+        self.player_array[(self.another_count % 4) - 1] = 1
 
         self._initialize_player_card_tracking()
 
@@ -94,18 +96,18 @@ class Whist:
                               self.player3_cards, self.player4_cards]
 
         for arr in player_card_arrays:
-            for i in range(13):
+            for i in range(ARRAY_LENGTH):
                 arr[i] = 0
 
         # For the current player, we know their hand exactly
-        current_player_idx = self.count % 4
+        current_player_idx = self.another_count % 4
         current_player = self.players[current_player_idx]
         current_player_array = player_card_arrays[current_player_idx]
 
         for card in current_player.hand:
             card_position = card.rank_value - 2
             current_player_array[card_position] = 1
-            print(current_player_array)
+            # print(current_player_array)
 
         # For cards that have been played, mark them as impossible (0)
         for i, played in enumerate(self.cards_array):
@@ -115,7 +117,7 @@ class Whist:
 
     def step(self, action):
         done = False
-        current_player = self.players[self.count % 4]
+        current_player = self.players[self.another_count % 4]
 
         if not current_player.hand:
             return None, 0, True
@@ -156,36 +158,46 @@ class Whist:
 
     def _get_game_state(self, card: wg.Card):
         self.count += 1
+        self.another_count += 1
 
         # Reset round_array every 4th card
-        if self.count % 4 == 1:  # When a new trick starts
-            self.round_array = [0] * 13
-        if self.count % 12 == 1:
-            self.cards_array = [0] * 13
+        if self.another_count % 4 == 1:  # When a new trick starts
+            self.round_array = [0] * ARRAY_LENGTH
+        if self.another_count % 12 == 1:
+            self.cards_array = [0] * ARRAY_LENGTH
             self.score_array = [0] * 4
+
         self.cards_array = self._cards_played(card)
         self.round_array = self._round_cards_played(card)
-        current_player = self.players[(self.count - 1) % 4]
+        current_player = self.players[(self.another_count - 1) % 4]
         self.hand_array = self._player_hand(current_player)
         self.player_array = [0] * 4
-        self.player_array[(self.count % 4) - 1] = 1
+        self.player_array[(self.another_count % 4) - 1] = 1
         self._update_player_card_tracking(card)
 
-        game_state = ([self.cards_array] + [self.round_array] + [self.hand_array]
-                      + [self.player1_cards] + [self.player2_cards]
-                      + [self.player3_cards] + [self.player4_cards]
-                      + [self.player_array] + [self.score_array])
+        # Structure the game state as a list for easier processing by the multi-input network
+        game_state = [
+            self.cards_array,  # [0] Cards played so far
+            self.round_array,  # [1] Cards played this round
+            self.hand_array,  # [2] Current player's hand
+            self.player_array,  # [3] Player turn indicator
+            self.player1_cards,  # [4] Player 1's possible cards
+            self.player2_cards,  # [5] Player 2's possible cards
+            self.player3_cards,  # [6] Player 3's possible cards
+            self.player4_cards,  # [7] Player 4's possible cards
+            self.score_array  # [8] Player scores
+        ]
 
         return game_state
 
     def _update_player_card_tracking(self, card: wg.Card):
-        player_idx = (self.count - 1) % 4  # Determine which player played the card
+        player_idx = (self.another_count - 1) % 4  # Determine which player played the card
         card_position = card.rank_value - 2  # Convert rank to index (assuming 2-14)
 
         player_card_arrays = [self.player1_cards, self.player2_cards,
                               self.player3_cards, self.player4_cards]
 
-        current_player_idx = self.count % 4
+        current_player_idx = self.another_count % 4
         if player_idx == current_player_idx:
             return
 
@@ -195,7 +207,7 @@ class Whist:
         for card in current_player.hand:
             card_position = card.rank_value - 2
             current_player_array[card_position] = 1
-            print(current_player_array)
+            # print(current_player_array)
 
     def _cards_played(self, card_s: wg.Card):
         # print(self.count)
@@ -218,7 +230,7 @@ class Whist:
         return self.round_array
 
     def _player_hand(self, player: wg.Player):
-        self.hand_array = [0] * 13  # Reset hand array
+        self.hand_array = [0] * ARRAY_LENGTH   # Reset hand array
         for card in player.hand:
             card_position = card.rank_value - 2
             self.hand_array[card_position] = card.rank_value
@@ -250,7 +262,7 @@ game = Whist(player_names)
 
 # for name, hand in game.get_player_hand().items():
 #     print(name, hand)
-agents = [DQNAgent(13 + 13 + 13 + (13 * 4) + 4 + 4) for _ in range(4)]
+agents = [DQNAgent((ARRAY_LENGTH * 7) + 4 + 4) for _ in range(4)]
 
 for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
     print(f'Episode: {episode + 1}/{EPISODES}')
@@ -261,16 +273,16 @@ for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
     episode_rewards = [0, 0, 0, 0]
     done = False
 
-    while count <= 12:
+    while count <= ARRAY_LENGTH:
         pending_transitions = []
         for _ in range(4):
             current_player_index = count % 4
             current_player = game.players[current_player_index]
             agent = agents[current_player_index]  # Hent den rigtige agent
 
+            # if 0 <= count < 4:
+            #     action_space = 3
             if 0 <= count < 4:
-                action_space = 3
-            elif 4 <= count < 8:
                 action_space = 2
             else:
                 action_space = 1
