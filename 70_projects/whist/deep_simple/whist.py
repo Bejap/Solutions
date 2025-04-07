@@ -3,7 +3,7 @@ from tqdm import tqdm
 import numpy as np
 from simple_whist_DQN import DQNAgent
 
-EPISODES = 100
+EPISODES = 10
 
 epsilon = 1
 EPSILON_DECAY = 0.98
@@ -22,6 +22,7 @@ class Whist:
         self.count = 0
         self.step_count = 0
         self.round_list = []
+        self.static_hand = self.hand_array
         self.player1_cards = [0] * 13
         self.player2_cards = [0] * 13
         self.player3_cards = [0] * 13
@@ -33,6 +34,7 @@ class Whist:
 
         for player in self.players:
             player.hand = self.deck.deal(cards_per_player)
+            self.static_hand = player.hand
 
         # self.deck = [
         #     wg.Card('Hearts', 'Jack'), wg.Card('Hearts', '3'), wg.Card('Hearts', '4'),
@@ -103,6 +105,7 @@ class Whist:
         for card in current_player.hand:
             card_position = card.rank_value - 2
             current_player_array[card_position] = 1
+            print(current_player_array)
 
         # For cards that have been played, mark them as impossible (0)
         for i, played in enumerate(self.cards_array):
@@ -169,22 +172,30 @@ class Whist:
         self._update_player_card_tracking(card)
 
         game_state = ([self.cards_array] + [self.round_array] + [self.hand_array]
-                      + [self.player_array] + [self.score_array]
                       + [self.player1_cards] + [self.player2_cards]
-                      + [self.player3_cards] + [self.player4_cards])
+                      + [self.player3_cards] + [self.player4_cards]
+                      + [self.player_array] + [self.score_array])
 
         return game_state
 
     def _update_player_card_tracking(self, card: wg.Card):
-        player_idx = (self.count - 1) % 4
-        card_position = card.rank_value - 2
+        player_idx = (self.count - 1) % 4  # Determine which player played the card
+        card_position = card.rank_value - 2  # Convert rank to index (assuming 2-14)
 
-        # Mark the card as played (impossible) for all players
         player_card_arrays = [self.player1_cards, self.player2_cards,
                               self.player3_cards, self.player4_cards]
 
-        for arr in player_card_arrays:
-            arr[card_position] = 0
+        current_player_idx = self.count % 4
+        if player_idx == current_player_idx:
+            return
+
+        current_player = self.players[current_player_idx]
+        current_player_array = player_card_arrays[current_player_idx]
+
+        for card in current_player.hand:
+            card_position = card.rank_value - 2
+            current_player_array[card_position] = 1
+            print(current_player_array)
 
     def _cards_played(self, card_s: wg.Card):
         # print(self.count)
@@ -210,7 +221,7 @@ class Whist:
         self.hand_array = [0] * 13  # Reset hand array
         for card in player.hand:
             card_position = card.rank_value - 2
-            self.hand_array[card_position] = 1
+            self.hand_array[card_position] = card.rank_value
         return self.hand_array
 
     def _evaluate_trick_winner(self):
@@ -302,7 +313,10 @@ for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
                     if rewards != 0:
                         reward_value = rewards[i]  # Get reward for this player
                         # Now add to replay memory with correct reward
+                        if sum(game.score_array) == 3:
+                            done = True
                         agents[i].update_replay_memory((s, a, reward_value, ns, done))
+                        print(f"Agent {i}: State: {s}, Action: {a}, Reward: {reward_value}, Next State: {ns}, Done: {done}")
 
                 for agent_idx, agent in enumerate(agents):
                     agent.train(done, count)

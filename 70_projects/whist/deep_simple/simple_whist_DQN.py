@@ -4,7 +4,7 @@ from collections import deque
 import random
 
 GAMMA = 0.99
-REPLAY_MEMORY_SIZE = 500  # How many last steps to keep for model training
+REPLAY_MEMORY_SIZE = 220  # How many last steps to keep for model training
 MIN_REPLAY_MEMORY_SIZE = 150  # Minimum number of steps in a memory to start training
 MINIBATCH_SIZE = 6  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
