@@ -11,6 +11,7 @@ UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 MODEL_NAME = 'smalle'
 MIN_REWARD = -200  # For model save
 MEMORY_FRACTION = 0.35
+ARRAY_LENGTH = 13
 
 class DQNAgent:
     def __init__(self, input_size: int):
@@ -25,15 +26,15 @@ class DQNAgent:
         self.target_update_counter = 0
 
     def create_model(self):
-        game_input = tf.keras.layers.Input(shape=(16,))
-        player_input = tf.keras.layers.Input(shape=(12,))
-        tracking_input = tf.keras.layers.Input(shape=(32,))
+        game_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH * 2,))
+        player_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH + 4,))
+        tracking_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH * 4,))
         score_input = tf.keras.layers.Input(shape=(4,))
 
-        game_features = tf.keras.layers.Dense(16, activation='relu')(game_input)
-        player_features = tf.keras.layers.Dense(16, activation='relu')(player_input)
-        tracking_features = tf.keras.layers.Dense(32, activation='relu')(tracking_input)
-        score_features = tf.keras.layers.Dense(8, activation='relu')(score_input)
+        game_features = tf.keras.layers.Dense(ARRAY_LENGTH * 2, activation='relu')(game_input)
+        player_features = tf.keras.layers.Dense(ARRAY_LENGTH + 4, activation='relu')(player_input)
+        tracking_features = tf.keras.layers.Dense(ARRAY_LENGTH * 4, activation='relu')(tracking_input)
+        score_features = tf.keras.layers.Dense(ARRAY_LENGTH, activation='relu')(score_input)
 
         combined = tf.keras.layers.Concatenate()([game_features, player_features, tracking_features, score_features])
 
@@ -42,7 +43,7 @@ class DQNAgent:
         hidden3 = tf.keras.layers.Dense(32, activation='relu')(hidden2)
 
         # Output layer for Q-values
-        output = tf.keras.layers.Dense(8, activation='linear')(hidden3)  # 13 possible card actions
+        output = tf.keras.layers.Dense(ARRAY_LENGTH, activation='linear')(hidden3)  # 13 possible card actions
 
         # Create model with multiple inputs
         model = tf.keras.Model(
