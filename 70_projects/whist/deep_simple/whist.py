@@ -135,7 +135,7 @@ class Whist:
         print(f"{current_player} played {card}")
         # print(game_state)
         for player in self.players:
-            player.observe(current _player.id, card.rank_value)
+            player.observe(current_player.id, card.rank_value)
 
         if len(self.round_list) == 4:
             trick_winner = self._evaluate_trick_winner()
