@@ -44,11 +44,12 @@ class Deck:
 
 
 class Player:
-    def __init__(self, name):
+    def __init__(self, id):
         self.last_played_card = None
-        self.name = name
         self.hand = []
         self.tricks_won = 0
+        self.id = id
+        self.known_actions = []
 
     def action(self, choice):
         self._sort_hand()
@@ -56,6 +57,28 @@ class Player:
             return self.hand[choice]
 
         # self.last_played_card = self.hand[choice]
+
+    def observe(self, player_id, action):
+        if player_id != self.id:
+            self.known_actions.append((player_id, action))
+
+    def return_other_hand(self, hand, list_length):
+        player_card_list = [[0] * list_length for _ in range(4)]
+        # print(self.id)
+        player_card_list[self.id - 1] = hand
+        print("Player ", self.id,"this is the hand: ", hand)
+        print("Player ", self.id, "knows ", self.known_actions)
+
+        for p_id, act in self.known_actions:
+            card_pos = act - 2
+            player_card_list[p_id - 1][card_pos] = 1
+
+        print(player_card_list[0], player_card_list[1], player_card_list[2], player_card_list[3], "\n")
+
+        return player_card_list[0], player_card_list[1], player_card_list[2], player_card_list[3]
+
+    def resetting_observation(self):
+        self.known_actions = []
 
     def _sort_hand(self):
         self.hand.sort(key=lambda card: (card.suit_value, card.rank_value))
@@ -65,4 +88,4 @@ class Player:
         return [(card.suit_value, card.rank_value) for card in self.hand]
 
     def __repr__(self):
-        return f"Player {self.name}, Hand: {self.get_hand()}"
+        return f"Player {self.id}, Hand: {self.get_hand()}"

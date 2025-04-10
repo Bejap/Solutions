@@ -160,6 +160,7 @@ class DQNAgent:
         return flat_state
 
     def get_qs(self, state):
+
         # Preprocess state into the correct input format
         game_data = np.concatenate([state[0], state[1]])  # cards_array + round_array
         player_data = np.concatenate([state[2], state[3]])  # hand_array + player_array

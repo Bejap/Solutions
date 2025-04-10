@@ -10,6 +10,7 @@ EPSILON_DECAY = 0.99
 MIN_EPSILON = 0.001
 ARRAY_LENGTH = 13
 
+
 class Whist:
     def __init__(self, player_names: list):
         self.deck = wg.Deck()
@@ -20,9 +21,9 @@ class Whist:
         self.player_array = [0] * 4
         self.score_array = [0] * 4
         self.count = 0
+        self.static_hands = {}
         self.step_count = 0
         self.round_list = []
-        self.static_hand = self.hand_array
         self.player1_cards = [0] * ARRAY_LENGTH
         self.player2_cards = [0] * ARRAY_LENGTH
         self.player3_cards = [0] * ARRAY_LENGTH
@@ -35,7 +36,7 @@ class Whist:
 
         for player in self.players:
             player.hand = self.deck.deal(cards_per_player)
-            self.static_hand = player.hand
+
 
         # self.deck = [
         #     wg.Card('Hearts', 'Jack'), wg.Card('Hearts', '3'), wg.Card('Hearts', '4'),
@@ -66,6 +67,7 @@ class Whist:
         for player in self.players:
             player.hand = []
 
+        self.static_hands = {}
         self.deal_cards()
         self.count = np.random.randint(0, 4)
 
@@ -81,14 +83,15 @@ class Whist:
         self._initialize_player_card_tracking()
 
         game_state = ([self.cards_array] + [self.round_array] + [self.hand_array]
-                      + [self.player_array] + [self.score_array]
+                      + [self.player_array]
                       + [self.player1_cards] + [self.player2_cards]
-                      + [self.player3_cards] + [self.player4_cards])
+                      + [self.player3_cards] + [self.player4_cards]
+                      + [self.score_array])
 
         return game_state
 
     def get_player_hand(self):
-        return {player.name: player.get_hand() for player in self.players}
+        return {player.id: player.get_hand() for player in self.players}
 
     def _initialize_player_card_tracking(self):
         # Reset all player card arrays
@@ -131,6 +134,8 @@ class Whist:
         reward = [0] * 4  # Track rewards for all players
         print(f"{current_player} played {card}")
         # print(game_state)
+        for player in self.players:
+            player.observe(current _player.id, card.rank_value)
 
         if len(self.round_list) == 4:
             trick_winner = self._evaluate_trick_winner()
@@ -162,11 +167,6 @@ class Whist:
         self.another_count += 1
 
         # Reset round_array every 4th card
-        if self.another_count % 4 == 1:  # When a new trick starts
-            self.round_array = [0] * ARRAY_LENGTH
-        if self.another_count % 12 == 1:
-            self.cards_array = [0] * ARRAY_LENGTH
-            self.score_array = [0] * 4
 
         self.cards_array = self._cards_played(card)
         self.round_array = self._round_cards_played(card)
@@ -174,17 +174,25 @@ class Whist:
         self.hand_array = self._player_hand(current_player)
         self.player_array = [0] * 4
         self.player_array[(self.another_count % 4) - 1] = 1
+        if self.another_count % 4 == 1:  # When a new trick starts
+            self.round_array = [0] * ARRAY_LENGTH
+        player1_cards, player2_cards, player3_cards, player4_cards, = current_player.return_other_hand(self.static_hands[current_player.id], ARRAY_LENGTH)
+        if self.another_count % ARRAY_LENGTH == 1:
+            self.cards_array = [0] * ARRAY_LENGTH
+            self.score_array = [0] * 4
+            for player in self.players:
+                player.resetting_observation()
 
-        # Structure the game state as a list for easier processing by the multi-input network
+                # Structure the game state as a list for easier processing by the multi-input network
         game_state = [
             self.cards_array,  # [0] Cards played so far
             self.round_array,  # [1] Cards played this round
             self.hand_array,  # [2] Current player's hand
             self.player_array,  # [3] Player turn indicator
-            self.player1_cards,  # [4] Player 1's possible cards
-            self.player2_cards,  # [5] Player 2's possible cards
-            self.player3_cards,  # [6] Player 3's possible cards
-            self.player4_cards,  # [7] Player 4's possible cards
+            player1_cards,  # [4] Player 1's possible cards
+            player2_cards,  # [5] Player 2's possible cards
+            player3_cards,  # [6] Player 3's possible cards
+            player4_cards,  # [7] Player 4's possible cards
             self.score_array  # [8] Player scores
         ]
 
@@ -228,32 +236,38 @@ class Whist:
         return self.round_array
 
     def _player_hand(self, player: wg.Player):
-        self.hand_array = [0] * ARRAY_LENGTH   # Reset hand array
+        self.hand_array = [0] * ARRAY_LENGTH  # Reset hand array
         for card in player.hand:
             card_position = card.rank_value - 2
             self.hand_array[card_position] = card.rank_value
+
+        if not hasattr(self, 'static_hands'):
+            self.static_hands = {}
+
+        if player.id not in self.static_hands:
+            self.static_hands[player.id] = self.hand_array.copy()
+
         return self.hand_array
 
     def _evaluate_trick_winner(self):
-        trick_cards = self.round_list
+        trick_cards = self.round_list  # typisk en liste af (player_id, card)
         print(trick_cards)
 
         # Find det højeste kort i farven
-        winning_card = max(
-            (card for card in trick_cards),
-            key=lambda c: c.rank_value
+        winning_tuple = max(
+            (entry for entry in trick_cards),
+            key=lambda t: t[1].rank_value  # t = (player_id, card)
         )
 
-        winner_index = trick_cards.index(winning_card)  # Find vinderen
-        winner = self.players[winner_index]
+        winner_player_id, winning_card = winning_tuple
 
-        # Opdater score_array
-        self.score_array[winner_index] += 1
+        winner = self.players[winner_player_id]
+        self.score_array[winner_player_id] += 1
 
         return winner
 
 
-player_names = ['1', '2', '3', '4']
+player_names = [1, 2, 3, 4]
 game = Whist(player_names)
 # game.play()
 
@@ -271,7 +285,7 @@ for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
     episode_rewards = [0, 0, 0, 0]
     done = False
 
-    while count <= ARRAY_LENGTH:
+    while count <= ARRAY_LENGTH - 1:
         pending_transitions = []
         for _ in range(4):
             current_player_index = count % 4
@@ -326,12 +340,13 @@ for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
                         if sum(game.score_array) == 3:
                             done = True
                         agents[i].update_replay_memory((s, a, reward_value, ns, done))
-                        print(f"Agent {i}: State: {s}, Action: {a}, Reward: {reward_value}, Next State: {ns}, Done: {done}")
+                        # print(f"Agent {i}: State: {s}, Action: {a}, Reward: {reward_value}, Next State: {ns}, Done: {done}")
 
                 for agent_idx, agent in enumerate(agents):
                     agent.train(done, count)
 
                 pending_transitions = []
+                # print(agent.model.input_shape)
 
             count += 1
 
