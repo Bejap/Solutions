@@ -6,7 +6,7 @@ class Card:
                    '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14
                    }
 
-    SUIT_VALUES = {'Hearts': 0}
+    SUIT_VALUES = {'Hearts': 0, 'Diamonds': 1, 'Clubs': 2, 'Spades': 3}
 
     def __init__(self, suit, rank):
         self.suit = suit
@@ -29,7 +29,8 @@ class Card:
 class Deck:
     def __init__(self):
         self.card_deck = []
-        for suit in Card.SUIT_VALUES:
+        suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
+        for suit in suits:
             for rank in Card.RANK_VALUES:
                 self.card_deck.append(Card(suit, rank))
 
@@ -53,8 +54,11 @@ class Player:
 
     def action(self, choice):
         self._sort_hand()
-        if 0 <= choice <= len(self.hand):
-            return self.hand[choice]
+        if 0 <= choice < len(self.hand):  # Fixed off-by-one error
+            played_card = self.hand.pop(choice)  # Actually remove card
+            self.last_played_card = played_card
+            return played_card
+        raise IndexError("Invalid card choice")
 
         # self.last_played_card = self.hand[choice]
 
@@ -66,14 +70,14 @@ class Player:
         player_card_list = [[0] * list_length for _ in range(4)]
         # print(self.id)
         player_card_list[self.id - 1] = hand
-        # print("Player ", self.id,"this is the hand: ", hand)
-        # print("Player ", self.id, "knows ", self.known_actions)
+        print("Player ", self.id,"this is the hand: ", hand)
+        print("Player ", self.id, "knows ", self.known_actions)
 
         for p_id, act in self.known_actions:
             card_pos = act - 2
             player_card_list[p_id - 1][card_pos] = 1
 
-        # print(player_card_list[0], player_card_list[1], player_card_list[2], player_card_list[3], "\n")
+        print(player_card_list[0], player_card_list[1], player_card_list[2], player_card_list[3], "\n")
 
         return player_card_list[0], player_card_list[1], player_card_list[2], player_card_list[3]
 
