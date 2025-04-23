@@ -13,6 +13,9 @@ class Whist:
     def __init__(self, player_names: list):
         self.deck = wg.Deck()
         self.players = [wg.Player(name) for name in player_names]
+        self.team_1 = [self.players[0], self.players[2]]
+        self.team_2 = [self.players[1], self.players[3]]
+        self.trick_winner = None
         self.cards_array = [0] * ARRAY_LENGTH
         self.round_array = [0] * ARRAY_LENGTH
         self.hand_array = [0] * ARRAY_LENGTH
@@ -60,6 +63,7 @@ class Whist:
     def reset(self):
         self.deck = wg.Deck()
         self.deck.shuffle()
+        self.trick_winner = None
 
         for player in self.players:
             player.hand = []
@@ -129,14 +133,14 @@ class Whist:
         # print(f"Player {current_player.name} played {card}. Count: {self.count}")
 
         reward = [0] * 4  # Track rewards for all players
-        print(f"{current_player} played {card}")
+        # print(f"{current_player} played {card}")
         # print(game_state)
         for player in self.players:
             player.observe(current_player.id, card.rank_value)
 
         if len(self.round_list) == 4:
-            trick_winner = self._evaluate_trick_winner()
-            winner_index = self.players.index(trick_winner)
+            self.trick_winner = self._evaluate_trick_winner()
+            winner_index = self.players.index(self.trick_winner)
 
             # Assign rewards
             for i, player in enumerate(self.players):
@@ -249,7 +253,7 @@ class Whist:
         return self.hand_array
 
     def _evaluate_trick_winner(self):
-        trick_cards = self.round_list  # typisk en liste af (player_id, card)
+        trick_cards = self.round_list
         print(trick_cards)
 
         # Find det højeste kort i farven
@@ -264,3 +268,8 @@ class Whist:
         self.score_array[winner_player_id] += 1
 
         return winner
+
+
+if __name__ == '__main__':
+    player_names = [1, 2, 3, 4]
+    game = Whist(player_names)

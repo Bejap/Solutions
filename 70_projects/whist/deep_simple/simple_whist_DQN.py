@@ -5,7 +5,7 @@ import random
 
 GAMMA = 0.99
 REPLAY_MEMORY_SIZE = 100  # How many last steps to keep for model training
-MIN_REPLAY_MEMORY_SIZE = 300  # Minimum number of steps in a memory to start training
+MIN_REPLAY_MEMORY_SIZE = 150  # Minimum number of steps in a memory to start training
 MINIBATCH_SIZE = 6  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 MODEL_NAME = 'smalle'
@@ -14,9 +14,10 @@ MEMORY_FRACTION = 0.35
 ARRAY_LENGTH = 13
 
 class DQNAgent:
-    def __init__(self, input_size: int):
+    def __init__(self, input_size: int, gamma):
         self.input_shape = input_size
         self.model = self.create_model()
+        self.gamma = gamma
 
         self.target_model = self.create_model()
         self.target_model.set_weights(self.model.get_weights())
@@ -121,7 +122,7 @@ class DQNAgent:
         for index, (state, action, reward, next_state, done) in enumerate(minibatch):
             if not done:
                 max_future_q = np.max(future_qs_list[index])
-                new_q = reward + GAMMA * max_future_q
+                new_q = reward + self.gamma * max_future_q
             else:
                 new_q = reward
 

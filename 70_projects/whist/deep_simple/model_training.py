@@ -4,12 +4,13 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import numpy as np
 
-EPISODES = 250
+EPISODES = 350
 
 epsilon = 1
-EPSILON_DECAY = 0.99
+EPSILON_DECAY = 0.993
 MIN_EPSILON = 0.001
 ARRAY_LENGTH = 13
+GAMMA_VALUES = [0.99, 0.95, 0.90, 0.85]
 
 if __name__ == "__main__":
     player_names = [1, 2, 3, 4]
@@ -18,7 +19,7 @@ if __name__ == "__main__":
 
     # for name, hand in game.get_player_hand().items():
     #     print(name, hand)
-    agents = [DQNAgent((ARRAY_LENGTH * 7) + 4 + 4) for _ in range(4)]
+    agents = [DQNAgent((ARRAY_LENGTH * 7) + 4 + 4, gamma=GAMMA_VALUES[i]) for i in range(4)]
     all_episode_rewards = []
     for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
         print(f'Episode: {episode + 1}/{EPISODES}')
@@ -63,12 +64,9 @@ if __name__ == "__main__":
                             print("This is agent, random")
                             action = np.random.randint(action_space)  # Fallback in case of an issue
                     else:
-                        action = 0  # Default action
+                        action = np.random.randint(action_space)  # Default action
                 else:
-                    if valid_actions:
-                        action = np.random.randint(action_space)  # Pick a random valid card
-                    else:
-                        action = 0  # Default action
+                    action = np.random.randint(action_space)  # Pick a random valid card
 
                 new_state, rewards, done = game.step(action)
                 if rewards != 0:  # Check if rewards is not None
