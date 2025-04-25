@@ -22,7 +22,7 @@ if __name__ == "__main__":
     agents = [DQNAgent((ARRAY_LENGTH * 7) + 4 + 4, gamma=GAMMA_VALUES[i]) for i in range(4)]
     all_episode_rewards = []
     for episode in tqdm(range(1, NUM_GAMES + 1), ascii=True, unit='episodes'):
-        print(f'Episode: {episode + 1}/{NUM_GAMES}')
+        print(f'Episode: {episode}/{NUM_GAMES}')
         print(epsilon)
         count = 0
         episode_rewards = [0, 0, 0, 0]
@@ -31,7 +31,7 @@ if __name__ == "__main__":
         episode_rewards = [0, 0, 0, 0]
         done = False
 
-        while count <= ARRAY_LENGTH - 1:
+        while count != ARRAY_LENGTH - 1:
             pending_transitions = []
             for _ in range(4):
                 current_player_index = count % 4
@@ -101,10 +101,10 @@ if __name__ == "__main__":
                     # print(agent.model.input_shape)
 
                 count += 1
-                print("\nThis is current state: ", current_state)
-                print("\nThis is new state:     ", new_state)
                 print(count)
                 print(game.turn_counter)
+                print("\nThis is current state: ", current_state)
+                print("\nThis is new state:     ", new_state)
 
                 if done:
                     break
@@ -121,7 +121,7 @@ if __name__ == "__main__":
 
     plt.plot(all_episode_rewards)
     plt.xlabel("Episode")
-    plt.ylabel("Gennemsnitlig reward")
-    plt.title("Læring over tid")
+    plt.ylabel("average reward")
+    plt.title("learning over time")
     plt.grid(True)
     plt.show()

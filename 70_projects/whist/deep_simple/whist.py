@@ -56,6 +56,7 @@ class Whist:
         self.deck.shuffle()
         self.trick_winner = None
         self.turn_counter = 0
+        self.score_array = [0] * 4
 
         for player in self.players:
             player.hand = []
@@ -63,6 +64,12 @@ class Whist:
         self.static_hands = {}
         self.deal_cards()
         self.current_player_idx = np.random.randint(0, 4)
+        self.cards_array = [0] * ARRAY_LENGTH
+        self.round_array = [0] * ARRAY_LENGTH
+        self.player1_cards = [0] * ARRAY_LENGTH
+        self.player2_cards = [0] * ARRAY_LENGTH
+        self.player3_cards = [0] * ARRAY_LENGTH
+        self.player4_cards = [0] * ARRAY_LENGTH
 
         init_state = self._get_init_state()
         return init_state
@@ -92,7 +99,6 @@ class Whist:
             for i in range(ARRAY_LENGTH):
                 arr[i] = 0
 
-
         current_player = self.players[self.current_player_idx]
         current_player_array = player_card_arrays[self.current_player_idx]
 
@@ -120,34 +126,18 @@ class Whist:
         current_player.hand.remove(card)
         # print(f"Player {current_player.name} played {card}. Count: {self.count}")
 
-        reward = [0] * 4  # Track rewards for all players
         # print(f"{current_player} played {card}")
         # print(game_state)
         for player in self.players:
             player.observe(current_player.id, card.rank_value)
 
-        if len(self.round_list) == 4:
-            self.trick_winner = self._evaluate_trick_winner()
-            winner_index = self.players.index(self.trick_winner)
-
-            # Assign rewards
-            for i, player in enumerate(self.players):
-                if i == winner_index:
-                    reward[i] += 10  # Reward for winning the trick
-
-                else:
-                    reward[i] -= 5  # Penalty for losing the trick
-
-            # print(f"Trick completed. Winner: Player {winner_index}. Rewards: {reward}")
-
-            # Reset round list for next trick
-            self.round_list = []
-
-        game_state = self._get_game_state(card)
+        game_state, reward = self._get_game_state(card)
         if all(len(player.hand) == 0 for player in self.players):
             done = True
         self.current_player_idx = (self.current_player_idx + 1) % 4
         self.step_count += 1
+        if self.turn_counter % 4 == 0 and self.turn_counter > 0:  # After exactly 4 cards
+            self.round_array = [0] * ARRAY_LENGTH
         self.turn_counter += 1
         # agent.train(terminal, self.step_count)
 
@@ -168,10 +158,28 @@ class Whist:
 
         player1_cards, player2_cards, player3_cards, player4_cards, = current_player.return_other_hand(self.static_hands[current_player.id], ARRAY_LENGTH)
         # if self.turn_counter % ARRAY_LENGTH == 4:
-            # self.cards_array = [0] * ARRAY_LENGTH
-            # self.score_array = [0] * 4
-            # for player in self.players:
-            #     player.resetting_observation()
+        # self.cards_array = [0] * ARRAY_LENGTH
+        # self.score_array = [0] * 4
+        # for player in self.players:
+        #     player.resetting_observation()
+
+        reward = [0] * 4  # Track rewards for all players
+        if len(self.round_list) == 4:
+            self.trick_winner = self._evaluate_trick_winner()
+            winner_index = self.players.index(self.trick_winner)
+
+            # Assign rewards
+            for i, player in enumerate(self.players):
+                if i == winner_index:
+                    reward[i] += 10  # Reward for winning the trick
+
+                else:
+                    reward[i] -= 5  # Penalty for losing the trick
+
+            # print(f"Trick completed. Winner: Player {winner_index}. Rewards: {reward}")
+
+            # Reset round list for next trick
+            self.round_list = []
 
         # Structure the game state as a list for easier processing by the multi-input network
         game_state = [
@@ -186,7 +194,7 @@ class Whist:
             self.score_array  # [8] Player scores
         ]
 
-        return game_state
+        return game_state, reward
 
     def _count_cards_in_round(self):
         # Index of the player who just played (last one to play)
@@ -222,7 +230,7 @@ class Whist:
 
     def _round_cards_played(self, card_p: wg.Card):
         card_position_p = card_p.rank_value - 2
-        self.round_array[card_position_p] = 1
+        self.round_array[card_position_p] = card_p.rank_value
         return self.round_array
 
     def player_hand(self, player: wg.Player):
@@ -257,6 +265,7 @@ class Whist:
         self.score_array[winner_player_id] += 1
 
         return winner
+
 
 
 if __name__ == '__main__':

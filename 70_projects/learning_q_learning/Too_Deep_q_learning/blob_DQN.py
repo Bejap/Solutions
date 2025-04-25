@@ -31,7 +31,7 @@ EPSILON_DECAY = 0.9985
 MIN_EPSILON = 0.001
 
 #  Stats settings
-AGGREGATE_STATS_EVERY = 30  # episodes
+AGGREGATE_STATS_EVERY = 25  # episodes
 SHOW_PREVIEW = 9
 
 
