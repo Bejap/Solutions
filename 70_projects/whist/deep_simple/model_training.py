@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import numpy as np
 
-EPISODES = 350
+NUM_GAMES = 1000
 
 epsilon = 1
-EPSILON_DECAY = 0.993
+EPSILON_DECAY = 0.996
 MIN_EPSILON = 0.001
 ARRAY_LENGTH = 13
 GAMMA_VALUES = [0.99, 0.95, 0.90, 0.85]
@@ -21,8 +21,8 @@ if __name__ == "__main__":
     #     print(name, hand)
     agents = [DQNAgent((ARRAY_LENGTH * 7) + 4 + 4, gamma=GAMMA_VALUES[i]) for i in range(4)]
     all_episode_rewards = []
-    for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes'):
-        print(f'Episode: {episode + 1}/{EPISODES}')
+    for episode in tqdm(range(1, NUM_GAMES + 1), ascii=True, unit='episodes'):
+        print(f'Episode: {episode + 1}/{NUM_GAMES}')
         print(epsilon)
         count = 0
         episode_rewards = [0, 0, 0, 0]
@@ -47,8 +47,9 @@ if __name__ == "__main__":
 
                 valid_actions = [i for i, value in enumerate(game.player_hand(current_player)) if value != 0]
                 # print(valid_actions)
+                a = np.random.random()
 
-                if np.random.random() > epsilon:
+                if a > epsilon:
                     qs = agent.get_qs(current_state)
                     if valid_actions:
                         # Ensure that all card values are within the valid index range of qs
@@ -76,7 +77,11 @@ if __name__ == "__main__":
 
                 if new_state is not None:
                     current_state = new_state  # Update state
-                pending_transitions.append((current_state, action, None, new_state, False))
+                if len(valid_actions) >= 1:
+                    pending_transitions.append((current_state, action, None, new_state, False))
+                else:
+                    # Optional: just log it for debug purposes
+                    print(f"Skipping training for player {current_player} at count {count} (only one valid action)")
                 # print(pending_transitions)
 
                 if len(game.round_list) == 0:  # Trick is complete
@@ -96,6 +101,10 @@ if __name__ == "__main__":
                     # print(agent.model.input_shape)
 
                 count += 1
+                print("\nThis is current state: ", current_state)
+                print("\nThis is new state:     ", new_state)
+                print(count)
+                print(game.turn_counter)
 
                 if done:
                     break

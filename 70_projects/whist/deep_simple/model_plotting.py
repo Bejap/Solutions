@@ -99,12 +99,13 @@ class AgentEvaluator:
                 # Record step data
                 step_data = {
                     'step': game_steps,
-                    'player': current_player_index,
+                    'player': env.players[current_player_index],
                     'action': action,
                     'reward': reward[current_player_index],
-                    'valid_actions_count': len(valid_actions)
+                    'valid_actions_count': len(valid_actions),
                 }
                 game_data['steps'].append(step_data)
+                # print(env.players[current_player_index])
 
                 if env.trick_winner is not None:
                     winner_id = env.trick_winner.id - 1  # Convert to 0-indexed
@@ -112,8 +113,8 @@ class AgentEvaluator:
                     total_tricks += 1
                     if winner_id == self.agent_index:
                         agent_tricks += 1
-                        if verbose and game_steps % 2 == 0:  # Only print occasionally to avoid spamming
-                            print(f"Game {game}: Our agent won a trick")
+                        # if verbose and game_steps % 2 == 0:  # Only print occasionally to avoid spamming
+                        #     print(f"Game {game}: Our agent won a trick")
 
                 state = next_state
                 game_steps += 1
@@ -262,7 +263,7 @@ class AgentEvaluator:
         # Custom encoder for numpy types
         def convert_np(o):
             if isinstance(o, (np.integer, np.int_)): return int(o)
-            if isinstance(o, (np.floating, np.float_)): return float(o)
+            if isinstance(o, (np.floating, np.float64)): return float(o)
             if isinstance(o, (np.bool_)): return bool(o)
             if isinstance(o, np.ndarray): return o.tolist()
             return str(o)
@@ -338,19 +339,19 @@ class AgentEvaluator:
 # Example usage:
 if __name__ == "__main__":
     # Single model evaluation
-    evaluator = AgentEvaluator(model_path='Models/full_agent_player_1.keras', agent_index=1)
-    evaluator.evaluate(num_games=250)
-    evaluator.plot_learning_curve()
-    evaluator.plot_reward_distribution()
-    evaluator.plot_action_frequency()
-    evaluator.save_metrics()
+    evaluator = AgentEvaluator(model_path='Models/full_agent_player_0.keras', agent_index=3)
+    # evaluator.evaluate(num_games=50)
+    # evaluator.plot_learning_curve()
+    # evaluator.plot_reward_distribution()
+    # evaluator.plot_action_frequency()
+    # evaluator.save_metrics()
 
     # Compare multiple models
-    # models_to_compare = [
-    #     'Models/full_agent_player_0.keras',
-    #     'Models/full_agent_player_1.keras',
-    #     'Models/full_agent_player_2.keras',
-    #     'Models/full_agent_player_3.keras'
-    # ]
-    # comparison_results = evaluator.compare_agents(models_to_compare, num_games=50)
-    # print(comparison_results)
+    models_to_compare = [
+        'Models/full_agent_player_0.keras',
+        'Models/full_agent_player_1.keras',
+        'Models/full_agent_player_2.keras',
+        'Models/full_agent_player_3.keras'
+    ]
+    comparison_results = evaluator.compare_agents(models_to_compare, num_games=50)
+    print(comparison_results)

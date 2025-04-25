@@ -5,8 +5,8 @@ import random
 
 GAMMA = 0.99
 REPLAY_MEMORY_SIZE = 100  # How many last steps to keep for model training
-MIN_REPLAY_MEMORY_SIZE = 150  # Minimum number of steps in a memory to start training
-MINIBATCH_SIZE = 6  # How many steps (samples) to use for training
+MIN_REPLAY_MEMORY_SIZE = 1000  # Minimum number of steps in a memory to start training
+MINIBATCH_SIZE = 8  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 MODEL_NAME = 'smalle'
 MIN_REWARD = -200  # For model save
@@ -57,6 +57,7 @@ class DQNAgent:
 
     def update_replay_memory(self, transition):
         state, action, reward, next_state, done = transition
+        # print(transition)
         self.replay_memory.append(transition)
 
     def train(self, terminal_state, step):
@@ -65,6 +66,7 @@ class DQNAgent:
             return
 
         minibatch = random.sample(self.replay_memory, MINIBATCH_SIZE)
+        print(minibatch)
 
         # Process all states in batch
         current_game_data = []

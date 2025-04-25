@@ -16,6 +16,7 @@ class Whist:
         self.team_1 = [self.players[0], self.players[2]]
         self.team_2 = [self.players[1], self.players[3]]
         self.trick_winner = None
+        self.current_player_idx = 0
         self.cards_array = [0] * ARRAY_LENGTH
         self.round_array = [0] * ARRAY_LENGTH
         self.hand_array = [0] * ARRAY_LENGTH
@@ -30,6 +31,7 @@ class Whist:
         self.player3_cards = [0] * ARRAY_LENGTH
         self.player4_cards = [0] * ARRAY_LENGTH
         self.another_count = 0
+        self.turn_counter = 0
 
     def deal_cards(self):
         self.deck.shuffle()
@@ -49,34 +51,24 @@ class Whist:
         # for i, player in enumerate(self.players):
         #     player.hand = self.deck[i * 3:(i + 1) * 3]
 
-    def play(self):
-        global game_state
-        self.deal_cards()
-        for player in self.players:
-            card = player.action(0)
-            print(card)
-
-            game_state = self._get_game_state(card)
-
-        return game_state
-
     def reset(self):
         self.deck = wg.Deck()
         self.deck.shuffle()
         self.trick_winner = None
+        self.turn_counter = 0
 
         for player in self.players:
             player.hand = []
 
         self.static_hands = {}
         self.deal_cards()
-        self.count = np.random.randint(0, 4)
+        self.current_player_idx = np.random.randint(0, 4)
 
         init_state = self._get_init_state()
         return init_state
 
     def _get_init_state(self):
-        current_player = self.players[(self.another_count - 1) % 4]
+        current_player = self.players[self.current_player_idx]
         self.hand_array = self.player_hand(current_player)
         self.player_array = [0] * 4
         self.player_array[(self.another_count % 4) - 1] = 1
@@ -91,9 +83,6 @@ class Whist:
 
         return game_state
 
-    def get_player_hand(self):
-        return {player.id: player.get_hand() for player in self.players}
-
     def _initialize_player_card_tracking(self):
         # Reset all player card arrays
         player_card_arrays = [self.player1_cards, self.player2_cards,
@@ -103,10 +92,9 @@ class Whist:
             for i in range(ARRAY_LENGTH):
                 arr[i] = 0
 
-        # For the current player, we know their hand exactly
-        current_player_idx = self.another_count % 4
-        current_player = self.players[current_player_idx]
-        current_player_array = player_card_arrays[current_player_idx]
+
+        current_player = self.players[self.current_player_idx]
+        current_player_array = player_card_arrays[self.current_player_idx]
 
         for card in current_player.hand:
             card_position = card.rank_value - 2
@@ -121,7 +109,7 @@ class Whist:
 
     def step(self, action):
         done = False
-        current_player = self.players[self.count % 4]
+        current_player = self.players[self.current_player_idx]
 
         if not current_player.hand:
             return None, 0, True
@@ -145,7 +133,7 @@ class Whist:
             # Assign rewards
             for i, player in enumerate(self.players):
                 if i == winner_index:
-                    reward[i] += 20  # Reward for winning the trick
+                    reward[i] += 10  # Reward for winning the trick
 
                 else:
                     reward[i] -= 5  # Penalty for losing the trick
@@ -158,7 +146,9 @@ class Whist:
         game_state = self._get_game_state(card)
         if all(len(player.hand) == 0 for player in self.players):
             done = True
+        self.current_player_idx = (self.current_player_idx + 1) % 4
         self.step_count += 1
+        self.turn_counter += 1
         # agent.train(terminal, self.step_count)
 
         return game_state, reward, done
@@ -166,25 +156,24 @@ class Whist:
     def _get_game_state(self, card: wg.Card):
         self.count += 1
         self.another_count += 1
-
-        # Reset round_array every 4th card
-
+        if self.turn_counter % 4 == 0 and self.turn_counter > 0:  # After exactly 4 cards
+            self.round_array = [0] * ARRAY_LENGTH
         self.cards_array = self._cards_played(card)
         self.round_array = self._round_cards_played(card)
-        current_player = self.players[(self.another_count - 1) % 4]
-        self.hand_array = self.player_hand(current_player)
-        self.player_array = [0] * 4
-        self.player_array[(self.another_count % 4) - 1] = 1
-        if self.another_count % 4 == 1:  # When a new trick starts
-            self.round_array = [0] * ARRAY_LENGTH
-        player1_cards, player2_cards, player3_cards, player4_cards, = current_player.return_other_hand(self.static_hands[current_player.id], ARRAY_LENGTH)
-        if self.another_count % ARRAY_LENGTH == 1:
-            self.cards_array = [0] * ARRAY_LENGTH
-            self.score_array = [0] * 4
-            for player in self.players:
-                player.resetting_observation()
 
-                # Structure the game state as a list for easier processing by the multi-input network
+        current_player = self.players[self.current_player_idx]
+        self.hand_array = self.player_hand(current_player)
+
+        self.player_array = [1 if i == self.current_player_idx else 0 for i in range(4)]
+
+        player1_cards, player2_cards, player3_cards, player4_cards, = current_player.return_other_hand(self.static_hands[current_player.id], ARRAY_LENGTH)
+        # if self.turn_counter % ARRAY_LENGTH == 4:
+            # self.cards_array = [0] * ARRAY_LENGTH
+            # self.score_array = [0] * 4
+            # for player in self.players:
+            #     player.resetting_observation()
+
+        # Structure the game state as a list for easier processing by the multi-input network
         game_state = [
             self.cards_array,  # [0] Cards played so far
             self.round_array,  # [1] Cards played this round
@@ -254,7 +243,7 @@ class Whist:
 
     def _evaluate_trick_winner(self):
         trick_cards = self.round_list
-        print(trick_cards)
+        # print(trick_cards)
 
         # Find det højeste kort i farven
         winning_tuple = max(
