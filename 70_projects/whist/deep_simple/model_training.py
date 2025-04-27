@@ -118,7 +118,6 @@ if __name__ == "__main__":
         agent.save_agent(f"Weights/agent_player_{i}.weights.h5")
         agent.save_full_agent(f"Models/full_agent_player_{i}.keras")
 
-
     plt.plot(all_episode_rewards)
     plt.xlabel("Episode")
     plt.ylabel("average reward")

@@ -353,5 +353,5 @@ if __name__ == "__main__":
         'Models/full_agent_player_2.keras',
         'Models/full_agent_player_3.keras'
     ]
-    comparison_results = evaluator.compare_agents(models_to_compare, num_games=50)
+    comparison_results = evaluator.compare_agents(models_to_compare, num_games=150)
     print(comparison_results)
