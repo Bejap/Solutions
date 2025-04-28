@@ -30,13 +30,15 @@ if __name__ == "__main__":
         current_state = game.reset()
         episode_rewards = [0, 0, 0, 0]
         done = False
+        # print("\nThis is the current state", current_state)
 
         while count != ARRAY_LENGTH - 1:
             pending_transitions = []
             for _ in range(4):
-                current_player_index = count % 4
+                current_player_index = game.current_player_idx
                 current_player = game.players[current_player_index]
                 agent = agents[current_player_index]  # Hent den rigtige agent
+                current_state = game.get_init_state()
 
                 if 0 <= count < 4:
                     action_space = 3
@@ -74,25 +76,33 @@ if __name__ == "__main__":
                     episode_rewards[current_player_index] += rewards[current_player_index]
 
                 # Optionally train after each step
-
-                if new_state is not None:
-                    current_state = new_state  # Update state
                 if len(valid_actions) >= 1:
                     pending_transitions.append((current_state, action, None, new_state, False))
                 else:
-                    # Optional: just log it for debug purposes
                     print(f"Skipping training for player {current_player} at count {count} (only one valid action)")
-                # print(pending_transitions)
+
+                # print("\nThis is the current state", current_state)
+
+
+                if new_state is not None:
+                    current_state = new_state  # Update state
+
 
                 if len(game.round_list) == 0:  # Trick is complete
                     for i, (s, a, _, ns, _) in enumerate(pending_transitions):
+                        print("\n This is S", s)
+                        print("\n This is NS", ns)
+                        print("\n This is A", a)
                         if rewards != 0:
                             reward_value = rewards[i]  # Get reward for this player
                             # Now add to replay memory with correct reward
-                            if sum(game.score_array) == 3:
-                                done = True
-                            agents[i].update_replay_memory((s, a, reward_value, ns, done))
-                            # print(f"Agent {i}: State: {s}, Action: {a}, Reward: {reward_value}, Next State: {ns}, Done: {done}")
+                        else:
+                            reward_value = 0
+
+                        if sum(game.score_array) == 3:
+                             done = True
+                        agents[i].update_replay_memory((s, a, reward_value, ns, done))
+                        print(f"Agent {i}: State: {s}, Action: {a}, Reward: {reward_value}, Next State: {ns}, Done: {done}")
 
                     for agent_idx, agent in enumerate(agents):
                         agent.train(done, count)
@@ -103,8 +113,8 @@ if __name__ == "__main__":
                 count += 1
                 print(count)
                 print(game.turn_counter)
-                print("\nThis is current state: ", current_state)
-                print("\nThis is new state:     ", new_state)
+
+                # print("\nThis is new state:     ", new_state)
 
                 if done:
                     break

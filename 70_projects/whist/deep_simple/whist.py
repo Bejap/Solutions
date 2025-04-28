@@ -70,17 +70,18 @@ class Whist:
         self.player2_cards = [0] * ARRAY_LENGTH
         self.player3_cards = [0] * ARRAY_LENGTH
         self.player4_cards = [0] * ARRAY_LENGTH
+        self._initialize_player_card_tracking()
 
-        init_state = self._get_init_state()
+        init_state = self.get_init_state()
         return init_state
 
-    def _get_init_state(self):
+    def get_init_state(self):
         current_player = self.players[self.current_player_idx]
         self.hand_array = self.player_hand(current_player)
         self.player_array = [0] * 4
-        self.player_array[(self.another_count % 4) - 1] = 1
 
-        self._initialize_player_card_tracking()
+        self.player_array = [1 if i == self.current_player_idx else 0 for i in range(4)]
+
 
         game_state = ([self.cards_array] + [self.round_array] + [self.hand_array]
                       + [self.player_array]
@@ -104,7 +105,7 @@ class Whist:
 
         for card in current_player.hand:
             card_position = card.rank_value - 2
-            current_player_array[card_position] = 1
+            current_player_array[card_position] = card.rank_value
             # print(current_player_array)
 
         # For cards that have been played, mark them as impossible (0)
@@ -146,8 +147,8 @@ class Whist:
     def _get_game_state(self, card: wg.Card):
         self.count += 1
         self.another_count += 1
-        if self.turn_counter % 4 == 0 and self.turn_counter > 0:  # After exactly 4 cards
-            self.round_array = [0] * ARRAY_LENGTH
+        # if self.turn_counter % 4 == 0 and self.turn_counter > 0:  # After exactly 4 cards
+        #     self.round_array = [0] * ARRAY_LENGTH
         self.cards_array = self._cards_played(card)
         self.round_array = self._round_cards_played(card)
 
