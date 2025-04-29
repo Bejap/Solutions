@@ -11,6 +11,7 @@ EPSILON_DECAY = 0.996
 MIN_EPSILON = 0.001
 ARRAY_LENGTH = 13
 GAMMA_VALUES = [0.99, 0.95, 0.90, 0.85]
+SAVE_EVERY = 500
 
 if __name__ == "__main__":
     player_names = [1, 2, 3, 4]
@@ -27,22 +28,22 @@ if __name__ == "__main__":
         count = 0
         episode_rewards = [0, 0, 0, 0]
 
-        current_state = game.reset()
+        start_state = game.reset()
         episode_rewards = [0, 0, 0, 0]
         done = False
+        pending_transitions = []
         # print("\nThis is the current state", current_state)
 
         while count != ARRAY_LENGTH - 1:
-            pending_transitions = []
             for _ in range(4):
                 current_player_index = game.current_player_idx
                 current_player = game.players[current_player_index]
                 agent = agents[current_player_index]  # Hent den rigtige agent
                 current_state = game.get_init_state()
 
-                if 0 <= count < 4:
+                if count < 4:
                     action_space = 3
-                if 0 <= count < 4:
+                elif count < 8:
                     action_space = 2
                 else:
                     action_space = 1
@@ -90,9 +91,6 @@ if __name__ == "__main__":
 
                 if len(game.round_list) == 0:  # Trick is complete
                     for i, (s, a, _, ns, _) in enumerate(pending_transitions):
-                        print("\n This is S", s)
-                        print("\n This is NS", ns)
-                        print("\n This is A", a)
                         if rewards != 0:
                             reward_value = rewards[i]  # Get reward for this player
                             # Now add to replay memory with correct reward
@@ -100,20 +98,16 @@ if __name__ == "__main__":
                             reward_value = 0
 
                         if sum(game.score_array) == 3:
-                             done = True
+                            done = True
                         agents[i].update_replay_memory((s, a, reward_value, ns, done))
-                        print(f"Agent {i}: State: {s}, Action: {a}, Reward: {reward_value}, Next State: {ns}, Done: {done}")
+                        print(f"\nAgent {i}: State: {s}, Action: {a}, Reward: {reward_value}, Next State: {ns}, Done: {done}, Gamma: {agents[i].gamma}")
 
                     for agent_idx, agent in enumerate(agents):
                         agent.train(done, count)
 
                     pending_transitions = []
                     # print(agent.model.input_shape)
-
                 count += 1
-                print(count)
-                print(game.turn_counter)
-
                 # print("\nThis is new state:     ", new_state)
 
                 if done:
@@ -124,9 +118,10 @@ if __name__ == "__main__":
         for agent in agents:
             agent.train(True, count)
 
-    for i, agent in enumerate(agents):
-        agent.save_agent(f"Weights/agent_player_{i}.weights.h5")
-        agent.save_full_agent(f"Models/full_agent_player_{i}.keras")
+        if episode % SAVE_EVERY == 0:
+            for i, agent in enumerate(agents):
+                agent.save_agent(f"Weights/agent_player_{i}_ep{episode}.weights.h5")
+                agent.save_full_agent(f"Models/full_agent_player_{i}_ep{episode}.keras")
 
     plt.plot(all_episode_rewards)
     plt.xlabel("Episode")

@@ -12,7 +12,7 @@ from simple_whist_DQN import DQNAgent
 
 
 class AgentEvaluator:
-    def __init__(self, model_path='Models/full_agent_player_0.keras', results_dir='evaluation_results', agent_index=0):
+    def __init__(self, model_path='Models/full_agent_player_0_ep1000.keras', results_dir='evaluation_results', agent_index=0):
         self.model_path = model_path
         self.results_dir = results_dir
         self.agent_index = agent_index
@@ -339,7 +339,7 @@ class AgentEvaluator:
 # Example usage:
 if __name__ == "__main__":
     # Single model evaluation
-    evaluator = AgentEvaluator(model_path='Models/full_agent_player_0.keras', agent_index=3)
+    evaluator = AgentEvaluator(model_path='Models/full_agent_player_0_ep1000.keras', agent_index=3)
     # evaluator.evaluate(num_games=50)
     # evaluator.plot_learning_curve()
     # evaluator.plot_reward_distribution()
@@ -348,10 +348,10 @@ if __name__ == "__main__":
 
     # Compare multiple models
     models_to_compare = [
-        'Models/full_agent_player_0.keras',
-        'Models/full_agent_player_1.keras',
-        'Models/full_agent_player_2.keras',
-        'Models/full_agent_player_3.keras'
+        'Models/full_agent_player_0_ep1000.keras',
+        'Models/full_agent_player_1_ep1000.keras',
+        'Models/full_agent_player_2_ep1000.keras',
+        'Models/full_agent_player_3_ep1000.keras'
     ]
     comparison_results = evaluator.compare_agents(models_to_compare, num_games=150)
     print(comparison_results)

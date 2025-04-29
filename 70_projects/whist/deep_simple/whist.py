@@ -57,12 +57,15 @@ class Whist:
         self.trick_winner = None
         self.turn_counter = 0
         self.score_array = [0] * 4
+        for player in self.players:
+            player.resetting_observation()
 
         for player in self.players:
             player.hand = []
 
         self.static_hands = {}
         self.deal_cards()
+        self.round_list = []
         self.current_player_idx = np.random.randint(0, 4)
         self.cards_array = [0] * ARRAY_LENGTH
         self.round_array = [0] * ARRAY_LENGTH
@@ -79,9 +82,12 @@ class Whist:
         current_player = self.players[self.current_player_idx]
         self.hand_array = self.player_hand(current_player)
         self.player_array = [0] * 4
+        if self.turn_counter % 4 == 0 and self.turn_counter > 0:  # After exactly 4 cards
+            self.round_array = [0] * ARRAY_LENGTH
 
         self.player_array = [1 if i == self.current_player_idx else 0 for i in range(4)]
 
+        self.player1_cards, self.player2_cards, self.player3_cards, self.player4_cards, = current_player.return_other_hand(self.static_hands[current_player.id], ARRAY_LENGTH)
 
         game_state = ([self.cards_array] + [self.round_array] + [self.hand_array]
                       + [self.player_array]
@@ -135,7 +141,9 @@ class Whist:
         game_state, reward = self._get_game_state(card)
         if all(len(player.hand) == 0 for player in self.players):
             done = True
+
         self.current_player_idx = (self.current_player_idx + 1) % 4
+
         self.step_count += 1
         if self.turn_counter % 4 == 0 and self.turn_counter > 0:  # After exactly 4 cards
             self.round_array = [0] * ARRAY_LENGTH
@@ -147,8 +155,6 @@ class Whist:
     def _get_game_state(self, card: wg.Card):
         self.count += 1
         self.another_count += 1
-        # if self.turn_counter % 4 == 0 and self.turn_counter > 0:  # After exactly 4 cards
-        #     self.round_array = [0] * ARRAY_LENGTH
         self.cards_array = self._cards_played(card)
         self.round_array = self._round_cards_played(card)
 
@@ -157,7 +163,7 @@ class Whist:
 
         self.player_array = [1 if i == self.current_player_idx else 0 for i in range(4)]
 
-        player1_cards, player2_cards, player3_cards, player4_cards, = current_player.return_other_hand(self.static_hands[current_player.id], ARRAY_LENGTH)
+        self.player1_cards, self.player2_cards, self.player3_cards, self.player4_cards, = current_player.return_other_hand(self.static_hands[current_player.id], ARRAY_LENGTH)
         # if self.turn_counter % ARRAY_LENGTH == 4:
         # self.cards_array = [0] * ARRAY_LENGTH
         # self.score_array = [0] * 4
@@ -188,10 +194,10 @@ class Whist:
             self.round_array,  # [1] Cards played this round
             self.hand_array,  # [2] Current player's hand
             self.player_array,  # [3] Player turn indicator
-            player1_cards,  # [4] Player 1's possible cards
-            player2_cards,  # [5] Player 2's possible cards
-            player3_cards,  # [6] Player 3's possible cards
-            player4_cards,  # [7] Player 4's possible cards
+            self.player1_cards,  # [4] Player 1's possible cards
+            self.player2_cards,  # [5] Player 2's possible cards
+            self.player3_cards,  # [6] Player 3's possible cards
+            self.player4_cards,  # [7] Player 4's possible cards
             self.score_array  # [8] Player scores
         ]
 
@@ -263,7 +269,7 @@ class Whist:
         winner_player_id, winning_card = winning_tuple
 
         winner = self.players[winner_player_id]
-        self.score_array[winner_player_id] += 1
+        self.score_array[winner_player_id ] += 1
 
         return winner
 

@@ -194,39 +194,3 @@ class DQNAgent:
     def save_full_agent(agent, filename):
         agent.model.save(filename)
         print(f"Full agent model saved to {filename}")
-
-
-def load_full_agent(filename="whist_dqn_agent"):
-    loaded_model = tf.keras.models.load_model(filename)
-    print("Full agent model loaded successfully")
-    return DQNAgent(model=loaded_model)  # Wrap in agent class
-
-def test_agent(agent, env, episodes=10):
-    for episode in range(episodes):
-        state = env.reset()  # Reset game for new episode
-        done = False
-        total_reward = 0
-
-        while not done:
-            action = agent.predict_action(state)  # Get action
-            next_state, reward, done = env.step(action)  # Take action
-
-            total_reward += reward
-            state = next_state  # Move to next state
-
-        print(f"Episode {episode + 1}: Total Reward = {total_reward}")
-
-
-def qs_values_get(state, model):
-    return model.get_qs(state)
-
-
-# Load environment and agent
-# env = whist.Whist(["1", "2", "3", "4"])  # Initialize the game environment
-# my_agent = load_full_agent()
-#
-# Show model summary
-# my_agent.model.summary()
-#
-# Run tests
-# test_agent(my_agent, env)
