@@ -11,10 +11,10 @@ def main():
 
     while not game.is_game_over():
         if keyboard.is_pressed("w"):
-            game.move_up()
+            game.move_up(True)
             time.sleep(0.15)
         elif keyboard.is_pressed("s"):
-            game.move_down()
+            game.move_down(True)
             time.sleep(0.15)
         elif keyboard.is_pressed("a"):
             game.move_left()
@@ -22,6 +22,10 @@ def main():
         elif keyboard.is_pressed("d"):
             game.move_right()
             time.sleep(0.15)
+        elif keyboard.is_pressed("r"):
+            print("\nGame resetting")
+            time.sleep(0.5)
+            game.reset()
         elif keyboard.is_pressed("q"):
             print("Quitting the game.")
             break
