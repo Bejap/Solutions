@@ -20,7 +20,7 @@ EPISODES = 100
 
 # Exploration settings
 epsilon = 1  # not a constant, going to be decayed
-EPSILON_DECAY = 0.995
+EPSILON_DECAY = 0.99
 MIN_EPSILON = 0.001
 
 #  Stats settings
@@ -118,6 +118,7 @@ for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes', desc="T
     done = False
     while not done:
         if np.random.random() > epsilon:
+            print('agent moves')
             action = np.argmax(agent.get_qs(current_state))
         else:
             action = np.random.randint(0, 4)
