@@ -101,7 +101,7 @@ class DQNAgent:
         return self.model.predict(np.array(state).reshape(1, -1) / 255, verbose=0)[0]
 
 
-agent = DQNAgent(state_size=9, action_size=4)
+agent = DQNAgent(state_size=Game2048.BOARD_SIZE ** 2, action_size=4)
 
 ep_rewards = [-100]
 
@@ -120,6 +120,7 @@ for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes', desc="T
         if np.random.random() > epsilon:
             print('agent moves')
             action = np.argmax(agent.get_qs(current_state))
+            print(action)
         else:
             action = np.random.randint(0, 4)
 
