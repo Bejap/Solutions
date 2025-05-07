@@ -32,21 +32,19 @@ def merge_row(row):
     :return: the merged row shifted to left
     """
     new_row = [x for x in row if x != 0]
-    score = 0
 
     i = 0
     while i < len(new_row) - 1:
         if new_row[i] == new_row[i + 1]:
             new_row[i] *= 2
-            score += new_row[i]
             new_row[i + 1] = 0
             i += 2
         else:
             i += 1
 
     final = [x for x in new_row if x != 0]
-    final += [0] * (4 - len(final))
-    return final, score
+    final += [0] * (len(row) - len(final))
+    return final
 
 
 def transpose(board):
@@ -63,9 +61,9 @@ def transpose(board):
     return k
 
 
-assert merge_row([2, 2, 0, 0])[0] == [4, 0, 0, 0]
-assert merge_row([2, 2, 4, 4])[0] == [4, 8, 0, 0]
-assert merge_row([2, 0, 2, 2])[0] == [4, 2, 0, 0]
+assert merge_row([2, 2, 0, 0]) == [4, 0, 0, 0]
+assert merge_row([2, 2, 4, 4]) == [4, 8, 0, 0]
+assert merge_row([2, 0, 2, 2]) == [4, 2, 0, 0]
 
 assert transpose([[1, 2], [3, 4]]) == [[1, 3], [2, 4]]
 
