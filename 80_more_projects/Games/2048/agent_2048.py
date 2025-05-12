@@ -13,7 +13,7 @@ MIN_REPLAY_MEMORY_SIZE = 150  # Minimum number of steps in a memory to start tra
 MINIBATCH_SIZE = 16  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 MODEL_NAME = '2048'
-MIN_REWARD = 0 # For model save
+MIN_REWARD = 50 # For model save
 MEMORY_FRACTION = 0.35
 
 # Environment settings

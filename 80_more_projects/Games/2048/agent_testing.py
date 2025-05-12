@@ -3,7 +3,7 @@ import numpy as np
 from agent_2048 import DQNAgent
 import tensorflow as tf
 
-MODEL_PATH: str = 'models_3x3/2048____22.00max____5.92avg__-34.00min__1746713487.keras'
+MODEL_PATH: str = ''
 agent = DQNAgent(state_size=game2048.Game2048.BOARD_SIZE ** 2, action_size=4)
 agent.model = tf.keras.models.load_model(MODEL_PATH)
 
