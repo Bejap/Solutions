@@ -46,48 +46,27 @@ class DQNAgent:
         self.transition_count = 0
 
     def create_model(self):
-        # Create a CNN model
         model = tf.keras.Sequential([
-            # Input layer with shape (board_size, board_size, 1)
             tf.keras.layers.InputLayer(input_shape=self.input_shape),
 
-            # First convolutional layer
-            tf.keras.layers.Conv2D(
-                filters=32,
-                kernel_size=(2, 2),
-                padding='same',
-                activation='relu'
-            ),
+            # Improved convolutional layers
+            tf.keras.layers.Conv2D(128, (3, 3), padding='same', activation='relu'),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.Conv2D(256, (2, 2), padding='same', activation='relu'),
+            tf.keras.layers.BatchNormalization(),
 
-            # Second convolutional layer
-            tf.keras.layers.Conv2D(
-                filters=64,
-                kernel_size=(2, 2),
-                padding='same',
-                activation='relu'
-            ),
+            # Spatial attention module
+            tf.keras.layers.GlobalAvgPool2D(),
+            tf.keras.layers.Reshape((1, 1, 256)),
+            tf.keras.layers.Conv2D(1, (1, 1), activation='sigmoid'),
+            tf.keras.layers.UpSampling2D(size=(self.state_size, self.state_size)),
+            tf.keras.layers.Multiply(),
 
-            # Third convolutional layer
-            tf.keras.layers.Conv2D(
-                filters=64,
-                kernel_size=(2, 2),
-                padding='same',
-                activation='relu'
-            ),
-
-            # Flatten the output to feed into dense layers
             tf.keras.layers.Flatten(),
-
-            # Dense layers
-            tf.keras.layers.Dense(64, activation='relu'),
+            tf.keras.layers.Dense(512, activation='relu'),
             tf.keras.layers.Dense(self.action_size, activation='linear')
         ])
-
-        model.compile(
-            optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
-            loss='mse'
-        )
-
+        model.compile(optimizer=tf.keras.optimizers.Adam(0.00025), loss='huber')
         return model
 
     def update_replay_memory(self, transition):
