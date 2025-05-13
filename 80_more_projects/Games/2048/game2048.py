@@ -3,6 +3,7 @@ import copy
 from utils import colored_tile, transpose, merge_row, boards_differ
 from collections import defaultdict
 import numpy as np
+import tensorflow as tf
 
 
 INVALID_MOVE_PENALTY = -25

@@ -13,7 +13,7 @@ MIN_REPLAY_MEMORY_SIZE = 250  # Minimum number of steps in a memory to start tra
 MINIBATCH_SIZE = 32  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 MODEL_NAME = '2048'
-MIN_REWARD = 1500 # For model save
+MIN_REWARD = 250 # For model save
 MEMORY_FRACTION = 0.35
 
 # Environment settings
@@ -21,7 +21,7 @@ EPISODES = 350
 
 # Exploration settings
 epsilon = 1  # not a constant, going to be decayed
-EPSILON_DECAY = 0.0015
+EPSILON_DECAY = 0.005
 MIN_EPSILON = 0.0005
 
 #  Stats settings
@@ -32,6 +32,8 @@ class DQNAgent:
     def __init__(self, state_size, action_size):
         self.state_size = state_size
         self.action_size = action_size
+
+        self.input_shape = (state_size, state_size, 1)
 
         self.model = self.create_model()
 
@@ -44,14 +46,48 @@ class DQNAgent:
         self.transition_count = 0
 
     def create_model(self):
+        # Create a CNN model
         model = tf.keras.Sequential([
-            tf.keras.layers.Input(shape=(self.state_size,)),
+            # Input layer with shape (board_size, board_size, 1)
+            tf.keras.layers.InputLayer(input_shape=self.input_shape),
+
+            # First convolutional layer
+            tf.keras.layers.Conv2D(
+                filters=32,
+                kernel_size=(2, 2),
+                padding='same',
+                activation='relu'
+            ),
+
+            # Second convolutional layer
+            tf.keras.layers.Conv2D(
+                filters=64,
+                kernel_size=(2, 2),
+                padding='same',
+                activation='relu'
+            ),
+
+            # Third convolutional layer
+            tf.keras.layers.Conv2D(
+                filters=64,
+                kernel_size=(2, 2),
+                padding='same',
+                activation='relu'
+            ),
+
+            # Flatten the output to feed into dense layers
+            tf.keras.layers.Flatten(),
+
+            # Dense layers
             tf.keras.layers.Dense(64, activation='relu'),
-            tf.keras.layers.Dense(32, activation='relu'),
             tf.keras.layers.Dense(self.action_size, activation='linear')
         ])
-        model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
-                      loss='mse')
+
+        model.compile(
+            optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+            loss='mse'
+        )
+
         return model
 
     def update_replay_memory(self, transition):
@@ -107,14 +143,19 @@ class DQNAgent:
             self.target_update_counter = 0
 
     def get_qs(self, state):
-        state_reshaped = np.array(state).reshape(1, -1)
+        numpy_state = np.array(state)
+        state_reshaped = self.process_state(numpy_state)
+        state_reshaped = np.expand_dims(state_reshaped, axis=0)
         action_values = self.model.predict(state_reshaped, verbose=0)
         action_values = action_values[0]
         return action_values
         # return self.model.predict(np.array(state).reshape(1, -1), verbose=0)[0]
 
+    def process_state(self, state):
+        return state.reshape(game.BOARD_SIZE, game.BOARD_SIZE, 1)
 
-agent = DQNAgent(state_size=Game2048.BOARD_SIZE ** 2, action_size=4)
+
+agent = DQNAgent(state_size=Game2048.BOARD_SIZE, action_size=4)
 
 ep_rewards = [-100]
 reward = 0
