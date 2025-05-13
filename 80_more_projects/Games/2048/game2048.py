@@ -5,7 +5,7 @@ from collections import defaultdict
 import numpy as np
 
 
-INVALID_MOVE_PENALTY: float = -2.00
+INVALID_MOVE_PENALTY = -25
 class Game2048:
     """
     Simple implementation of the game 2048
@@ -155,15 +155,13 @@ class Game2048:
         """
 
         if self.is_game_over():
-            return self.get_state(), -100, True
+            return self.get_state(), -5, True
 
         old_score = 0
         before = copy.deepcopy(self.board)
         old_tile_count = sum(cell > 0 for row in before for cell in row)
         for i in range(self.BOARD_SIZE):
             old_score += sum(before[i])
-
-        reward = np.log2(old_score).round(3)
 
         action_map = {
             0: (self.move_up, 'up'),
@@ -174,6 +172,8 @@ class Game2048:
 
         move_fn, name = action_map[action]
         merged_board, merge_reward = move_fn(show=False, add_tile=False)
+        self.move_counter[name] += 1
+        self.move_counter['Sum'] += 1
 
         valid = boards_differ(merged_board, before)
         if valid:
@@ -181,10 +181,15 @@ class Game2048:
             self.add_new_tile()
         else:
             self.board = merged_board
-            merge_reward = INVALID_MOVE_PENALTY
+            self.move_counter['Invalid'] += 1
+            if self.move_counter['Invalid'] >= 5:
+                return self.get_state(), -150, True
+            else:
+                return self.get_state(), INVALID_MOVE_PENALTY, False
+
 
         new_tile_count = sum(cell > 0 for row in self.board for cell in row)
-        empty_bonus = 0.1 * (new_tile_count - old_tile_count)
+        empty_bonus = 0.1 * (new_tile_count - old_tile_count) + self.move_counter['Sum']
 
         reward = merge_reward + empty_bonus
 
@@ -195,8 +200,36 @@ class Game2048:
 
     def print_move_summary(self):
         print("Move count summary:")
-        for direction in ['up', 'down', 'left', 'right', 'Invalid']:
+        for direction in ['up', 'down', 'left', 'right', 'Invalid', 'Sum']:
             print(f"{direction.title()}: {self.move_counter[direction]}")
+
+
+    def get_valid_actions(self):
+        """
+        Returns a list of all actions (0=up, 1=down, 2=left, 3=right)
+        that would actually change the board.
+        """
+        valid_actions = []
+        # define your action→move-function mapping here
+        action_map = {
+            0: self.move_up,
+            1: self.move_down,
+            2: self.move_left,
+            3: self.move_right,
+        }
+
+        for action, move_fn in action_map.items():
+            # snapshot the board
+            board_before = copy.deepcopy(self.board)
+            # perform the move *without* spawning a new tile
+            new_board, _ = move_fn(show=False, add_tile=False)
+            # if the move changed the board, it's valid
+            if boards_differ(new_board, board_before):
+                valid_actions.append(action)
+            # restore original board for next test
+            self.board = board_before
+
+        return valid_actions
 
 
 if __name__ == '__main__':
