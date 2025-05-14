@@ -10,7 +10,7 @@ from copy import deepcopy
 
 DISCOUNT = 0.95
 REPLAY_MEMORY_SIZE = 50_000  # How many last steps to keep for model training
-MIN_REPLAY_MEMORY_SIZE = 250  # Minimum number of steps in a memory to start training
+MIN_REPLAY_MEMORY_SIZE = 2500  # Minimum number of steps in a memory to start training
 MINIBATCH_SIZE = 32  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 MODEL_NAME = '2048'
@@ -137,7 +137,7 @@ reward = 0
 
 if __name__ == '__main__':
     for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes', desc="Training Progress"):
-        print(f"Episode: {episode + 1}/{EPISODES}")
+        print(f"Episode: {episode - 1}/{EPISODES}")
         print(epsilon)
         # time.sleep(1)
 
