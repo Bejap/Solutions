@@ -11,7 +11,7 @@ class Game2048:
     """
     Simple implementation of the game 2048
     """
-    BOARD_SIZE = 3
+    BOARD_SIZE = 4
 
     def __init__(self):
         self.score = 0
@@ -115,7 +115,7 @@ class Game2048:
         print()
         for row in self.board:
             print("\t".join(colored_tile(x) for x in row))
-        print(f"Move: {self.moves}\n")
+        # print(f"Move: {self.moves}\n")
 
     def is_game_over(self):
         """

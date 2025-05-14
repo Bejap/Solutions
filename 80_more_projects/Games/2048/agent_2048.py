@@ -6,22 +6,23 @@ from tqdm import tqdm
 from game2048 import Game2048
 import time
 import matplotlib.pyplot as plt
+from copy import deepcopy
 
-DISCOUNT = 0.9
+DISCOUNT = 0.95
 REPLAY_MEMORY_SIZE = 50_000  # How many last steps to keep for model training
 MIN_REPLAY_MEMORY_SIZE = 250  # Minimum number of steps in a memory to start training
 MINIBATCH_SIZE = 32  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 MODEL_NAME = '2048'
-MIN_REWARD = 250 # For model save
+MIN_REWARD = 140 # For model save
 MEMORY_FRACTION = 0.35
 
 # Environment settings
-EPISODES = 350
+EPISODES = 350*7
 
 # Exploration settings
 epsilon = 1  # not a constant, going to be decayed
-EPSILON_DECAY = 0.005
+EPSILON_DECAY = 0.99
 MIN_EPSILON = 0.0005
 
 #  Stats settings
@@ -47,26 +48,13 @@ class DQNAgent:
 
     def create_model(self):
         model = tf.keras.Sequential([
-            tf.keras.layers.InputLayer(input_shape=self.input_shape),
-
-            # Improved convolutional layers
-            tf.keras.layers.Conv2D(128, (3, 3), padding='same', activation='relu'),
-            tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.Conv2D(256, (2, 2), padding='same', activation='relu'),
-            tf.keras.layers.BatchNormalization(),
-
-            # Spatial attention module
-            tf.keras.layers.GlobalAvgPool2D(),
-            tf.keras.layers.Reshape((1, 1, 256)),
-            tf.keras.layers.Conv2D(1, (1, 1), activation='sigmoid'),
-            tf.keras.layers.UpSampling2D(size=(self.state_size, self.state_size)),
-            tf.keras.layers.Multiply(),
-
-            tf.keras.layers.Flatten(),
-            tf.keras.layers.Dense(512, activation='relu'),
+            tf.keras.layers.Input(shape=(self.state_size,)),
+            tf.keras.layers.Dense(64, activation='relu'),
+            tf.keras.layers.Dense(32, activation='relu'),
             tf.keras.layers.Dense(self.action_size, activation='linear')
         ])
-        model.compile(optimizer=tf.keras.optimizers.Adam(0.00025), loss='huber')
+        model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+                      loss='mse')
         return model
 
     def update_replay_memory(self, transition):
@@ -76,6 +64,11 @@ class DQNAgent:
             self.replay_memory.append(transition)
         elif random.random() < 0.2:
             self.replay_memory.append(transition)
+        if transition[4] == True:
+            tran_copy = (transition[3], transition[1], -100, transition[3], True)
+            self.replay_memory.append(tran_copy)
+
+
 
     def train(self, terminal_state, step):
 
@@ -84,10 +77,12 @@ class DQNAgent:
 
         minibatch = random.sample(self.replay_memory, MINIBATCH_SIZE)
 
-        current_states = np.array([transition[0] for transition in minibatch])
+        current_states = [transition[0] for transition in minibatch]
+        current_states = np.array(current_states)
         current_qs_list = self.model.predict(current_states)
 
-        new_current_states = np.array([transition[3] for transition in minibatch])
+        new_current_states = [transition[3] for transition in minibatch]
+        new_current_states = np.array(new_current_states)
         future_qs_list = self.target_model.predict(new_current_states)
 
         X = []
@@ -123,8 +118,8 @@ class DQNAgent:
 
     def get_qs(self, state):
         numpy_state = np.array(state)
-        state_reshaped = self.process_state(numpy_state)
-        state_reshaped = np.expand_dims(state_reshaped, axis=0)
+        # state_reshaped = self.process_state(numpy_state)
+        state_reshaped = np.expand_dims(numpy_state, axis=0)
         action_values = self.model.predict(state_reshaped, verbose=0)
         action_values = action_values[0]
         return action_values
@@ -133,8 +128,9 @@ class DQNAgent:
     def process_state(self, state):
         return state.reshape(game.BOARD_SIZE, game.BOARD_SIZE, 1)
 
-
-agent = DQNAgent(state_size=Game2048.BOARD_SIZE, action_size=4)
+MODEL_PATH: str = 'models_3x3/2048__4941.70max_1364.14avg__123.70min__1747209497.keras'
+agent = DQNAgent(state_size=Game2048.BOARD_SIZE ** 2, action_size=4)
+# agent.model = tf.keras.models.load_model(MODEL_PATH)
 
 ep_rewards = [-100]
 reward = 0
@@ -166,6 +162,7 @@ if __name__ == '__main__':
                 action = np.random.choice(masked_actions)
 
             new_state, reward, done = game.step(action)
+            reward /= 100
             episode_reward += reward
 
             agent.update_replay_memory((current_state, action, reward, new_state, done))
@@ -179,13 +176,14 @@ if __name__ == '__main__':
             average_reward = sum(ep_rewards[-AGGREGATE_STATS_EVERY:]) / len(ep_rewards[-AGGREGATE_STATS_EVERY:])
             min_reward = min(ep_rewards[-AGGREGATE_STATS_EVERY:])
             max_reward = max(ep_rewards[-AGGREGATE_STATS_EVERY:])
-            # print(average_reward)
+            print(average_reward)
+            time.sleep(0.5)
 
             if average_reward >= MIN_REWARD:
-                agent.model.save(f'models_3x3/{MODEL_NAME}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.keras')
+                agent.model.save(f'models_4x4/{MODEL_NAME}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.keras')
 
         if epsilon > MIN_EPSILON:
-            epsilon -= EPSILON_DECAY
+            epsilon *= EPSILON_DECAY
             epsilon = max(MIN_EPSILON, epsilon)
 
         # print("\nMAX ", max(ep_rewards[-AGGREGATE_STATS_EVERY:]))
