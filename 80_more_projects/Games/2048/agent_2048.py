@@ -19,10 +19,10 @@ MIN_REWARD = 200 # For model save
 MEMORY_FRACTION = 0.35
 
 # Environment settings
-EPISODES = 250*7
+EPISODES = 175
 
 # Exploration settings
-epsilon = 1  # not a constant, going to be decayed
+epsilon = 0.5  # not a constant, going to be decayed
 EPSILON_DECAY = 0.995
 MIN_EPSILON = 0.0005
 
@@ -131,13 +131,14 @@ class DQNAgent:
         # return self.model.predict(np.array(state).reshape(1, -1), verbose=0)[0]
 
 
-MODEL_PATH: str = 'models_3x3/2048__4941.70max_1364.14avg__123.70min__1747209497.keras'
+MODEL_PATH: str = 'models_4x4/2048___773.42max__211.51avg___34.92min__1747299505.keras'
 agent = DQNAgent(state_size=Game2048.BOARD_SIZE ** 2, action_size=4)
-# agent.model = tf.keras.models.load_model(MODEL_PATH)
+agent.model = tf.keras.models.load_model(MODEL_PATH)
 
 ep_rewards = [-100]
 reward = 0
 best_avg_reward = -100
+avg_move = []
 
 if __name__ == '__main__':
     for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes', desc="Training Progress"):
@@ -193,6 +194,18 @@ if __name__ == '__main__':
             epsilon *= EPSILON_DECAY
             epsilon = max(MIN_EPSILON, epsilon)
 
+        up_count = game.move_counter['up']
+        up_avg = up_count / step
+        down_count = game.move_counter['down']
+        down_avg = down_count / step
+        left_count = game.move_counter['left']
+        left_avg = left_count / step
+        right_count = game.move_counter['right']
+        right_avg = right_count / step
+
+        ratio = abs(up_avg - down_avg) + abs(left_avg - right_avg)
+
+        avg_move.append(ratio)
         # print("\nMAX ", max(ep_rewards[-AGGREGATE_STATS_EVERY:]))
         # print("MIN ", min(ep_rewards[-AGGREGATE_STATS_EVERY:]))
         print(game.print_move_summary())
@@ -201,6 +214,7 @@ if __name__ == '__main__':
 
     plt.plot(ep_rewards[1:], label='Episode reward')  # [1:] to skip initial dummy -100
     rolling_mean = np.convolve(ep_rewards[1:], np.ones(10) / 10, mode='valid')
+    rolling_move_avg = np.convolve(avg_move[1:], np.ones(10) / 10, mode='valid')
     plt.plot(range(9, len(ep_rewards) - 1), rolling_mean, label='Rolling avg (10)')
     plt.xlabel('Episode')
     plt.ylabel('Reward')

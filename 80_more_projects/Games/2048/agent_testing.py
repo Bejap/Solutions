@@ -4,7 +4,7 @@ from agent_2048 import DQNAgent
 import tensorflow as tf
 import csv
 
-MODEL_PATH: str = 'models_4x4/2048___773.42max__211.51avg___34.92min__1747299505.keras'
+MODEL_PATH: str = 'models_4x4/2048___520.46max__210.23avg_-100.00min__1747305233.keras'
 agent = DQNAgent(state_size=game2048.Game2048.BOARD_SIZE, action_size=4)
 agent.model = tf.keras.models.load_model(MODEL_PATH)
 
