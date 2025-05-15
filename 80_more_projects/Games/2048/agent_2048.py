@@ -15,8 +15,9 @@ MIN_REPLAY_MEMORY_SIZE = 500  # Minimum number of steps in a memory to start tra
 MINIBATCH_SIZE = 32  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 MODEL_NAME = '2048'
-MIN_REWARD = 50 # For model save
+MIN_REWARD = 30 # For model save
 MEMORY_FRACTION = 0.35
+SAVE_EVERY = 75
 
 # Environment settings
 EPISODES = 175
@@ -177,6 +178,7 @@ if __name__ == '__main__':
             # print("\nThe agent accumulated this reward: ", reward)
 
         ep_rewards.append(episode_reward)
+
         if not episode % AGGREGATE_STATS_EVERY or episode == 1:
             average_reward = sum(ep_rewards[-AGGREGATE_STATS_EVERY:]) / len(ep_rewards[-AGGREGATE_STATS_EVERY:])
             min_reward = min(ep_rewards[-AGGREGATE_STATS_EVERY:])
@@ -184,11 +186,18 @@ if __name__ == '__main__':
             print(average_reward)
             time.sleep(0.5)
 
+            if not episode % SAVE_EVERY:
+                agent.model.save(
+                    f'models_3x3/{MODEL_NAME}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.keras'
+                )
+
+
             if average_reward >= MIN_REWARD and average_reward > best_avg_reward:
                 best_avg_reward = average_reward  # Update the best seen
                 agent.model.save(
                     f'models_3x3/{MODEL_NAME}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.keras'
                 )
+
 
         if epsilon > MIN_EPSILON:
             epsilon *= EPSILON_DECAY
