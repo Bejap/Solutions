@@ -1,12 +1,13 @@
-import tensorflow as tf
-import numpy as np
 import random
-from collections import deque
-from tqdm import tqdm
-from game2048 import Game2048
 import time
+from collections import deque
+
 import matplotlib.pyplot as plt
-from copy import deepcopy
+import numpy as np
+import tensorflow as tf
+from tqdm import tqdm
+
+from game2048 import Game2048
 
 DISCOUNT = 0.95
 REPLAY_MEMORY_SIZE = 50_000  # How many last steps to keep for model training
@@ -27,6 +28,10 @@ MIN_EPSILON = 0.0005
 
 #  Stats settings
 AGGREGATE_STATS_EVERY = 25  # episodes
+
+
+def process_state(state):
+    return state.reshape(game.BOARD_SIZE, game.BOARD_SIZE, 1)
 
 
 class DQNAgent:
@@ -64,13 +69,13 @@ class DQNAgent:
             self.replay_memory.append(transition)
         elif random.random() < 0.2:
             self.replay_memory.append(transition)
-        if transition[4] == True:
+        if transition[4]:
             tran_copy = (transition[3], transition[1], -100, transition[3], True)
             self.replay_memory.append(tran_copy)
 
 
 
-    def train(self, terminal_state, step):
+    def train(self, terminal_state):
 
         if len(self.replay_memory) < MIN_REPLAY_MEMORY_SIZE:
             return
@@ -88,21 +93,21 @@ class DQNAgent:
         X = []
         y = []
 
-        for index, (current_state, action, reward, new_current_state, done) in enumerate(minibatch):
+        for index, (cur_s, act, rew, next_s, done_flag) in enumerate(minibatch):
 
-            if not done:
+            if not done_flag:
                 max_future_q = np.max(future_qs_list[index])
-                new_q = reward + DISCOUNT * max_future_q
+                new_q = rew + DISCOUNT * max_future_q
             else:
-                new_q = reward
+                new_q = rew
 
             new_q = np.clip(new_q, -200, +200)
 
             current_qs = current_qs_list[index]
-            current_qs[action] = new_q
+            current_qs[act] = new_q
 
             # And append to our training data
-            X.append(current_state)
+            X.append(cur_s)
             y.append(current_qs)
 
         self.model.fit(np.array(X), np.array(y), batch_size=MINIBATCH_SIZE, verbose=0, shuffle=False if terminal_state else None)
@@ -125,8 +130,6 @@ class DQNAgent:
         return action_values
         # return self.model.predict(np.array(state).reshape(1, -1), verbose=0)[0]
 
-    def process_state(self, state):
-        return state.reshape(game.BOARD_SIZE, game.BOARD_SIZE, 1)
 
 MODEL_PATH: str = 'models_3x3/2048__4941.70max_1364.14avg__123.70min__1747209497.keras'
 agent = DQNAgent(state_size=Game2048.BOARD_SIZE ** 2, action_size=4)
@@ -166,7 +169,7 @@ if __name__ == '__main__':
             episode_reward += reward
 
             agent.update_replay_memory((current_state, action, reward, new_state, done))
-            agent.train(done, step)
+            agent.train(done)
             current_state = new_state
             step += 1
             # print("\nThe agent accumulated this reward: ", reward)

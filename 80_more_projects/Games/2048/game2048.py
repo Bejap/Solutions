@@ -1,12 +1,15 @@
-import random
 import copy
-from utils import colored_tile, transpose, merge_row, boards_differ
+import random
 from collections import defaultdict
-import numpy as np
-import tensorflow as tf
 
+import numpy as np
+
+from utils import colored_tile, transpose, merge_row, boards_differ
 
 INVALID_MOVE_PENALTY = -25
+
+
+# noinspection PyPackageRequirements
 class Game2048:
     """
     Simple implementation of the game 2048
@@ -20,6 +23,20 @@ class Game2048:
         self.add_new_tile()
         self.move_counter = defaultdict(int)
         self.moves = 0
+        self.top_tile = 0
+
+    def reset(self):
+        """
+        resets the board
+        """
+        self.board = [[0] * self.BOARD_SIZE for _ in range(self.BOARD_SIZE)]
+        self.add_new_tile()
+        self.add_new_tile()
+        self.moves = 0
+        self.print_board()
+        self.move_counter = defaultdict(int)
+        self.score = 0
+        self.top_tile = 0
 
     def add_new_tile(self):
         """
@@ -36,15 +53,11 @@ class Game2048:
         """
         if self.is_game_over():
             return None
-
-        score = 0
-
         before = copy.deepcopy(self.board)
 
         for i in range(self.BOARD_SIZE):
             row = self.board[i]
-            self.board[i], merge_rew = merge_row(row)
-            score += merge_rew
+            self.board[i] = merge_row(row)
 
         if boards_differ(self.board, before) and add_tile:
             self.add_new_tile()
@@ -52,7 +65,7 @@ class Game2048:
             self.print_board()
             # print("this is score ", self.score)
 
-        return self.board, score
+        return self.board
 
     def move_right(self, show=True, add_tile=True):
         """
@@ -62,14 +75,11 @@ class Game2048:
         if self.is_game_over():
             return None
 
-        score = 0
-
         before = copy.deepcopy(self.board)
         for i in range(self.BOARD_SIZE):
             row = self.board[i][::-1]  # reverse row
-            merged, merge_rew = merge_row(row)
+            merged = merge_row(row)
             self.board[i] = merged[::-1]  # reverse back
-            score += merge_rew
 
         if boards_differ(self.board, before) and add_tile:
             self.add_new_tile()
@@ -77,7 +87,7 @@ class Game2048:
             self.print_board()
             # print("this is score ", self.score)
 
-        return self.board, score
+        return self.board
 
     def move_up(self, show=True, add_tile=True):
         """
@@ -87,13 +97,13 @@ class Game2048:
             return None
 
         self.board = transpose(self.board)
-        self.board, board_rew = self.move_left(show=False, add_tile=add_tile)
+        self.board = self.move_left(show=False, add_tile=add_tile)
         self.board = transpose(self.board)
         if show:
             self.print_board()
         # print("this is score ", self.score)
 
-        return self.board, board_rew
+        return self.board
 
     def move_down(self, show=True, add_tile=True):
         """
@@ -102,13 +112,13 @@ class Game2048:
         if self.is_game_over():
             return None
         self.board = transpose(self.board)
-        self.board, board_rew = self.move_right(show=False, add_tile=add_tile)
+        self.board = self.move_right(show=False, add_tile=add_tile)
         self.board = transpose(self.board)
         if show:
             self.print_board()
         # print("this is score ", self.score)
 
-        return self.board, board_rew
+        return self.board
 
     def print_board(self):
         self.moves += 1
@@ -137,18 +147,6 @@ class Game2048:
 
         return True  # placeholder
 
-    def reset(self):
-        """
-        resets the board
-        """
-        self.board = [[0] * self.BOARD_SIZE for _ in range(self.BOARD_SIZE)]
-        self.add_new_tile()
-        self.add_new_tile()
-        self.moves = 0
-        self.print_board()
-        self.move_counter = defaultdict(int)
-        self.score = 0
-
     def step(self, action):
         """
         :param action: 0=up, 1=down, 2=left, 3=right
@@ -158,11 +156,8 @@ class Game2048:
         if self.is_game_over():
             return self.get_state(), -5, True
 
-        old_score = 0
         before = copy.deepcopy(self.board)
-        old_tile_count = sum(cell > 0 for row in before for cell in row)
-        for i in range(self.BOARD_SIZE):
-            old_score += sum(before[i])
+        old_board_max_score = max(cell for row in before for cell in row)
 
         action_map = {
             0: (self.move_up, 'up'),
@@ -172,7 +167,7 @@ class Game2048:
         }
 
         move_fn, name = action_map[action]
-        merged_board, merge_reward = move_fn(show=False, add_tile=False)
+        merged_board = move_fn(show=False, add_tile=False)
         self.move_counter[name] += 1
         self.move_counter['Sum'] += 1
 
@@ -189,10 +184,9 @@ class Game2048:
                 return self.get_state(), INVALID_MOVE_PENALTY, False
 
 
-        new_tile_count = sum(cell > 0 for row in self.board for cell in row)
-        empty_bonus = 0.1 * (new_tile_count - old_tile_count) + self.move_counter['Sum']
+        new_tile_max_score = max(cell for row in self.board for cell in row)
 
-        reward = merge_reward + empty_bonus
+        reward = (new_tile_max_score - old_board_max_score) + (self.moves / 2)
 
         return self.get_state(), reward, self.is_game_over()
 
@@ -223,7 +217,7 @@ class Game2048:
             # snapshot the board
             board_before = copy.deepcopy(self.board)
             # perform the move *without* spawning a new tile
-            new_board, _ = move_fn(show=False, add_tile=False)
+            new_board = move_fn(show=False, add_tile=False)
             # if the move changed the board, it's valid
             if boards_differ(new_board, board_before):
                 valid_actions.append(action)
