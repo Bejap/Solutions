@@ -15,15 +15,15 @@ MIN_REPLAY_MEMORY_SIZE = 2500  # Minimum number of steps in a memory to start tr
 MINIBATCH_SIZE = 32  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 MODEL_NAME = '2048'
-MIN_REWARD = 140 # For model save
+MIN_REWARD = 200 # For model save
 MEMORY_FRACTION = 0.35
 
 # Environment settings
-EPISODES = 350*7
+EPISODES = 250*7
 
 # Exploration settings
 epsilon = 1  # not a constant, going to be decayed
-EPSILON_DECAY = 0.99
+EPSILON_DECAY = 0.995
 MIN_EPSILON = 0.0005
 
 #  Stats settings
@@ -137,6 +137,7 @@ agent = DQNAgent(state_size=Game2048.BOARD_SIZE ** 2, action_size=4)
 
 ep_rewards = [-100]
 reward = 0
+best_avg_reward = -100
 
 if __name__ == '__main__':
     for episode in tqdm(range(1, EPISODES + 1), ascii=True, unit='episodes', desc="Training Progress"):
@@ -165,7 +166,7 @@ if __name__ == '__main__':
                 action = np.random.choice(masked_actions)
 
             new_state, reward, done = game.step(action)
-            reward /= 100
+            reward /= 10
             episode_reward += reward
 
             agent.update_replay_memory((current_state, action, reward, new_state, done))
@@ -182,8 +183,11 @@ if __name__ == '__main__':
             print(average_reward)
             time.sleep(0.5)
 
-            if average_reward >= MIN_REWARD:
-                agent.model.save(f'models_4x4/{MODEL_NAME}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.keras')
+            if average_reward >= MIN_REWARD and average_reward > best_avg_reward:
+                best_avg_reward = average_reward  # Update the best seen
+                agent.model.save(
+                    f'models_4x4/{MODEL_NAME}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.keras'
+                )
 
         if epsilon > MIN_EPSILON:
             epsilon *= EPSILON_DECAY

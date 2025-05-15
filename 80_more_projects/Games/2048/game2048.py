@@ -121,7 +121,6 @@ class Game2048:
         return self.board
 
     def print_board(self):
-        self.moves += 1
         print()
         for row in self.board:
             print("\t".join(colored_tile(x) for x in row))
@@ -148,6 +147,7 @@ class Game2048:
         return True  # placeholder
 
     def step(self, action):
+        self.moves += 1
         """
         :param action: 0=up, 1=down, 2=left, 3=right
         :returns: next_state, reward, done
@@ -186,7 +186,7 @@ class Game2048:
 
         new_tile_max_score = max(cell for row in self.board for cell in row)
 
-        reward = (new_tile_max_score - old_board_max_score) + (self.moves / 2)
+        reward = (new_tile_max_score - old_board_max_score) + (self.moves / 5)
 
         return self.get_state(), reward, self.is_game_over()
 
