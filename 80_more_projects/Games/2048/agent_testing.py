@@ -4,12 +4,12 @@ from agent_2048 import DQNAgent
 import tensorflow as tf
 import csv
 
-MODEL_PATH: str = 'models_4x4/2048___520.46max__210.23avg_-100.00min__1747305233.keras'
+MODEL_PATH: str = 'models_4x4/2048___740.96max__236.25avg___31.42min__1747312304.keras'
 agent = DQNAgent(state_size=game2048.Game2048.BOARD_SIZE, action_size=4)
 agent.model = tf.keras.models.load_model(MODEL_PATH)
 
 scores = []
-num_games = 5
+num_games = 15
 move_count = []
 move_counter_summaries = []
 

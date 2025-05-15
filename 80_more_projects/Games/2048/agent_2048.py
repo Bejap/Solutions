@@ -11,19 +11,19 @@ from game2048 import Game2048
 
 DISCOUNT = 0.95
 REPLAY_MEMORY_SIZE = 50_000  # How many last steps to keep for model training
-MIN_REPLAY_MEMORY_SIZE = 2500  # Minimum number of steps in a memory to start training
+MIN_REPLAY_MEMORY_SIZE = 500  # Minimum number of steps in a memory to start training
 MINIBATCH_SIZE = 32  # How many steps (samples) to use for training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 MODEL_NAME = '2048'
-MIN_REWARD = 200 # For model save
+MIN_REWARD = 50 # For model save
 MEMORY_FRACTION = 0.35
 
 # Environment settings
 EPISODES = 175
 
 # Exploration settings
-epsilon = 0.5  # not a constant, going to be decayed
-EPSILON_DECAY = 0.995
+epsilon = 1  # not a constant, going to be decayed
+EPSILON_DECAY = 0.97
 MIN_EPSILON = 0.0005
 
 #  Stats settings
@@ -131,9 +131,9 @@ class DQNAgent:
         # return self.model.predict(np.array(state).reshape(1, -1), verbose=0)[0]
 
 
-MODEL_PATH: str = 'models_4x4/2048___773.42max__211.51avg___34.92min__1747299505.keras'
+MODEL_PATH: str = 'models_4x4/2048___533.90max__220.72avg___54.12min__1747308178.keras'
 agent = DQNAgent(state_size=Game2048.BOARD_SIZE ** 2, action_size=4)
-agent.model = tf.keras.models.load_model(MODEL_PATH)
+# agent.model = tf.keras.models.load_model(MODEL_PATH)
 
 ep_rewards = [-100]
 reward = 0
@@ -187,7 +187,7 @@ if __name__ == '__main__':
             if average_reward >= MIN_REWARD and average_reward > best_avg_reward:
                 best_avg_reward = average_reward  # Update the best seen
                 agent.model.save(
-                    f'models_4x4/{MODEL_NAME}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.keras'
+                    f'models_3x3/{MODEL_NAME}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.keras'
                 )
 
         if epsilon > MIN_EPSILON:
@@ -215,7 +215,8 @@ if __name__ == '__main__':
     plt.plot(ep_rewards[1:], label='Episode reward')  # [1:] to skip initial dummy -100
     rolling_mean = np.convolve(ep_rewards[1:], np.ones(10) / 10, mode='valid')
     rolling_move_avg = np.convolve(avg_move[1:], np.ones(10) / 10, mode='valid')
-    plt.plot(range(9, len(ep_rewards) - 1), rolling_mean, label='Rolling avg (10)')
+    plt.plot(range(9, len(ep_rewards) - 1), rolling_mean, label='Rolling avg reward (10)')
+    plt.plot(range(9, len(avg_move) - 1), rolling_move_avg, label='Rolling avg move (10)')
     plt.xlabel('Episode')
     plt.ylabel('Reward')
     plt.legend()
