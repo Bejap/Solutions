@@ -188,6 +188,15 @@ class Game2048:
 
         reward = (new_tile_max_score - old_board_max_score) + (self.moves / 5)
 
+        corners = [
+            self.board[0][0],
+            self.board[0][-1],
+            self.board[-1][0],
+            self.board[-1][-1]
+        ]
+        if max(corners) == new_tile_max_score:
+            reward += self.moves
+
         return self.get_state(), reward, self.is_game_over()
 
     def get_state(self):
