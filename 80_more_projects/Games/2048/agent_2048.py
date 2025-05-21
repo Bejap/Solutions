@@ -190,7 +190,7 @@ if __name__ == '__main__':
                 )
 
             if average_reward >= MIN_REWARD and average_reward > best_avg_reward:
-                best_avg_reward = average_reward  # Update the best seen
+                best_avg_reward = average_reward
                 agent.model.save(
                     f'models_4x4/{MODEL_NAME}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.keras'
                 )
