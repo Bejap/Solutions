@@ -33,7 +33,7 @@ North and South agents learn to cooperate as partners on the same team. East and
 - `loading_model.py` - Load and use saved models
 - `model_plotting.py` - Visualization tools for training results
 - `game.py` - Simple game initialization script
-- `docs/` - Documentation folder with optimization suggestions and team structure info
+- `docs/` - Documentation folder with architecture details, optimization suggestions and team structure info
 
 ## Requirements
 
@@ -79,7 +79,9 @@ The DQN agent uses a multi-input neural network architecture that processes:
 - Tracking information (cards played throughout the game)
 - Score information
 
-The agent learns through experience replay and uses a target network for stable training.
+The agent learns through experience replay and uses a target network for stable training. The network includes dropout layers (rate=0.35) for regularization to prevent overfitting.
+
+For detailed architecture information, see `docs/architecture.md`.
 
 ## License
 

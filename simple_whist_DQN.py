@@ -40,11 +40,14 @@ class DQNAgent:
         combined = tf.keras.layers.Concatenate()([game_features, player_features, tracking_features, score_features])
 
         hidden1 = tf.keras.layers.Dense(128, activation='relu')(combined)
-        hidden2 = tf.keras.layers.Dense(64, activation='relu')(hidden1)
-        hidden3 = tf.keras.layers.Dense(32, activation='relu')(hidden2)
+        dropout1 = tf.keras.layers.Dropout(0.35)(hidden1)
+        hidden2 = tf.keras.layers.Dense(64, activation='relu')(dropout1)
+        dropout2 = tf.keras.layers.Dropout(0.35)(hidden2)
+        hidden3 = tf.keras.layers.Dense(32, activation='relu')(dropout2)
+        dropout3 = tf.keras.layers.Dropout(0.35)(hidden3)
 
         # Output layer for Q-values
-        output = tf.keras.layers.Dense(ARRAY_LENGTH, activation='linear')(hidden3)  # 13 possible card actions
+        output = tf.keras.layers.Dense(ARRAY_LENGTH, activation='linear')(dropout3)  # 13 possible card actions
 
         # Create model with multiple inputs
         model = tf.keras.Model(

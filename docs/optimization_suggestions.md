@@ -21,10 +21,11 @@ This document provides light and simple optimization suggestions for the Deep Si
 
 ## Model Architecture Optimizations
 
-### 4. Network Depth
-- **Current**: 3 hidden layers (128, 64, 32 units)
-- **Suggestion**: Try adding dropout layers (0.2-0.3) to prevent overfitting
-- **Impact**: Better generalization to unseen game states
+### 4. Dropout Regularization
+- **Status**: ✅ Implemented
+- **Current**: 3 hidden layers (128, 64, 32 units) with dropout rate of 0.35
+- **Implementation**: Dropout layers added after each hidden layer
+- **Impact**: Better generalization to unseen game states, prevents overfitting
 
 ### 5. Activation Functions
 - **Current**: ReLU activation
