@@ -10,9 +10,9 @@ This document provides light and simple optimization suggestions for the Deep Si
 - **Impact**: Better gradient estimates, faster convergence
 
 ### 2. Replay Memory Size
-- **Current**: `REPLAY_MEMORY_SIZE = 100`
-- **Suggestion**: Increase to 10,000+ for better experience diversity
-- **Impact**: More diverse training samples, better generalization
+- **Current**: `maxlen=100000` (actual replay memory size)
+- **Suggestion**: This is already good. Can adjust based on memory constraints
+- **Impact**: Current size provides good experience diversity
 
 ### 3. Learning Rate
 - **Current**: Default Adam optimizer learning rate (0.001)
