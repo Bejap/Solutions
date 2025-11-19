@@ -1,5 +1,6 @@
 from whist import Whist
 from simple_whist_DQN import DQNAgent
+from ew_strategy import EWStrategy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import numpy as np
@@ -19,6 +20,13 @@ if __name__ == "__main__":
 
     # Only train agents for North (0) and South (2) positions, which are on the same team
     agents = [DQNAgent((ARRAY_LENGTH * 7) + 4 + 4, gamma=GAMMA_VALUES[i]) if i in [0, 2] else None for i in range(4)]
+    
+    # Create EW strategy players for positions 1 (East) and 3 (West)
+    ew_strategies = {
+        1: EWStrategy(2, game),  # Player 2 is at position 1 (East)
+        3: EWStrategy(4, game)   # Player 4 is at position 3 (West)
+    }
+    
     all_episode_rewards = []
     for episode in tqdm(range(1, NUM_GAMES + 1), ascii=True, unit='episodes'):
         count = 0
@@ -61,8 +69,9 @@ if __name__ == "__main__":
                     else:
                         action = np.random.randint(action_space)
                 else:
-                    # Random action for East (1) and West (3)
-                    action = np.random.randint(action_space)
+                    # Use strategic play for East (1) and West (3)
+                    ew_strategy = ew_strategies[current_player_index]
+                    action = ew_strategy.choose_action(current_player, valid_actions)
 
                 new_state, rewards, done = game.step(action)
                 if rewards != 0:

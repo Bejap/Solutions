@@ -18,15 +18,16 @@ This is a machine learning project that implements a Deep Q-Network (DQN) agent 
 The game uses a traditional 4-player setup with two teams:
 
 - **Team 1 (North-South)**: Players at positions 0 and 2 - controlled by DQN agents
-- **Team 2 (East-West)**: Players at positions 1 and 3 - play randomly during training
+- **Team 2 (East-West)**: Players at positions 1 and 3 - use strategic rule-based play (80% of the time) with 20% randomness
 
-North and South agents learn to cooperate as partners on the same team. See `docs/team_structure.md` for more details.
+North and South agents learn to cooperate as partners on the same team. East and West provide consistent, challenging opponents using bridge-like playing strategies. See `docs/team_structure.md` for more details.
 
 ## Files
 
 - `whist_game.py` - Core game classes (Card, Deck, Player)
 - `whist.py` - Main Whist game environment implementation
 - `simple_whist_DQN.py` - DQN agent implementation
+- `ew_strategy.py` - Strategic rule-based player for East-West positions
 - `model_training.py` - Training loop for the DQN agents
 - `model_testing.py` - Test trained models
 - `loading_model.py` - Load and use saved models

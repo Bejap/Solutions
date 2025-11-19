@@ -1,6 +1,7 @@
 import numpy as np
 from whist import Whist
 from simple_whist_DQN import DQNAgent
+from ew_strategy import EWStrategy
 import tensorflow as tf
 
 
@@ -15,6 +16,13 @@ def evaluate_agent_vs_randoms(agent: DQNAgent, num_games=100):
     total_tricks = 0
     agent_tricks = 0
     env = Whist([1, 2, 3, 4])
+    
+    # Create EW strategy players
+    ew_strategies = {
+        1: EWStrategy(2, env),  # Player 2 is at position 1 (East)
+        3: EWStrategy(4, env)   # Player 4 is at position 3 (West)
+    }
+    
     count = 0
 
     for _ in range(num_games):
@@ -46,8 +54,9 @@ def evaluate_agent_vs_randoms(agent: DQNAgent, num_games=100):
                 else:
                     action = np.random.randint(action_space)
             else:
-                # Random action for East (1) and West (3)
-                action = np.random.randint(action_space)
+                # Use strategic play for East (1) and West (3)
+                ew_strategy = ew_strategies[current_player_index]
+                action = ew_strategy.choose_action(current_player, valid_actions)
 
             next_state, reward, done = env.step(action)
 

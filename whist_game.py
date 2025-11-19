@@ -53,10 +53,10 @@ class Player:
 
     def action(self, choice):
         self._sort_hand()
-        if 0 <= choice <= len(self.hand):
+        if 0 <= choice < len(self.hand):
             return self.hand[choice]
-
-        # self.last_played_card = self.hand[choice]
+        # Fallback to first card if choice is out of range
+        return self.hand[0] if self.hand else None
 
     def observe(self, player_id, action):
         if player_id != self.id:
