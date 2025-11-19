@@ -13,6 +13,15 @@ This is a machine learning project that implements a Deep Q-Network (DQN) agent 
 - **Visualization**: Plot training progress and model performance
 - **Testing**: Test trained agents against each other
 
+## Team Structure
+
+The game uses a traditional 4-player setup with two teams:
+
+- **Team 1 (North-South)**: Players at positions 0 and 2 - controlled by DQN agents
+- **Team 2 (East-West)**: Players at positions 1 and 3 - play randomly during training
+
+North and South agents learn to cooperate as partners on the same team. See `docs/team_structure.md` for more details.
+
 ## Files
 
 - `whist_game.py` - Core game classes (Card, Deck, Player)
@@ -23,6 +32,7 @@ This is a machine learning project that implements a Deep Q-Network (DQN) agent 
 - `loading_model.py` - Load and use saved models
 - `model_plotting.py` - Visualization tools for training results
 - `game.py` - Simple game initialization script
+- `docs/` - Documentation folder with optimization suggestions and team structure info
 
 ## Requirements
 

@@ -66,7 +66,6 @@ class DQNAgent:
             return
 
         minibatch = random.sample(self.replay_memory, MINIBATCH_SIZE)
-        print(minibatch)
 
         # Process all states in batch
         current_game_data = []

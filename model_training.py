@@ -16,15 +16,11 @@ SAVE_EVERY = 500
 if __name__ == "__main__":
     player_names = [1, 2, 3, 4]
     game = Whist(player_names)
-    # game.play()
 
-    # for name, hand in game.get_player_hand().items():
-    #     print(name, hand)
-    agents = [DQNAgent((ARRAY_LENGTH * 7) + 4 + 4, gamma=GAMMA_VALUES[i]) for i in range(4)]
+    # Only train agents for North (0) and South (2) positions, which are on the same team
+    agents = [DQNAgent((ARRAY_LENGTH * 7) + 4 + 4, gamma=GAMMA_VALUES[i]) if i in [0, 2] else None for i in range(4)]
     all_episode_rewards = []
     for episode in tqdm(range(1, NUM_GAMES + 1), ascii=True, unit='episodes'):
-        print(f'Episode: {episode}/{NUM_GAMES}')
-        print(epsilon)
         count = 0
         episode_rewards = [0, 0, 0, 0]
 
@@ -32,13 +28,12 @@ if __name__ == "__main__":
         episode_rewards = [0, 0, 0, 0]
         done = False
         pending_transitions = []
-        # print("\nThis is the current state", current_state)
 
         while count != ARRAY_LENGTH - 1:
             for _ in range(4):
                 current_player_index = game.current_player_idx
                 current_player = game.players[current_player_index]
-                agent = agents[current_player_index]  # Hent den rigtige agent
+                agent = agents[current_player_index]
                 current_state = game.get_init_state()
 
                 if count < 4:
@@ -49,79 +44,71 @@ if __name__ == "__main__":
                     action_space = 1
 
                 valid_actions = [i for i, value in enumerate(game.player_hand(current_player)) if value != 0]
-                # print(valid_actions)
-                a = np.random.random()
 
-                if a > epsilon:
-                    qs = agent.get_qs(current_state)
-                    if valid_actions:
-                        # Ensure that all card values are within the valid index range of qs
-                        print("This is agent", current_player)
-                        valid_q_values = [qs[card] for card in valid_actions if card < len(qs)]
-
-                        if valid_q_values:
-                            print("This is agent, q_values")
-                            action = np.argmax(valid_q_values)
-                            print(action)
-                            # Get the corresponding card
+                # Only use agent for North (0) and South (2)
+                if agent is not None:
+                    a = np.random.random()
+                    if a > epsilon:
+                        qs = agent.get_qs(current_state)
+                        if valid_actions:
+                            valid_q_values = [qs[card] for card in valid_actions if card < len(qs)]
+                            if valid_q_values:
+                                action = np.argmax(valid_q_values)
+                            else:
+                                action = np.random.randint(action_space)
                         else:
-                            print("This is agent, random")
-                            action = np.random.randint(action_space)  # Fallback in case of an issue
+                            action = np.random.randint(action_space)
                     else:
-                        action = np.random.randint(action_space)  # Default action
+                        action = np.random.randint(action_space)
                 else:
-                    action = np.random.randint(action_space)  # Pick a random valid card
+                    # Random action for East (1) and West (3)
+                    action = np.random.randint(action_space)
 
                 new_state, rewards, done = game.step(action)
-                if rewards != 0:  # Check if rewards is not None
+                if rewards != 0:
                     episode_rewards[current_player_index] += rewards[current_player_index]
 
-                # Optionally train after each step
-                if len(valid_actions) >= 1:
-                    pending_transitions.append((current_state, action, None, new_state, False))
-                else:
-                    print(f"Skipping training for player {current_player} at count {count} (only one valid action)")
-
-                # print("\nThis is the current state", current_state)
-
+                # Only store transitions for agents
+                if agent is not None and len(valid_actions) >= 1:
+                    pending_transitions.append((current_state, action, None, new_state, False, current_player_index))
 
                 if new_state is not None:
-                    current_state = new_state  # Update state
-
+                    current_state = new_state
 
                 if len(game.round_list) == 0:  # Trick is complete
-                    for i, (s, a, _, ns, _) in enumerate(pending_transitions):
+                    for s, a, _, ns, _, player_idx in pending_transitions:
                         if rewards != 0:
-                            reward_value = rewards[i]  # Get reward for this player
-                            # Now add to replay memory with correct reward
+                            reward_value = rewards[player_idx]
                         else:
                             reward_value = 0
 
                         if sum(game.score_array) == 3:
                             done = True
-                        agents[i].update_replay_memory((s, a, reward_value, ns, done))
-                        print(f"\nAgent {i}: State: {s}, Action: {a}, Reward: {reward_value}, Next State: {ns}, Done: {done}")
+                        
+                        if agents[player_idx] is not None:
+                            agents[player_idx].update_replay_memory((s, a, reward_value, ns, done))
 
                     for agent_idx, agent in enumerate(agents):
-                        agent.train(done, count)
+                        if agent is not None:
+                            agent.train(done, count)
 
                     pending_transitions = []
-                    # print(agent.model.input_shape)
                 count += 1
-                # print("\nThis is new state:     ", new_state)
 
                 if done:
                     break
         all_episode_rewards.append(np.mean(episode_rewards))
-        epsilon = max(MIN_EPSILON, epsilon * EPSILON_DECAY)  # Decay epsilon
+        epsilon = max(MIN_EPSILON, epsilon * EPSILON_DECAY)
 
-        for agent in agents:
-            agent.train(True, count)
+        for agent_idx, agent in enumerate(agents):
+            if agent is not None:
+                agent.train(True, count)
 
         if episode % SAVE_EVERY == 0:
             for i, agent in enumerate(agents):
-                agent.save_agent(f"Weights/agent_player_{i}_ep{episode}.weights.h5")
-                agent.save_full_agent(f"Models/full_agent_player_{i}_ep{episode}.keras")
+                if agent is not None:
+                    agent.save_agent(f"Weights/agent_player_{i}_ep{episode}.weights.h5")
+                    agent.save_full_agent(f"Models/full_agent_player_{i}_ep{episode}.keras")
 
     plt.plot(all_episode_rewards)
     plt.xlabel("Episode")
