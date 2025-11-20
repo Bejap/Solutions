@@ -55,7 +55,7 @@ class DQNAgent:
             outputs=output
         )
 
-        model.compile(optimizer='adam', loss='mse')
+        model.compile(optimizer='adam', loss='mse', jit_compile=False)
         return model
 
     def update_replay_memory(self, transition):
@@ -105,15 +105,15 @@ class DQNAgent:
         new_tracking_data = np.array(new_tracking_data)
         new_score_data = np.array(new_score_data)
 
-        # Get current Q values
-        current_qs_list = self.model.predict(
+        # Get current Q values (using direct call instead of predict to avoid retracing)
+        current_qs_list = self.model(
             [current_game_data, current_player_data, current_tracking_data, current_score_data],
             verbose=0,
             batch_size=MINIBATCH_SIZE
         )
 
         # Get future Q values
-        future_qs_list = self.target_model.predict(
+        future_qs_list = self.target_model(
             [new_game_data, new_player_data, new_tracking_data, new_score_data],
             verbose=0,
             batch_size=MINIBATCH_SIZE
