@@ -37,6 +37,7 @@ class Whist:
         self.player4_cards = [0] * ARRAY_LENGTH
         self.another_count = 0
         self.turn_counter = 0
+        self.next_player_is_winner = None  # Track if next player should be trick winner
         
         # Monitoring: Track reward statistics per episode
         self.reward_stats = {
@@ -106,6 +107,7 @@ class Whist:
         self.trick_winner = None
         self.turn_counter = 0
         self.score_array = [0] * 4
+        self.next_player_is_winner = None  # Reset winner tracking
         for player in self.players:
             player.resetting_observation()
 
@@ -208,7 +210,7 @@ class Whist:
             return None, 0, True
 
         card = current_player.action(action)
-        self.round_list.append((self.count % 4, card))
+        self.round_list.append((self.current_player_idx, card))
         self._count_cards_in_round()
         current_player.hand.remove(card)
         # print(f"Player {current_player.name} played {card}. Count: {self.count}")
@@ -246,7 +248,14 @@ class Whist:
                 logger.info(f"Game ended in a TIE. Score: {team_1_score}-{team_2_score}. "
                            f"No game-ending bonus/penalty.")
 
-        self.current_player_idx = (self.current_player_idx + 1) % 4
+        # Update current_player_idx
+        # If a trick was just completed, the winner should lead the next trick
+        if self.next_player_is_winner is not None:
+            self.current_player_idx = self.next_player_is_winner
+            self.next_player_is_winner = None
+        else:
+            # Normal increment for cards within a trick
+            self.current_player_idx = (self.current_player_idx + 1) % 4
 
         self.step_count += 1
         if self.turn_counter % 4 == 0 and self.turn_counter > 0:  # After exactly 4 cards
@@ -319,6 +328,12 @@ class Whist:
 
             # Reset round list for next trick
             self.round_list = []
+            
+            # IMPORTANT: Winner of the trick leads the next trick
+            # Set current_player_idx to winner so they start next trick
+            # Note: step() will increment it by 1, so we need to set it to winner-1
+            # But we need to handle this after the step increment
+            self.next_player_is_winner = winner_index
 
         # Structure the game state as a list for easier processing by the multi-input network
         game_state = [
