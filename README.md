@@ -35,7 +35,8 @@ North and South agents learn to cooperate as partners on the same team. East and
 - `whist.py` - Main Whist game environment implementation
 - `simple_whist_DQN.py` - DQN agent implementation
 - `ew_strategy.py` - Strategic rule-based player for East-West positions
-- `model_training.py` - Training loop for the DQN agents
+- `training_logic.py` - WhistTrainer class with training logic and helper functions
+- `model_training.py` - Entry point script to run training using WhistTrainer class
 - `model_testing.py` - Test trained models
 - `loading_model.py` - Load and use saved models
 - `model_plotting.py` - Visualization tools for training results
