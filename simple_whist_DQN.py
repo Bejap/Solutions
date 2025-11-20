@@ -5,8 +5,8 @@ import random
 
 GAMMA = 0.99
 REPLAY_MEMORY_SIZE = 100  # How many last steps to keep for model training
-MIN_REPLAY_MEMORY_SIZE = 1000  # Minimum number of steps in a memory to start training
-MINIBATCH_SIZE = 8  # How many steps (samples) to use for training
+MIN_REPLAY_MEMORY_SIZE = 100  # Reduced from 1000 to 100 for faster training startup
+MINIBATCH_SIZE = 32  # Increased from 8 to 32 for more stable and faster training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 MODEL_NAME = 'smalle'
 MIN_REWARD = -200  # For model save
@@ -55,7 +55,7 @@ class DQNAgent:
             outputs=output
         )
 
-        model.compile(optimizer='adam', loss='mse')
+        model.compile(optimizer='adam', loss='mse', jit_compile=False)
         return model
 
     def update_replay_memory(self, transition):
@@ -105,16 +105,18 @@ class DQNAgent:
         new_tracking_data = np.array(new_tracking_data)
         new_score_data = np.array(new_score_data)
 
-        # Get current Q values
-        current_qs_list = self.model.predict(
+        # Get current Q values (using direct call instead of predict to avoid retracing)
+        current_qs_list = self.model(
             [current_game_data, current_player_data, current_tracking_data, current_score_data],
-            verbose=0
+            verbose=0,
+            batch_size=MINIBATCH_SIZE
         )
 
         # Get future Q values
-        future_qs_list = self.target_model.predict(
+        future_qs_list = self.target_model(
             [new_game_data, new_player_data, new_tracking_data, new_score_data],
-            verbose=0
+            verbose=0,
+            batch_size=MINIBATCH_SIZE
         )
 
         X_game = []
@@ -178,10 +180,11 @@ class DQNAgent:
         tracking_data = np.expand_dims(tracking_data, axis=0)
         score_data = np.expand_dims(score_data, axis=0)
 
-        # Predict using all inputs
+        # Predict using all inputs with batch_size
         return self.model.predict(
             [game_data, player_data, tracking_data, score_data],
-            verbose=0
+            verbose=0,
+            batch_size=1
         )[0]
 
     def predict_action(self, state):
