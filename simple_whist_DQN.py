@@ -11,7 +11,7 @@ UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 MODEL_NAME = 'smalle'
 MIN_REWARD = -200  # For model save
 MEMORY_FRACTION = 0.35
-ARRAY_LENGTH = 7  # Changed from 13 to 7 for 7-card game
+ARRAY_LENGTH = 13  # Changed from 13 to 7 for 7-card game
 
 class DQNAgent:
     def __init__(self, input_size: int, gamma):
@@ -27,13 +27,11 @@ class DQNAgent:
         self.target_update_counter = 0
 
     def create_model(self):
-        # Update input shapes for 7-card game
-        game_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH * 2,))  # 14 instead of 26
-        player_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH + 4,))  # 11 instead of 17
-        tracking_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH * 4,))  # 28 instead of 52
+        game_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH * 2,))  
+        player_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH + 4,))  
+        tracking_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH * 4,))  
         score_input = tf.keras.layers.Input(shape=(4,))
 
-        # Adjust hidden layer sizes for smaller input
         game_features = tf.keras.layers.Dense(ARRAY_LENGTH * 2, activation='relu')(game_input)
         player_features = tf.keras.layers.Dense(ARRAY_LENGTH + 4, activation='relu')(player_input)
         tracking_features = tf.keras.layers.Dense(ARRAY_LENGTH * 4, activation='relu')(tracking_input)
@@ -42,12 +40,11 @@ class DQNAgent:
         combined = tf.keras.layers.Concatenate()([game_features, player_features, tracking_features, score_features])
 
         # Smaller network for faster training
-        hidden1 = tf.keras.layers.Dense(64, activation='relu')(combined)  # Reduced from 128
-        dropout1 = tf.keras.layers.Dropout(0.25)(hidden1)  # Reduced dropout
-        hidden2 = tf.keras.layers.Dense(32, activation='relu')(dropout1)  # Reduced from 64
-        dropout2 = tf.keras.layers.Dropout(0.25)(hidden2)  # Reduced dropout
+        hidden1 = tf.keras.layers.Dense(128, activation='relu')(combined)  
+        dropout1 = tf.keras.layers.Dropout(0.25)(hidden1)  
+        hidden2 = tf.keras.layers.Dense(64, activation='relu')(dropout1)  
+        dropout2 = tf.keras.layers.Dropout(0.25)(hidden2)  
 
-        # Output layer for Q-values (7 cards instead of 13)
         output = tf.keras.layers.Dense(ARRAY_LENGTH, activation='linear')(dropout2)
 
         # Create model with multiple inputs

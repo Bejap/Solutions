@@ -10,7 +10,7 @@ NUM_GAMES = 1000
 epsilon = 1
 EPSILON_DECAY = 0.996
 MIN_EPSILON = 0.001
-ARRAY_LENGTH = 7  # Changed from 13 to 7 for 7-card game
+ARRAY_LENGTH = 13  
 GAMMA_VALUES = [0.99, 0.95, 0.90, 0.85]
 SAVE_EVERY = 500
 
