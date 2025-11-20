@@ -29,7 +29,7 @@ if __name__ == "__main__":
     
     all_episode_rewards = []
     for episode in tqdm(range(1, NUM_GAMES + 1), ascii=True, unit='episodes'):
-        count = 0
+        trick_count = 0
         episode_rewards = [0, 0, 0, 0]
 
         start_state = game.reset()
@@ -37,7 +37,7 @@ if __name__ == "__main__":
         done = False
         pending_transitions = []
 
-        while count != ARRAY_LENGTH:  # 7 tricks for 7-card game
+        while trick_count < ARRAY_LENGTH and not done:  # 7 tricks for 7-card game
             for _ in range(4):
                 current_player_index = game.current_player_idx
                 current_player = game.players[current_player_index]
@@ -83,13 +83,14 @@ if __name__ == "__main__":
                     current_state = new_state
 
                 if len(game.round_list) == 0:  # Trick is complete
+                    trick_count += 1
                     for s, a, _, ns, _, player_idx in pending_transitions:
                         if rewards != 0:
                             reward_value = rewards[player_idx]
                         else:
                             reward_value = 0
 
-                        if sum(game.score_array) == ARRAY_LENGTH:  # All 7 tricks completed
+                        if sum(game.score_array) >= ARRAY_LENGTH:  # All 7 tricks completed
                             done = True
                         
                         if agents[player_idx] is not None:
@@ -97,10 +98,9 @@ if __name__ == "__main__":
 
                     for agent_idx, agent in enumerate(agents):
                         if agent is not None:
-                            agent.train(done, count)
+                            agent.train(done, trick_count)
 
                     pending_transitions = []
-                count += 1
 
                 if done:
                     break
@@ -109,7 +109,7 @@ if __name__ == "__main__":
 
         for agent_idx, agent in enumerate(agents):
             if agent is not None:
-                agent.train(True, count)
+                agent.train(True, trick_count)
 
         if episode % SAVE_EVERY == 0:
             for i, agent in enumerate(agents):
