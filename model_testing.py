@@ -3,6 +3,7 @@ from whist import Whist
 from simple_whist_DQN import DQNAgent
 from ew_strategy import EWStrategy
 import tensorflow as tf
+from constants import STATE_SIZE, ACTION_SIZE
 
 
 def evaluate_agent_vs_randoms(agent: DQNAgent, num_games=100):
@@ -76,8 +77,5 @@ def evaluate_agent_vs_randoms(agent: DQNAgent, num_games=100):
     print(f"\n🎯 Evaluated over {num_games} games:")
     print(f" - Agent won {wins} out of {total_tricks} tricks")
     print(f" - Agent was best in {wins} of the games ({wins / num_games * 100:.1f}%)")
-
-STATE_SIZE = 91
-ACTION_SIZE = 13
 
 evaluate_agent_vs_randoms(None, num_games=100)

@@ -1,15 +1,24 @@
 from training_logic import WhistTrainer
+from constants import (
+    DEFAULT_NUM_GAMES,
+    DEFAULT_EPSILON,
+    DEFAULT_EPSILON_DECAY,
+    DEFAULT_MIN_EPSILON,
+    ARRAY_LENGTH,
+    DEFAULT_GAMMA_VALUES,
+    DEFAULT_SAVE_EVERY
+)
 
 if __name__ == "__main__":
     # Create and configure the trainer
     trainer = WhistTrainer(
-        num_games=1000,
-        epsilon=1.0,
-        epsilon_decay=0.996,
-        min_epsilon=0.001,
-        array_length=13,
-        gamma_values=[0.99, 0.95, 0.90, 0.85],
-        save_every=500
+        num_games=DEFAULT_NUM_GAMES,
+        epsilon=DEFAULT_EPSILON,
+        epsilon_decay=DEFAULT_EPSILON_DECAY,
+        min_epsilon=DEFAULT_MIN_EPSILON,
+        array_length=ARRAY_LENGTH,
+        gamma_values=DEFAULT_GAMMA_VALUES,
+        save_every=DEFAULT_SAVE_EVERY
     )
     
     # Run the training

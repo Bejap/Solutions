@@ -4,6 +4,19 @@ from ew_strategy import EWStrategy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import numpy as np
+from constants import (
+    DEFAULT_NUM_GAMES,
+    DEFAULT_EPSILON,
+    DEFAULT_EPSILON_DECAY,
+    DEFAULT_MIN_EPSILON,
+    ARRAY_LENGTH,
+    DEFAULT_GAMMA_VALUES,
+    DEFAULT_SAVE_EVERY,
+    NUM_PLAYERS,
+    DQN_AGENT_POSITIONS,
+    EAST,
+    WEST
+)
 
 
 def _as_list(actions):
@@ -70,8 +83,9 @@ def _best_valid_action_from_qs(qs: np.ndarray, valid_actions):
 class WhistTrainer:
     """Trainer class for Whist DQN agents."""
     
-    def __init__(self, num_games=1000, epsilon=1.0, epsilon_decay=0.996, 
-                 min_epsilon=0.001, array_length=13, gamma_values=None, save_every=500):
+    def __init__(self, num_games=DEFAULT_NUM_GAMES, epsilon=DEFAULT_EPSILON, 
+                 epsilon_decay=DEFAULT_EPSILON_DECAY, min_epsilon=DEFAULT_MIN_EPSILON, 
+                 array_length=ARRAY_LENGTH, gamma_values=None, save_every=DEFAULT_SAVE_EVERY):
         """
         Initialize the Whist trainer.
         
@@ -89,7 +103,7 @@ class WhistTrainer:
         self.EPSILON_DECAY = epsilon_decay
         self.MIN_EPSILON = min_epsilon
         self.ARRAY_LENGTH = array_length
-        self.GAMMA_VALUES = gamma_values if gamma_values is not None else [0.99, 0.95, 0.90, 0.85]
+        self.GAMMA_VALUES = gamma_values if gamma_values is not None else DEFAULT_GAMMA_VALUES
         self.SAVE_EVERY = save_every
         
         # Initialize game and agents
@@ -98,14 +112,14 @@ class WhistTrainer:
         
         # Only train agents for North (0) and South (2) positions, which are on the same team
         self.agents = [
-            DQNAgent((self.ARRAY_LENGTH * 7) + 4 + 4, gamma=self.GAMMA_VALUES[i]) if i in [0, 2] else None 
-            for i in range(4)
+            DQNAgent((self.ARRAY_LENGTH * 7) + 4 + 4, gamma=self.GAMMA_VALUES[i]) if i in DQN_AGENT_POSITIONS else None 
+            for i in range(NUM_PLAYERS)
         ]
         
         # Create EW strategy players for positions 1 (East) and 3 (West)
         self.ew_strategies = {
-            1: EWStrategy(2, self.game),  # Player 2 is at position 1 (East)
-            3: EWStrategy(4, self.game)   # Player 4 is at position 3 (West)
+            EAST: EWStrategy(2, self.game),  # Player 2 is at position 1 (East)
+            WEST: EWStrategy(4, self.game)   # Player 4 is at position 3 (West)
         }
         
         self.all_episode_rewards = []

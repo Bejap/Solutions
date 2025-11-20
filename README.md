@@ -35,6 +35,7 @@ North and South agents learn to cooperate as partners on the same team. East and
 - `whist.py` - Main Whist game environment implementation
 - `simple_whist_DQN.py` - DQN agent implementation
 - `ew_strategy.py` - Strategic rule-based player for East-West positions
+- `constants.py` - Centralized constants for game configuration, training hyperparameters, and model architecture
 - `training_logic.py` - WhistTrainer class with training logic and helper functions
 - `model_training.py` - Entry point script to run training using WhistTrainer class
 - `model_testing.py` - Test trained models
@@ -57,6 +58,27 @@ North and South agents learn to cooperate as partners on the same team. East and
 
 ```bash
 pip install -r requirements.txt
+```
+
+## Configuration
+
+All project constants are centralized in `constants.py`, including:
+
+- **Game Configuration**: Number of cards (13), player positions, team setup
+- **Training Hyperparameters**: Learning rates, epsilon decay, gamma values
+- **DQN Parameters**: Replay memory size, batch size, update frequency
+- **Model Architecture**: Network layer sizes, dropout rates, input dimensions
+
+To customize training behavior, modify values in `constants.py` or pass parameters when instantiating `WhistTrainer`:
+
+```python
+from training_logic import WhistTrainer
+
+trainer = WhistTrainer(
+    num_games=2000,        # Override default
+    epsilon=0.95,          # Custom starting exploration
+    save_every=1000        # Save less frequently
+)
 ```
 
 ## Usage
