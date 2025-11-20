@@ -55,7 +55,7 @@ class DQNAgent:
             outputs=output
         )
 
-        model.compile(optimizer='adam', loss='mse')
+        model.compile(optimizer='adam', loss='mse', jit_compile=False)
         return model
 
     def update_replay_memory(self, transition):
@@ -105,17 +105,17 @@ class DQNAgent:
         new_tracking_data = np.array(new_tracking_data)
         new_score_data = np.array(new_score_data)
 
-        # Get current Q values
-        current_qs_list = self.model.predict(
+        # Get current Q values (using direct call instead of predict to avoid retracing)
+        current_qs_list = self.model(
             [current_game_data, current_player_data, current_tracking_data, current_score_data],
-            verbose=0
-        )
+            training=False
+        ).numpy()
 
         # Get future Q values
-        future_qs_list = self.target_model.predict(
+        future_qs_list = self.target_model(
             [new_game_data, new_player_data, new_tracking_data, new_score_data],
-            verbose=0
-        )
+            training=False
+        ).numpy()
 
         X_game = []
         X_player = []
@@ -178,11 +178,11 @@ class DQNAgent:
         tracking_data = np.expand_dims(tracking_data, axis=0)
         score_data = np.expand_dims(score_data, axis=0)
 
-        # Predict using all inputs
-        return self.model.predict(
+        # Predict using all inputs (direct call to avoid retracing)
+        return self.model(
             [game_data, player_data, tracking_data, score_data],
-            verbose=0
-        )[0]
+            training=False
+        ).numpy()[0]
 
     def predict_action(self, state):
         state_input = self._flat_the_state(state)  # Ensure correct shape
