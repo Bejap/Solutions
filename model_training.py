@@ -67,34 +67,46 @@ if __name__ == "__main__":
                 
                 # Calculate action_space as number of cards in hand (dynamic)
                 action_space = len(current_player.hand)
+                
+                # Track decision type and certainty for logging
+                decision_type = 'unknown'
+                certainty = None
 
                 # Only use agent for North (0) and South (2)
                 if agent is not None:
                     a = np.random.random()
                     if a > epsilon:
+                        # Agent making a decision based on Q-values
                         qs = agent.get_qs(current_state)
                         if valid_actions:
                             valid_q_values = [(card, qs[card]) for card in valid_actions if card < len(qs)]
                             if valid_q_values:
                                 # Get the card index with highest Q-value
-                                action = max(valid_q_values, key=lambda x: x[1])[0]
+                                action, q_value = max(valid_q_values, key=lambda x: x[1])
+                                decision_type = 'agent'
+                                certainty = float(q_value)
                             else:
                                 action = np.random.randint(action_space) if action_space > 0 else 0
+                                decision_type = 'random'
                         else:
                             action = np.random.randint(action_space) if action_space > 0 else 0
+                            decision_type = 'random'
                     else:
+                        # Random exploration
                         action = np.random.randint(action_space) if action_space > 0 else 0
+                        decision_type = 'random'
                 else:
                     # Use strategic play for East (1) and West (3)
                     ew_strategy = ew_strategies[current_player_index]
                     action = ew_strategy.choose_action(current_player, valid_actions)
+                    decision_type = 'strategy'
 
                 # Peek at the card that will be played (don't remove it yet)
                 if should_log_game and 0 <= action < len(current_player.hand):
                     # Sort hand to match what action() will return
                     current_player._sort_hand()
                     played_card = current_player.hand[action]
-                    game_logger.log_card_played(current_player_index, played_card)
+                    game_logger.log_card_played(current_player_index, played_card, decision_type, certainty)
 
                 new_state, rewards, done = game.step(action)
                 if rewards != 0:

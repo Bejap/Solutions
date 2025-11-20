@@ -43,8 +43,22 @@ def test_game_logger():
             current_player._sort_hand()
             card = current_player.hand[0]
             
-            # Log the card
-            logger.log_card_played(game.current_player_idx, card)
+            # Simulate decision type based on player position
+            player_idx = game.current_player_idx
+            if player_idx in [0, 2]:  # Agents
+                # Alternate between agent decision and random
+                if trick % 2 == 0:
+                    decision_type = 'agent'
+                    certainty = 0.8 + (trick * 0.05)  # Increasing confidence
+                else:
+                    decision_type = 'random'
+                    certainty = None
+            else:  # Strategy players
+                decision_type = 'strategy'
+                certainty = None
+            
+            # Log the card with decision info
+            logger.log_card_played(game.current_player_idx, card, decision_type, certainty)
             
             # Execute the move
             game.step(0)
@@ -84,7 +98,11 @@ def test_game_logger():
     assert "N:" in log_content or "E:" in log_content or "S:" in log_content or "W:" in log_content, "ERROR: Missing card plays"
     assert "Final Scores:" in log_content, "ERROR: Missing final scores"
     
+    # Verify decision information is present
+    assert "[Agent:" in log_content or "[Random" in log_content or "[Strategy]" in log_content, "ERROR: Missing decision information"
+    
     print("\n✓ All format checks passed")
+    print("✓ Decision information included in logs")
     print("✓ Game logger test completed successfully!")
     
     # Cleanup

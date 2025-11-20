@@ -65,14 +65,16 @@ class GameLogger:
         
         self.current_game_log.append("")  # Blank line after hands
     
-    def log_card_played(self, player_idx, card):
+    def log_card_played(self, player_idx, card, decision_type='unknown', certainty=None):
         """Log a card played in the current trick.
         
         Args:
             player_idx: Index of the player (0-3)
             card: Card object that was played
+            decision_type: Type of decision - 'agent', 'random', 'strategy'
+            certainty: For agent decisions, the Q-value confidence (float)
         """
-        self.current_trick.append((player_idx, card))
+        self.current_trick.append((player_idx, card, decision_type, certainty))
         
         # If trick is complete (4 cards played), log it
         if len(self.current_trick) == 4:
@@ -84,9 +86,20 @@ class GameLogger:
         self.current_game_log.append(f"Trick {self.trick_number}:")
         
         # Log cards in the order they were played
-        for player_idx, card in self.current_trick:
+        for player_idx, card, decision_type, certainty in self.current_trick:
             position_short = self.POSITION_SHORT[player_idx]
-            self.current_game_log.append(f"  {position_short}: {card}")
+            
+            # Format decision info
+            if decision_type == 'agent' and certainty is not None:
+                decision_info = f" [Agent: Q={certainty:.3f}]"
+            elif decision_type == 'random':
+                decision_info = " [Random exploration]"
+            elif decision_type == 'strategy':
+                decision_info = " [Strategy]"
+            else:
+                decision_info = ""
+            
+            self.current_game_log.append(f"  {position_short}: {card}{decision_info}")
         
         self.current_game_log.append("")  # Blank line after trick
         
