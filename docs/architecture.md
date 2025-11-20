@@ -100,6 +100,17 @@ The network uses:
 - **Target Network**: Separate network for stable Q-value targets
 - **Epsilon-Greedy Exploration**: Balances exploration and exploitation
 - **Mini-batch Training**: Processes 8 samples at a time (MINIBATCH_SIZE = 8)
+- **Direct Model Calls**: Uses `model()` instead of `model.predict()` to avoid TensorFlow retracing overhead
+- **JIT Compilation Disabled**: Set `jit_compile=False` to prevent excessive retracing with dropout layers
+
+## Performance Optimizations
+
+### Avoiding TensorFlow Retracing
+The implementation uses direct model calls (`model(inputs, training=False).numpy()`) instead of `model.predict()` during training:
+- Significantly faster during training loops
+- Eliminates expensive tf.function retracing warnings
+- Explicitly controls training mode for proper dropout behavior
+- Maintains same accuracy with better performance
 
 ## Future Improvements
 
