@@ -1,6 +1,7 @@
 import whist_game as wg
 import numpy as np
 import logging
+import random
 
 EPISODES = 250
 
@@ -101,7 +102,17 @@ class Whist:
         # for i, player in enumerate(self.players):
         #     player.hand = self.deck[i * 3:(i + 1) * 3]
 
-    def reset(self):
+    def reset(self, seed=None):
+        """Reset the game state.
+        
+        Args:
+            seed: Optional random seed for reproducible games (for benchmarking)
+        """
+        # Set seed if provided (for reproducible benchmark games)
+        if seed is not None:
+            random.seed(seed)
+            np.random.seed(seed)
+        
         self.deck = wg.Deck()
         self.deck.shuffle()
         self.trick_winner = None

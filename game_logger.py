@@ -37,7 +37,7 @@ class GameLogger:
         # Create log directory if it doesn't exist
         os.makedirs(self.log_dir, exist_ok=True)
     
-    def start_game(self, episode_number, starting_player_idx, players, trump_suit='Spades'):
+    def start_game(self, episode_number, starting_player_idx, players, trump_suit='Spades', is_benchmark=False):
         """Start logging a new game.
         
         Args:
@@ -45,6 +45,7 @@ class GameLogger:
             starting_player_idx: Index of the player who starts (0-3)
             players: List of player objects with hand attribute
             trump_suit: The trump suit for this game (default: 'Spades')
+            is_benchmark: Whether this is a fixed-seed benchmark game
         """
         self.current_game_log = []
         self.starting_player_idx = starting_player_idx
@@ -54,7 +55,8 @@ class GameLogger:
         self.trump_suit = trump_suit
         
         # Log header
-        self.current_game_log.append(f"=== Game {episode_number} ===")
+        benchmark_marker = " [BENCHMARK - Fixed Seed]" if is_benchmark else ""
+        self.current_game_log.append(f"=== Game {episode_number}{benchmark_marker} ===")
         self.current_game_log.append(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         self.current_game_log.append(f"Trump: {trump_suit}")
         self.current_game_log.append(f"Starting player: {self.POSITION_NAMES[starting_player_idx]}\n")
