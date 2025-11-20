@@ -1,3 +1,4 @@
+import re
 from whist import Whist
 from simple_whist_DQN import DQNAgent
 from ew_strategy import EWStrategy
@@ -13,6 +14,83 @@ MIN_EPSILON = 0.001
 ARRAY_LENGTH = 13
 GAMMA_VALUES = [0.99, 0.95, 0.90, 0.85]
 SAVE_EVERY = 500
+
+def select_action(
+        agent,
+        current_state,
+        epsilon: float,
+        action_space: int,
+        valid_actions,
+        current_player,
+        current_player_index,
+        ) -> int:
+    if agent is not None:
+        return choose_agent_action(agent, current_state, epsilon, action_space, valid_actions)
+
+    else:
+        # Use strategic play for East (1) and West (3)
+        ew_strategy = ew_strategies[current_player_index]
+        action = ew_strategy.choose_action(current_player, valid_actions)
+        return action
+
+def _as_list(actions):
+    """Return a list copy of actions if not None, otherwise None."""
+    if actions is None:
+        return None
+    return list(actions)
+
+def choose_agent_action(
+    agent,
+    current_state,
+    epsilon: float,
+    action_space: int,
+    valid_actions,
+) -> int:
+    if agent is None:
+        raise ValueError("agent must not be None for choose_agent_action")
+    if action_space <= 0:
+        raise ValueError("action_space must be a positive integer")
+    
+    if np.random.random() > epsilon:
+        # Exploit
+        qs = agent.get_qs(current_state)
+        best = _best_valid_action_from_qs(qs, valid_actions)
+        if best is not None:
+            return best
+            # No valid action in range -> fallback to uniform random
+        return _random_action(action_space, valid_actions=None)
+                    
+    else:
+        # Explore: prefer sampling among valid_actions if present
+        return _random_action(action_space, valid_actions=valid_actions)
+
+
+def _random_action(action_space: int, valid_actions) -> int:
+    """
+    Sample a random action.
+
+    If valid_actions is provided and non-empty, sample from it. Otherwise sample uniformly
+    from [0, action_space).
+    """
+    if valid_actions:
+        valid_list = _as_list(valid_actions)
+        return int(np.random.choice(valid_list))
+    # fallback to uniform sample over action_space
+    return int(np.random.randint(action_space))
+
+def _best_valid_action_from_qs(qs: np.ndarray, valid_actions):
+    """
+    Given Q-values array and an iterable of valid action indices, return the valid action index
+    with the highest Q-value. If no valid actions or none in range, return None.
+    """
+    if not valid_actions:
+        return None
+    valid_list = [int(a) for a in valid_actions if 0 <= int(a) < len(qs)]
+    if not valid_list:
+        return None
+    # Choose the action (original id) with max Q-value
+    best_action = max(valid_list, key=lambda a: qs[a])
+    return int(best_action)
 
 if __name__ == "__main__":
     player_names = [1, 2, 3, 4]
@@ -47,25 +125,7 @@ if __name__ == "__main__":
 
                 valid_actions = [i for i, value in enumerate(game.player_hand(current_player)) if value != 0]
 
-                # Only use agent for North (0) and South (2)
-                if agent is not None:
-                    a = np.random.random()
-                    if a > epsilon:
-                        qs = agent.get_qs(current_state)
-                        if valid_actions:
-                            valid_q_values = [qs[card] for card in valid_actions if card < len(qs)]
-                            if valid_q_values:
-                                action = np.argmax(valid_q_values)
-                            else:
-                                action = np.random.randint(action_space)
-                        else:
-                            action = np.random.randint(action_space)
-                    else:
-                        action = np.random.randint(action_space)
-                else:
-                    # Use strategic play for East (1) and West (3)
-                    ew_strategy = ew_strategies[current_player_index]
-                    action = ew_strategy.choose_action(current_player, valid_actions)
+                action = select_action(agent, current_state, epsilon, action_space, valid_actions, current_player, current_player_index)
 
                 new_state, rewards, done = game.step(action)
                 if rewards != 0:
