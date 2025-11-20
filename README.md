@@ -8,10 +8,17 @@ This is a machine learning project that implements a Deep Q-Network (DQN) agent 
 
 - **Game Engine**: Full implementation of Whist game logic
 - **DQN Agent**: Deep reinforcement learning agent using TensorFlow
-- **Training System**: Training loop with epsilon-greedy exploration
+- **Training System**: Optimized training loop with epsilon-greedy exploration
 - **Model Management**: Save/load trained models
 - **Visualization**: Plot training progress and model performance
 - **Testing**: Test trained agents against each other
+
+## Game Configuration
+
+The game uses **13 cards per player** (13 total cards: ranks 2-A in Hearts suit):
+
+- Each game consists of **13 tricks** (one per card)
+- Each player gets 3 cards dealt at the start (12 total, with 1 card remaining)
 
 ## Team Structure
 
@@ -79,7 +86,21 @@ The DQN agent uses a multi-input neural network architecture that processes:
 - Tracking information (cards played throughout the game)
 - Score information
 
-The agent learns through experience replay and uses a target network for stable training. The network includes dropout layers (rate=0.35) for regularization to prevent overfitting.
+The agent learns through experience replay and uses a target network for stable training. The network architecture includes:
+- 3 hidden layers (128, 64, and 32 units) with dropout (rate=0.35)
+- Input dimensions for 13-card game
+- Approximately ~28,000 parameters
+- Batch size of 32 for stable gradient updates
+
+### Performance Optimizations
+
+This version includes several optimizations for faster training:
+- **Dynamic action space** based on hand size (no hardcoded values)
+- **Increased batch size** (32 instead of 8) for more stable learning
+- **Reduced replay memory threshold** (100 instead of 1000) for faster startup
+- **Improved trick counting** using proper trick counter instead of action counter
+- **Better action selection** using max Q-value from valid actions
+- **Optimized predictions** with explicit batch_size parameters
 
 For detailed architecture information, see `docs/architecture.md`.
 
