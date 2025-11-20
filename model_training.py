@@ -85,7 +85,7 @@ if __name__ == "__main__":
                                 # Get the card index with highest Q-value
                                 action, q_value = max(valid_q_values, key=lambda x: x[1])
                                 decision_type = 'agent'
-                                certainty = float(q_value)
+                                certainty = float(q_value[0])
                             else:
                                 action = np.random.choice(valid_actions) if valid_actions else 0
                                 decision_type = 'random'
