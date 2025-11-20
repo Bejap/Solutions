@@ -30,7 +30,6 @@ if __name__ == "__main__":
     all_episode_rewards = []
     for episode in tqdm(range(1, NUM_GAMES + 1), ascii=True, unit='episodes'):
         count = 0
-        episode_rewards = [0, 0, 0, 0]
 
         start_state = game.reset()
         episode_rewards = [0, 0, 0, 0]
@@ -44,12 +43,7 @@ if __name__ == "__main__":
                 agent = agents[current_player_index]
                 current_state = game.get_init_state()
 
-                if count < 4:
-                    action_space = 3
-                elif count < 8:
-                    action_space = 2
-                else:
-                    action_space = 1
+                action_space = 13 - count // 4
 
                 valid_actions = [i for i, value in enumerate(game.player_hand(current_player)) if value != 0]
 

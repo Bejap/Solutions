@@ -35,7 +35,7 @@ class Whist:
 
     def deal_cards(self):
         self.deck.shuffle()
-        cards_per_player = len(self.deck.get_deck()) // len(self.players)  # CHANGE THIS
+        cards_per_player = len(self.deck.get_deck()) // len(self.players)  # CHANGE THIS IF OTHER CARD AMOUNT TO DEAL.
 
         for player in self.players:
             player.hand = self.deck.deal(cards_per_player)
