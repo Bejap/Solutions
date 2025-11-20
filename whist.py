@@ -6,8 +6,7 @@ EPISODES = 250
 epsilon = 1
 EPSILON_DECAY = 0.99
 MIN_EPSILON = 0.001
-ARRAY_LENGTH = 13  # Changed from 13 to 7 for 7-card game
-CARDS_PER_PLAYER = 7  # Number of cards dealt to each player
+ARRAY_LENGTH = 13
 
 
 class Whist:
@@ -36,7 +35,7 @@ class Whist:
 
     def deal_cards(self):
         self.deck.shuffle()
-        cards_per_player = CARDS_PER_PLAYER  # CHANGE THIS TO FOR ANOTHER AMOUNT OF CARDS
+        cards_per_player = len(self.deck.get_deck()) // len(self.players)  # CHANGE THIS
 
         for player in self.players:
             player.hand = self.deck.deal(cards_per_player)

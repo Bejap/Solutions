@@ -11,7 +11,7 @@ UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 MODEL_NAME = 'smalle'
 MIN_REWARD = -200  # For model save
 MEMORY_FRACTION = 0.35
-ARRAY_LENGTH = 13  # Changed from 13 to 7 for 7-card game
+ARRAY_LENGTH = 13
 
 class DQNAgent:
     def __init__(self, input_size: int, gamma):
@@ -27,9 +27,9 @@ class DQNAgent:
         self.target_update_counter = 0
 
     def create_model(self):
-        game_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH * 2,))  
-        player_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH + 4,))  
-        tracking_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH * 4,))  
+        game_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH * 2,))
+        player_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH + 4,))
+        tracking_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH * 4,))
         score_input = tf.keras.layers.Input(shape=(4,))
 
         game_features = tf.keras.layers.Dense(ARRAY_LENGTH * 2, activation='relu')(game_input)
@@ -39,13 +39,15 @@ class DQNAgent:
 
         combined = tf.keras.layers.Concatenate()([game_features, player_features, tracking_features, score_features])
 
-        # Smaller network for faster training
-        hidden1 = tf.keras.layers.Dense(128, activation='relu')(combined)  
-        dropout1 = tf.keras.layers.Dropout(0.25)(hidden1)  
-        hidden2 = tf.keras.layers.Dense(64, activation='relu')(dropout1)  
-        dropout2 = tf.keras.layers.Dropout(0.25)(hidden2)  
+        hidden1 = tf.keras.layers.Dense(128, activation='relu')(combined)
+        dropout1 = tf.keras.layers.Dropout(0.35)(hidden1)
+        hidden2 = tf.keras.layers.Dense(64, activation='relu')(dropout1)
+        dropout2 = tf.keras.layers.Dropout(0.35)(hidden2)
+        hidden3 = tf.keras.layers.Dense(32, activation='relu')(dropout2)
+        dropout3 = tf.keras.layers.Dropout(0.35)(hidden3)
 
-        output = tf.keras.layers.Dense(ARRAY_LENGTH, activation='linear')(dropout2)
+        # Output layer for Q-values
+        output = tf.keras.layers.Dense(ARRAY_LENGTH, activation='linear')(dropout3)  # 13 possible card actions
 
         # Create model with multiple inputs
         model = tf.keras.Model(

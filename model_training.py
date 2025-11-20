@@ -10,7 +10,7 @@ NUM_GAMES = 1000
 epsilon = 1
 EPSILON_DECAY = 0.996
 MIN_EPSILON = 0.001
-ARRAY_LENGTH = 13  
+ARRAY_LENGTH = 13
 GAMMA_VALUES = [0.99, 0.95, 0.90, 0.85]
 SAVE_EVERY = 500
 
@@ -37,7 +37,7 @@ if __name__ == "__main__":
         done = False
         pending_transitions = []
 
-        while trick_count < ARRAY_LENGTH and not done:  # 7 tricks for 7-card game
+        while trick_count < ARRAY_LENGTH and not done:  # Complete all tricks
             for _ in range(4):
                 current_player_index = game.current_player_idx
                 current_player = game.players[current_player_index]
@@ -90,7 +90,7 @@ if __name__ == "__main__":
                         else:
                             reward_value = 0
 
-                        if sum(game.score_array) >= ARRAY_LENGTH:  # All 7 tricks completed
+                        if sum(game.score_array) >= ARRAY_LENGTH:  # All tricks completed
                             done = True
                         
                         if agents[player_idx] is not None:
