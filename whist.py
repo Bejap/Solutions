@@ -172,6 +172,34 @@ class Whist:
                 for arr in player_card_arrays:
                     arr[i] = 0
 
+    def get_valid_actions(self, player):
+        """Get valid card indices for a player based on follow suit rules.
+        
+        Args:
+            player: The player whose valid actions to get
+            
+        Returns:
+            List of valid card indices (positions in sorted hand)
+        """
+        player._sort_hand()
+        
+        # If this is the first card of the trick, all cards are valid
+        if len(self.round_list) == 0:
+            return list(range(len(player.hand)))
+        
+        # Get the led suit (first card played in the trick)
+        led_suit = self.round_list[0][1].suit
+        
+        # Find cards of the led suit
+        led_suit_indices = [i for i, card in enumerate(player.hand) if card.suit == led_suit]
+        
+        # If player has cards of the led suit, they must play one of them
+        if led_suit_indices:
+            return led_suit_indices
+        
+        # If player doesn't have led suit, they can play any card
+        return list(range(len(player.hand)))
+    
     def step(self, action):
         done = False
         current_player = self.players[self.current_player_idx]

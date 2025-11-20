@@ -37,23 +37,26 @@ class GameLogger:
         # Create log directory if it doesn't exist
         os.makedirs(self.log_dir, exist_ok=True)
     
-    def start_game(self, episode_number, starting_player_idx, players):
+    def start_game(self, episode_number, starting_player_idx, players, trump_suit='Spades'):
         """Start logging a new game.
         
         Args:
             episode_number: The episode/game number
             starting_player_idx: Index of the player who starts (0-3)
             players: List of player objects with hand attribute
+            trump_suit: The trump suit for this game (default: 'Spades')
         """
         self.current_game_log = []
         self.starting_player_idx = starting_player_idx
         self.starting_hands = {}
         self.current_trick = []
         self.trick_number = 0
+        self.trump_suit = trump_suit
         
         # Log header
         self.current_game_log.append(f"=== Game {episode_number} ===")
         self.current_game_log.append(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        self.current_game_log.append(f"Trump: {trump_suit}")
         self.current_game_log.append(f"Starting player: {self.POSITION_NAMES[starting_player_idx]}\n")
         
         # Log starting hands
@@ -75,13 +78,22 @@ class GameLogger:
             certainty: For agent decisions, the Q-value confidence (float)
         """
         self.current_trick.append((player_idx, card, decision_type, certainty))
-        
-        # If trick is complete (4 cards played), log it
-        if len(self.current_trick) == 4:
-            self._log_trick()
     
-    def _log_trick(self):
-        """Log the completed trick."""
+    def complete_trick(self, winner_idx):
+        """Complete and log the current trick with its winner.
+        
+        Args:
+            winner_idx: Index of the player who won the trick (0-3)
+        """
+        if len(self.current_trick) == 4:
+            self._log_trick(winner_idx)
+    
+    def _log_trick(self, winner_idx=None):
+        """Log the completed trick.
+        
+        Args:
+            winner_idx: Index of the player who won the trick (0-3)
+        """
         self.trick_number += 1
         self.current_game_log.append(f"Trick {self.trick_number}:")
         
@@ -100,6 +112,11 @@ class GameLogger:
                 decision_info = ""
             
             self.current_game_log.append(f"  {position_short}: {card}{decision_info}")
+        
+        # Log the winner
+        if winner_idx is not None:
+            winner_name = self.POSITION_SHORT[winner_idx]
+            self.current_game_log.append(f"\n{winner_name} winner")
         
         self.current_game_log.append("")  # Blank line after trick
         

@@ -16,6 +16,7 @@ ARRAY_LENGTH = 52  # Full deck: 13 ranks * 4 suits
 GAMMA_VALUES = [0.99, 0.95, 0.90, 0.85]
 SAVE_EVERY = 500
 LOG_GAME_EVERY = 50  # Save detailed game logs every 50 games
+LOG_START_AFTER = 250  # Start logging after first 250 games
 
 # Configure logging for monitoring
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -47,13 +48,13 @@ if __name__ == "__main__":
         done = False
         pending_transitions = []
         
-        # Check if we should log this game
-        should_log_game = (episode % LOG_GAME_EVERY == 0)
+        # Check if we should log this game (after first 250 games, every 50 games)
+        should_log_game = (episode > LOG_START_AFTER and episode % LOG_GAME_EVERY == 0)
         
         # Start logging if this is a logged game
         if should_log_game:
             starting_player_idx = game.current_player_idx
-            game_logger.start_game(episode, starting_player_idx, game.players)
+            game_logger.start_game(episode, starting_player_idx, game.players, trump_suit='Spades')
 
         while trick_count < ARRAY_LENGTH and not done:  # Complete all tricks
             for _ in range(4):
@@ -62,8 +63,8 @@ if __name__ == "__main__":
                 agent = agents[current_player_index]
                 current_state = game.get_init_state()
 
-                # Get valid actions based on actual hand
-                valid_actions = [i for i, value in enumerate(game.player_hand(current_player)) if value != 0]
+                # Get valid actions based on follow suit rules
+                valid_actions = game.get_valid_actions(current_player)
                 
                 # Calculate action_space as number of cards in hand (dynamic)
                 action_space = len(current_player.hand)
@@ -84,16 +85,16 @@ if __name__ == "__main__":
                                 # Get the card index with highest Q-value
                                 action, q_value = max(valid_q_values, key=lambda x: x[1])
                                 decision_type = 'agent'
-                                certainty = float(q_value[0])
+                                certainty = float(q_value)
                             else:
-                                action = np.random.randint(action_space) if action_space > 0 else 0
+                                action = np.random.choice(valid_actions) if valid_actions else 0
                                 decision_type = 'random'
                         else:
-                            action = np.random.randint(action_space) if action_space > 0 else 0
+                            action = np.random.choice(valid_actions) if valid_actions else 0
                             decision_type = 'random'
                     else:
-                        # Random exploration
-                        action = np.random.randint(action_space) if action_space > 0 else 0
+                        # Random exploration - but still must follow suit
+                        action = np.random.choice(valid_actions) if valid_actions else 0
                         decision_type = 'random'
                 else:
                     # Use strategic play for East (1) and West (3)
@@ -121,6 +122,12 @@ if __name__ == "__main__":
 
                 if len(game.round_list) == 0:  # Trick is complete
                     trick_count += 1
+                    
+                    # Complete trick logging with winner if we're logging this game
+                    if should_log_game and game.trick_winner is not None:
+                        winner_idx = game.players.index(game.trick_winner)
+                        game_logger.complete_trick(winner_idx)
+                    
                     for s, a, _, ns, _, player_idx in pending_transitions:
                         if rewards != 0:
                             reward_value = rewards[player_idx]
