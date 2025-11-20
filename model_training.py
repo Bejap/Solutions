@@ -100,7 +100,7 @@ if __name__ == "__main__":
                         if sum(game.score_array) == 3:
                             done = True
                         agents[i].update_replay_memory((s, a, reward_value, ns, done))
-                        print(f"\nAgent {i}: State: {s}, Action: {a}, Reward: {reward_value}, Next State: {ns}, Done: {done}, Gamma: {agents[i].gamma}")
+                        print(f"\nAgent {i}: State: {s}, Action: {a}, Reward: {reward_value}, Next State: {ns}, Done: {done}")
 
                     for agent_idx, agent in enumerate(agents):
                         agent.train(done, count)
