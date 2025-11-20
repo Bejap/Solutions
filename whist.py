@@ -1,5 +1,6 @@
 import whist_game as wg
 import numpy as np
+import logging
 
 EPISODES = 250
 
@@ -7,6 +8,10 @@ epsilon = 1
 EPSILON_DECAY = 0.99
 MIN_EPSILON = 0.001
 ARRAY_LENGTH = 13
+
+# Configure logging for monitoring reward system
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 class Whist:
@@ -32,6 +37,38 @@ class Whist:
         self.player4_cards = [0] * ARRAY_LENGTH
         self.another_count = 0
         self.turn_counter = 0
+        
+        # Monitoring: Track reward statistics per episode
+        self.reward_stats = {
+            'agent_0_total': 0,
+            'agent_2_total': 0,
+            'agent_0_wins': 0,
+            'agent_2_wins': 0,
+            'tricks_completed': 0
+        }
+    
+    def set_monitoring_level(self, level='INFO'):
+        """Set the logging level for monitoring reward system.
+        
+        Args:
+            level: Logging level ('DEBUG', 'INFO', 'WARNING', 'ERROR')
+        """
+        logger.setLevel(getattr(logging, level))
+        logger.info(f"Monitoring level set to {level}")
+    
+    def get_reward_stats(self):
+        """Get current reward statistics for monitoring."""
+        return self.reward_stats.copy()
+    
+    def reset_reward_stats(self):
+        """Reset reward statistics at the start of a new episode."""
+        self.reward_stats = {
+            'agent_0_total': 0,
+            'agent_2_total': 0,
+            'agent_0_wins': 0,
+            'agent_2_wins': 0,
+            'tricks_completed': 0
+        }
 
     def deal_cards(self):
         self.deck.shuffle()
@@ -74,6 +111,9 @@ class Whist:
         self.player3_cards = [0] * ARRAY_LENGTH
         self.player4_cards = [0] * ARRAY_LENGTH
         self._initialize_player_card_tracking()
+        
+        # Reset reward statistics for new episode
+        self.reset_reward_stats()
 
         init_state = self.get_init_state()
         return init_state
@@ -175,15 +215,33 @@ class Whist:
             self.trick_winner = self._evaluate_trick_winner()
             winner_index = self.players.index(self.trick_winner)
 
-            # Assign rewards
-            for i, player in enumerate(self.players):
+            # Assign rewards only to the 2 agents (positions 0 and 2)
+            # Positions 1 and 3 use strategic rule-based play and don't need rewards
+            agent_positions = [0, 2]  # North and South are the DQN agents
+            
+            for i in agent_positions:
                 if i == winner_index:
                     reward[i] += 10  # Reward for winning the trick
-
+                    # Update monitoring stats
+                    if i == 0:
+                        self.reward_stats['agent_0_wins'] += 1
+                        self.reward_stats['agent_0_total'] += 10
+                    else:  # i == 2
+                        self.reward_stats['agent_2_wins'] += 1
+                        self.reward_stats['agent_2_total'] += 10
                 else:
                     reward[i] -= 5  # Penalty for losing the trick
-
-            # print(f"Trick completed. Winner: Player {winner_index}. Rewards: {reward}")
+                    # Update monitoring stats
+                    if i == 0:
+                        self.reward_stats['agent_0_total'] -= 5
+                    else:  # i == 2
+                        self.reward_stats['agent_2_total'] -= 5
+            
+            self.reward_stats['tricks_completed'] += 1
+            
+            # Log reward distribution for monitoring
+            logger.debug(f"Trick {self.reward_stats['tricks_completed']} completed. Winner: Player {winner_index}. "
+                        f"Agent rewards: Agent 0: {reward[0]}, Agent 2: {reward[2]}")
 
             # Reset round list for next trick
             self.round_list = []

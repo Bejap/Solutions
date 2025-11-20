@@ -4,6 +4,7 @@ from ew_strategy import EWStrategy
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import numpy as np
+import logging
 
 NUM_GAMES = 1000
 
@@ -13,6 +14,10 @@ MIN_EPSILON = 0.001
 ARRAY_LENGTH = 13
 GAMMA_VALUES = [0.99, 0.95, 0.90, 0.85]
 SAVE_EVERY = 500
+
+# Configure logging for monitoring
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     player_names = [1, 2, 3, 4]
@@ -110,12 +115,21 @@ if __name__ == "__main__":
         for agent_idx, agent in enumerate(agents):
             if agent is not None:
                 agent.train(True, trick_count)
+        
+        # Monitor reward statistics every 100 episodes
+        if episode % 100 == 0:
+            reward_stats = game.get_reward_stats()
+            logger.info(f"Episode {episode} - Reward Stats: "
+                       f"Agent 0 total: {reward_stats['agent_0_total']}, wins: {reward_stats['agent_0_wins']} | "
+                       f"Agent 2 total: {reward_stats['agent_2_total']}, wins: {reward_stats['agent_2_wins']} | "
+                       f"Tricks: {reward_stats['tricks_completed']}")
 
         if episode % SAVE_EVERY == 0:
             for i, agent in enumerate(agents):
                 if agent is not None:
                     agent.save_agent(f"Weights/agent_player_{i}_ep{episode}.weights.h5")
                     agent.save_full_agent(f"Models/full_agent_player_{i}_ep{episode}.keras")
+            logger.info(f"Models saved at episode {episode}")
 
     plt.plot(all_episode_rewards)
     plt.xlabel("Episode")
