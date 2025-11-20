@@ -142,7 +142,7 @@ class DQNAgent:
                 new_q = reward
 
             # Update Q value for given state
-            current_qs = current_qs_list[index].copy()
+            current_qs = np.array(current_qs_list[index])
             current_qs[action] = new_q
 
             # And append to training data
