@@ -221,17 +221,13 @@ class Whist:
                 player_arrays[player_id][card_pos] = 1  # Mark as seen
 
     def _cards_played(self, card_s: wg.Card):
-        # print(self.count)
         if card_s.rank_value is None:
-            print("card_s.rank_value er None!")
             return
         card_position_s = card_s.rank_value - 2
         try:
             self.cards_array[card_position_s] = 1
-        except IndexError:
-            print(f"Index {card_position_s} er uden for grænserne for cards_array.")
-        except TypeError:
-            print(f"Ugyldig type for rank_value: {type(card_s.rank_value)}")
+        except (IndexError, TypeError):
+            pass
 
         return self.cards_array
 
