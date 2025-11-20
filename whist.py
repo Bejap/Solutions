@@ -181,6 +181,30 @@ class Whist:
         game_state, reward = self._get_game_state(card)
         if all(len(player.hand) == 0 for player in self.players):
             done = True
+            # Add game-ending rewards for agents (positions 0 and 2)
+            team_1_score = self.score_array[0] + self.score_array[2]  # Agents' team
+            team_2_score = self.score_array[1] + self.score_array[3]  # Opponents' team
+            
+            if team_1_score > team_2_score:
+                # Team 1 (agents) wins: +10 for each agent
+                reward[0] += 10
+                reward[2] += 10
+                self.reward_stats['agent_0_total'] += 10
+                self.reward_stats['agent_2_total'] += 10
+                logger.info(f"Game ended. Team 1 (Agents) WINS! Score: {team_1_score}-{team_2_score}. "
+                           f"Agents receive +10 bonus each.")
+            elif team_1_score < team_2_score:
+                # Team 1 (agents) loses: -20 for each agent
+                reward[0] -= 20
+                reward[2] -= 20
+                self.reward_stats['agent_0_total'] -= 20
+                self.reward_stats['agent_2_total'] -= 20
+                logger.info(f"Game ended. Team 1 (Agents) LOSES. Score: {team_1_score}-{team_2_score}. "
+                           f"Agents receive -20 penalty each.")
+            else:
+                # Tie - no game-ending bonus/penalty
+                logger.info(f"Game ended in a TIE. Score: {team_1_score}-{team_2_score}. "
+                           f"No game-ending bonus/penalty.")
 
         self.current_player_idx = (self.current_player_idx + 1) % 4
 
@@ -217,25 +241,35 @@ class Whist:
 
             # Assign rewards only to the 2 agents (positions 0 and 2)
             # Positions 1 and 3 use strategic rule-based play and don't need rewards
-            agent_positions = [0, 2]  # North and South are the DQN agents
+            agent_positions = [0, 2]  # North and South are the DQN agents (Team 1)
             
             for i in agent_positions:
                 if i == winner_index:
-                    reward[i] += 10  # Reward for winning the trick
+                    # Agent wins the trick: +1
+                    reward[i] = 1
                     # Update monitoring stats
                     if i == 0:
                         self.reward_stats['agent_0_wins'] += 1
-                        self.reward_stats['agent_0_total'] += 10
+                        self.reward_stats['agent_0_total'] += 1
                     else:  # i == 2
                         self.reward_stats['agent_2_wins'] += 1
-                        self.reward_stats['agent_2_total'] += 10
-                else:
-                    reward[i] -= 5  # Penalty for losing the trick
+                        self.reward_stats['agent_2_total'] += 1
+                elif winner_index in agent_positions:
+                    # Partner wins the trick: +0.8
+                    reward[i] = 0.8
                     # Update monitoring stats
                     if i == 0:
-                        self.reward_stats['agent_0_total'] -= 5
+                        self.reward_stats['agent_0_total'] += 0.8
                     else:  # i == 2
-                        self.reward_stats['agent_2_total'] -= 5
+                        self.reward_stats['agent_2_total'] += 0.8
+                else:
+                    # Opponent (non-agent) wins the trick: -1
+                    reward[i] = -1
+                    # Update monitoring stats
+                    if i == 0:
+                        self.reward_stats['agent_0_total'] -= 1
+                    else:  # i == 2
+                        self.reward_stats['agent_2_total'] -= 1
             
             self.reward_stats['tricks_completed'] += 1
             

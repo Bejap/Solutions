@@ -29,10 +29,22 @@ The game uses a traditional 4-player setup with two teams:
 
 North and South agents learn to cooperate as partners on the same team. East and West provide consistent, challenging opponents using bridge-like playing strategies. See `docs/team_structure.md` for more details.
 
+## Reward System
+
+The game uses a sophisticated reward structure to train the agents:
+
+- **+1** for winning a trick
+- **+0.8** for partner winning a trick  
+- **-1** for losing a trick
+- **+10** for winning the game
+- **-20** for losing the game
+
+Only the two DQN agents (positions 0 and 2) receive rewards. The system includes comprehensive monitoring and statistics tracking. See `docs/reward_system.md` for complete details.
+
 ## Files
 
 - `whist_game.py` - Core game classes (Card, Deck, Player)
-- `whist.py` - Main Whist game environment implementation
+- `whist.py` - Main Whist game environment implementation with reward system
 - `simple_whist_DQN.py` - DQN agent implementation
 - `ew_strategy.py` - Strategic rule-based player for East-West positions
 - `model_training.py` - Training loop for the DQN agents
@@ -40,7 +52,10 @@ North and South agents learn to cooperate as partners on the same team. East and
 - `loading_model.py` - Load and use saved models
 - `model_plotting.py` - Visualization tools for training results
 - `game.py` - Simple game initialization script
-- `docs/` - Documentation folder with architecture details, optimization suggestions and team structure info
+- `test_reward_system.py` - Test script to verify reward distribution
+- `Weights/` - Directory for saving model weights (*.h5 files)
+- `Models/` - Directory for saving full models (*.keras files)
+- `docs/` - Documentation folder with architecture details, optimization suggestions, team structure, and reward system info
 
 ## Requirements
 

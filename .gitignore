@@ -131,6 +131,12 @@ saved_models/
 checkpoints/
 logs/
 
+# Model files in Weights and Models folders (but keep the folders)
+Weights/*.h5
+Weights/*.weights.h5
+Models/*.keras
+Models/*.h5
+
 # IDEs
 .vscode/
 .idea/

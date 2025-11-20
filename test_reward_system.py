@@ -1,4 +1,12 @@
-"""Test script to verify the reward system only gives rewards to agents at positions 0 and 2."""
+"""Test script to verify the reward system only gives rewards to agents at positions 0 and 2.
+
+New Reward Structure:
+- +1 for winning the trick
+- +0.8 for partner winning the trick (Team 1 = positions 0 and 2)
+- -1 for losing a trick (opponent wins)
+- +10 for winning the game
+- -20 for losing the game
+"""
 
 from whist import Whist
 from simple_whist_DQN import DQNAgent
@@ -53,8 +61,8 @@ def test_reward_distribution():
             
             new_state, rewards, done = game.step(action)
             
-            # Check reward distribution
-            if rewards != 0:
+            # Check reward distribution (check if any reward is non-zero)
+            if any(r != 0 for r in rewards):
                 print(f"Rewards distributed: {rewards}")
                 print(f"  - Position 0 (Agent - North): {rewards[0]}")
                 print(f"  - Position 1 (EW Strategy - East): {rewards[1]}")
