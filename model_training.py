@@ -16,7 +16,7 @@ ARRAY_LENGTH = 52  # Full deck: 13 ranks * 4 suits
 GAMMA_VALUES = [0.99, 0.95, 0.90, 0.85]
 SAVE_EVERY = 500
 LOG_GAME_EVERY = 50  # Save detailed game logs every 50 games
-LOG_START_AFTER = 250  # Start logging after first 250 games
+LOG_START_AFTER = 249  # Start logging after first 250 games
 
 # Configure logging for monitoring
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
