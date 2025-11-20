@@ -13,7 +13,7 @@ from simple_whist_DQN import DQNAgent
 from ew_strategy import EWStrategy
 import numpy as np
 
-ARRAY_LENGTH = 13
+ARRAY_LENGTH = 52  # Full deck: 13 ranks * 4 suits
 
 def test_reward_distribution():
     """Test that rewards are only given to agent positions 0 and 2."""

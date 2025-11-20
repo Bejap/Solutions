@@ -7,7 +7,7 @@ EPISODES = 250
 epsilon = 1
 EPSILON_DECAY = 0.99
 MIN_EPSILON = 0.001
-ARRAY_LENGTH = 13
+ARRAY_LENGTH = 52  # Full deck: 13 ranks * 4 suits
 
 # Configure logging for monitoring reward system
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -69,6 +69,18 @@ class Whist:
             'agent_2_wins': 0,
             'tricks_completed': 0
         }
+    
+    @staticmethod
+    def _get_card_position(card: wg.Card):
+        """Calculate the position of a card in the state array.
+        
+        Maps 52 cards to positions 0-51:
+        - Clubs (suit_value=0): positions 0-12 (rank 2-A)
+        - Diamonds (suit_value=1): positions 13-25 (rank 2-A)
+        - Hearts (suit_value=2): positions 26-38 (rank 2-A)
+        - Spades/Trump (suit_value=3): positions 39-51 (rank 2-A)
+        """
+        return card.suit_value * 13 + (card.rank_value - 2)
 
     def deal_cards(self):
         self.deck.shuffle()
@@ -150,7 +162,7 @@ class Whist:
         current_player_array = player_card_arrays[self.current_player_idx]
 
         for card in current_player.hand:
-            card_position = card.rank_value - 2
+            card_position = self._get_card_position(card)
             current_player_array[card_position] = card.rank_value
             # print(current_player_array)
 
@@ -308,14 +320,14 @@ class Whist:
         ]
 
         for player_id, played_card in self.round_list:
-            card_pos = played_card.rank_value - 2
+            card_pos = self._get_card_position(played_card)
             if player_arrays[player_id][card_pos] != 0:
                 player_arrays[player_id][card_pos] = 1  # Mark as seen
 
     def _cards_played(self, card_s: wg.Card):
         if card_s.rank_value is None:
             return
-        card_position_s = card_s.rank_value - 2
+        card_position_s = self._get_card_position(card_s)
         try:
             self.cards_array[card_position_s] = 1
         except (IndexError, TypeError):
@@ -324,14 +336,14 @@ class Whist:
         return self.cards_array
 
     def _round_cards_played(self, card_p: wg.Card):
-        card_position_p = card_p.rank_value - 2
+        card_position_p = self._get_card_position(card_p)
         self.round_array[card_position_p] = card_p.rank_value
         return self.round_array
 
     def player_hand(self, player: wg.Player):
         self.hand_array = [0] * ARRAY_LENGTH  # Reset hand array
         for card in player.hand:
-            card_position = card.rank_value - 2
+            card_position = self._get_card_position(card)
             self.hand_array[card_position] = card.rank_value
 
         if not hasattr(self, 'static_hands'):
@@ -345,20 +357,35 @@ class Whist:
         return self.hand_array
 
     def _evaluate_trick_winner(self):
+        """Evaluate the winner of a trick considering trump (Spades).
+        
+        Rules:
+        1. Trump (Spades) beats any non-trump card
+        2. Highest trump wins if multiple trumps played
+        3. If no trump, highest card in led suit wins
+        """
         trick_cards = self.round_list
-        # print(trick_cards)
-
-        # Find det højeste kort i farven
-        winning_tuple = max(
-            (entry for entry in trick_cards),
-            key=lambda t: t[1].rank_value  # t = (player_id, card)
-        )
-
+        
+        # Get the led suit (first card played)
+        led_suit = trick_cards[0][1].suit
+        
+        # Separate trump cards from non-trump cards
+        trump_cards = [(pid, card) for pid, card in trick_cards if card.is_trump()]
+        
+        if trump_cards:
+            # If any trump card was played, highest trump wins
+            winning_tuple = max(trump_cards, key=lambda t: t[1].rank_value)
+        else:
+            # No trump played, highest card in led suit wins
+            led_suit_cards = [(pid, card) for pid, card in trick_cards if card.suit == led_suit]
+            winning_tuple = max(led_suit_cards, key=lambda t: t[1].rank_value)
+        
         winner_player_id, winning_card = winning_tuple
-
         winner = self.players[winner_player_id]
-        self.score_array[winner_player_id ] += 1
-
+        self.score_array[winner_player_id] += 1
+        
+        logger.debug(f"Trick winner: Player {winner_player_id} with {winning_card}")
+        
         return winner
 
 
