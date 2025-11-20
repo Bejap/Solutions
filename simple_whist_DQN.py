@@ -5,13 +5,13 @@ import random
 
 GAMMA = 0.99
 REPLAY_MEMORY_SIZE = 100  # How many last steps to keep for model training
-MIN_REPLAY_MEMORY_SIZE = 1000  # Minimum number of steps in a memory to start training
-MINIBATCH_SIZE = 8  # How many steps (samples) to use for training
+MIN_REPLAY_MEMORY_SIZE = 100  # Reduced from 1000 to 100 for faster training startup
+MINIBATCH_SIZE = 32  # Increased from 8 to 32 for more stable and faster training
 UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 MODEL_NAME = 'smalle'
 MIN_REWARD = -200  # For model save
 MEMORY_FRACTION = 0.35
-ARRAY_LENGTH = 13
+ARRAY_LENGTH = 7  # Changed from 13 to 7 for 7-card game
 
 class DQNAgent:
     def __init__(self, input_size: int, gamma):
@@ -27,11 +27,13 @@ class DQNAgent:
         self.target_update_counter = 0
 
     def create_model(self):
-        game_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH * 2,))
-        player_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH + 4,))
-        tracking_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH * 4,))
+        # Update input shapes for 7-card game
+        game_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH * 2,))  # 14 instead of 26
+        player_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH + 4,))  # 11 instead of 17
+        tracking_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH * 4,))  # 28 instead of 52
         score_input = tf.keras.layers.Input(shape=(4,))
 
+        # Adjust hidden layer sizes for smaller input
         game_features = tf.keras.layers.Dense(ARRAY_LENGTH * 2, activation='relu')(game_input)
         player_features = tf.keras.layers.Dense(ARRAY_LENGTH + 4, activation='relu')(player_input)
         tracking_features = tf.keras.layers.Dense(ARRAY_LENGTH * 4, activation='relu')(tracking_input)
@@ -39,15 +41,14 @@ class DQNAgent:
 
         combined = tf.keras.layers.Concatenate()([game_features, player_features, tracking_features, score_features])
 
-        hidden1 = tf.keras.layers.Dense(128, activation='relu')(combined)
-        dropout1 = tf.keras.layers.Dropout(0.35)(hidden1)
-        hidden2 = tf.keras.layers.Dense(64, activation='relu')(dropout1)
-        dropout2 = tf.keras.layers.Dropout(0.35)(hidden2)
-        hidden3 = tf.keras.layers.Dense(32, activation='relu')(dropout2)
-        dropout3 = tf.keras.layers.Dropout(0.35)(hidden3)
+        # Smaller network for faster training
+        hidden1 = tf.keras.layers.Dense(64, activation='relu')(combined)  # Reduced from 128
+        dropout1 = tf.keras.layers.Dropout(0.25)(hidden1)  # Reduced dropout
+        hidden2 = tf.keras.layers.Dense(32, activation='relu')(dropout1)  # Reduced from 64
+        dropout2 = tf.keras.layers.Dropout(0.25)(hidden2)  # Reduced dropout
 
-        # Output layer for Q-values
-        output = tf.keras.layers.Dense(ARRAY_LENGTH, activation='linear')(dropout3)  # 13 possible card actions
+        # Output layer for Q-values (7 cards instead of 13)
+        output = tf.keras.layers.Dense(ARRAY_LENGTH, activation='linear')(dropout2)
 
         # Create model with multiple inputs
         model = tf.keras.Model(
@@ -108,13 +109,15 @@ class DQNAgent:
         # Get current Q values
         current_qs_list = self.model.predict(
             [current_game_data, current_player_data, current_tracking_data, current_score_data],
-            verbose=0
+            verbose=0,
+            batch_size=MINIBATCH_SIZE
         )
 
         # Get future Q values
         future_qs_list = self.target_model.predict(
             [new_game_data, new_player_data, new_tracking_data, new_score_data],
-            verbose=0
+            verbose=0,
+            batch_size=MINIBATCH_SIZE
         )
 
         X_game = []
@@ -178,10 +181,11 @@ class DQNAgent:
         tracking_data = np.expand_dims(tracking_data, axis=0)
         score_data = np.expand_dims(score_data, axis=0)
 
-        # Predict using all inputs
+        # Predict using all inputs with batch_size
         return self.model.predict(
             [game_data, player_data, tracking_data, score_data],
-            verbose=0
+            verbose=0,
+            batch_size=1
         )[0]
 
     def predict_action(self, state):

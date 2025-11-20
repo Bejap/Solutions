@@ -2,11 +2,10 @@ import random
 
 
 class Card:
-    RANK_VALUES = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8,
-                   '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14
-                   }
+    # Only use ranks 2-8 for 7-card game, but all 4 suits
+    RANK_VALUES = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8}
 
-    SUIT_VALUES = {'Hearts': 0}
+    SUIT_VALUES = {'Hearts': 0, 'Diamonds': 1, 'Clubs': 2, 'Spades': 3}
 
     def __init__(self, suit, rank):
         self.suit = suit

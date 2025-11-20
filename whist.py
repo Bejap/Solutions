@@ -6,7 +6,7 @@ EPISODES = 250
 epsilon = 1
 EPSILON_DECAY = 0.99
 MIN_EPSILON = 0.001
-ARRAY_LENGTH = 13
+ARRAY_LENGTH = 7  # Changed from 13 to 7 for 7-card game
 
 
 class Whist:

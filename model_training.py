@@ -10,7 +10,7 @@ NUM_GAMES = 1000
 epsilon = 1
 EPSILON_DECAY = 0.996
 MIN_EPSILON = 0.001
-ARRAY_LENGTH = 13
+ARRAY_LENGTH = 7  # Changed from 13 to 7 for 7-card game
 GAMMA_VALUES = [0.99, 0.95, 0.90, 0.85]
 SAVE_EVERY = 500
 
@@ -37,21 +37,18 @@ if __name__ == "__main__":
         done = False
         pending_transitions = []
 
-        while count != ARRAY_LENGTH - 1:
+        while count != ARRAY_LENGTH:  # 7 tricks for 7-card game
             for _ in range(4):
                 current_player_index = game.current_player_idx
                 current_player = game.players[current_player_index]
                 agent = agents[current_player_index]
                 current_state = game.get_init_state()
 
-                if count < 4:
-                    action_space = 3
-                elif count < 8:
-                    action_space = 2
-                else:
-                    action_space = 1
-
+                # Get valid actions based on actual hand
                 valid_actions = [i for i, value in enumerate(game.player_hand(current_player)) if value != 0]
+                
+                # Calculate action_space as number of cards in hand (dynamic)
+                action_space = len(current_player.hand)
 
                 # Only use agent for North (0) and South (2)
                 if agent is not None:
@@ -59,15 +56,16 @@ if __name__ == "__main__":
                     if a > epsilon:
                         qs = agent.get_qs(current_state)
                         if valid_actions:
-                            valid_q_values = [qs[card] for card in valid_actions if card < len(qs)]
+                            valid_q_values = [(card, qs[card]) for card in valid_actions if card < len(qs)]
                             if valid_q_values:
-                                action = np.argmax(valid_q_values)
+                                # Get the card index with highest Q-value
+                                action = max(valid_q_values, key=lambda x: x[1])[0]
                             else:
-                                action = np.random.randint(action_space)
+                                action = np.random.randint(action_space) if action_space > 0 else 0
                         else:
-                            action = np.random.randint(action_space)
+                            action = np.random.randint(action_space) if action_space > 0 else 0
                     else:
-                        action = np.random.randint(action_space)
+                        action = np.random.randint(action_space) if action_space > 0 else 0
                 else:
                     # Use strategic play for East (1) and West (3)
                     ew_strategy = ew_strategies[current_player_index]
@@ -91,7 +89,7 @@ if __name__ == "__main__":
                         else:
                             reward_value = 0
 
-                        if sum(game.score_array) == 3:
+                        if sum(game.score_array) == ARRAY_LENGTH:  # All 7 tricks completed
                             done = True
                         
                         if agents[player_idx] is not None:
