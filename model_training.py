@@ -1,6 +1,7 @@
 from whist import Whist
 from simple_whist_DQN import DQNAgent
 from ew_strategy import EWStrategy
+from game_logger import GameLogger
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import numpy as np
@@ -14,6 +15,7 @@ MIN_EPSILON = 0.001
 ARRAY_LENGTH = 52  # Full deck: 13 ranks * 4 suits
 GAMMA_VALUES = [0.99, 0.95, 0.90, 0.85]
 SAVE_EVERY = 500
+LOG_GAME_EVERY = 50  # Save detailed game logs every 50 games
 
 # Configure logging for monitoring
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -32,6 +34,9 @@ if __name__ == "__main__":
         3: EWStrategy(4, game)   # Player 4 is at position 3 (West)
     }
     
+    # Initialize game logger
+    game_logger = GameLogger(log_dir='game_logs')
+    
     all_episode_rewards = []
     for episode in tqdm(range(1, NUM_GAMES + 1), ascii=True, unit='episodes'):
         trick_count = 0
@@ -41,6 +46,14 @@ if __name__ == "__main__":
         episode_rewards = [0, 0, 0, 0]
         done = False
         pending_transitions = []
+        
+        # Check if we should log this game
+        should_log_game = (episode % LOG_GAME_EVERY == 0)
+        
+        # Start logging if this is a logged game
+        if should_log_game:
+            starting_player_idx = game.current_player_idx
+            game_logger.start_game(episode, starting_player_idx, game.players)
 
         while trick_count < ARRAY_LENGTH and not done:  # Complete all tricks
             for _ in range(4):
@@ -76,6 +89,13 @@ if __name__ == "__main__":
                     ew_strategy = ew_strategies[current_player_index]
                     action = ew_strategy.choose_action(current_player, valid_actions)
 
+                # Peek at the card that will be played (don't remove it yet)
+                if should_log_game and 0 <= action < len(current_player.hand):
+                    # Sort hand to match what action() will return
+                    current_player._sort_hand()
+                    played_card = current_player.hand[action]
+                    game_logger.log_card_played(current_player_index, played_card)
+
                 new_state, rewards, done = game.step(action)
                 if rewards != 0:
                     episode_rewards[current_player_index] += rewards[current_player_index]
@@ -109,6 +129,11 @@ if __name__ == "__main__":
 
                 if done:
                     break
+        
+        # End game logging if this was a logged game
+        if should_log_game:
+            game_logger.end_game(episode, game.score_array)
+        
         all_episode_rewards.append(np.mean(episode_rewards))
         epsilon = max(MIN_EPSILON, epsilon * EPSILON_DECAY)
 

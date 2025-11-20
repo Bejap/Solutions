@@ -148,6 +148,9 @@ Models/*.h5
 .DS_Store
 Thumbs.db
 
+# Game logs
+game_logs/
+
 # Project specific
 *.json
 *.csv
