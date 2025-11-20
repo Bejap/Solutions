@@ -29,7 +29,7 @@ if __name__ == "__main__":
     
     all_episode_rewards = []
     for episode in tqdm(range(1, NUM_GAMES + 1), ascii=True, unit='episodes'):
-        count = 0
+        trick_count = 0
         episode_rewards = [0, 0, 0, 0]
 
         start_state = game.reset()
@@ -37,21 +37,18 @@ if __name__ == "__main__":
         done = False
         pending_transitions = []
 
-        while count != ARRAY_LENGTH - 1:
+        while trick_count < ARRAY_LENGTH and not done:  # Complete all tricks
             for _ in range(4):
                 current_player_index = game.current_player_idx
                 current_player = game.players[current_player_index]
                 agent = agents[current_player_index]
                 current_state = game.get_init_state()
 
-                if count < 4:
-                    action_space = 3
-                elif count < 8:
-                    action_space = 2
-                else:
-                    action_space = 1
-
+                # Get valid actions based on actual hand
                 valid_actions = [i for i, value in enumerate(game.player_hand(current_player)) if value != 0]
+                
+                # Calculate action_space as number of cards in hand (dynamic)
+                action_space = len(current_player.hand)
 
                 # Only use agent for North (0) and South (2)
                 if agent is not None:
@@ -59,15 +56,16 @@ if __name__ == "__main__":
                     if a > epsilon:
                         qs = agent.get_qs(current_state)
                         if valid_actions:
-                            valid_q_values = [qs[card] for card in valid_actions if card < len(qs)]
+                            valid_q_values = [(card, qs[card]) for card in valid_actions if card < len(qs)]
                             if valid_q_values:
-                                action = np.argmax(valid_q_values)
+                                # Get the card index with highest Q-value
+                                action = max(valid_q_values, key=lambda x: x[1])[0]
                             else:
-                                action = np.random.randint(action_space)
+                                action = np.random.randint(action_space) if action_space > 0 else 0
                         else:
-                            action = np.random.randint(action_space)
+                            action = np.random.randint(action_space) if action_space > 0 else 0
                     else:
-                        action = np.random.randint(action_space)
+                        action = np.random.randint(action_space) if action_space > 0 else 0
                 else:
                     # Use strategic play for East (1) and West (3)
                     ew_strategy = ew_strategies[current_player_index]
@@ -85,13 +83,14 @@ if __name__ == "__main__":
                     current_state = new_state
 
                 if len(game.round_list) == 0:  # Trick is complete
+                    trick_count += 1
                     for s, a, _, ns, _, player_idx in pending_transitions:
                         if rewards != 0:
                             reward_value = rewards[player_idx]
                         else:
                             reward_value = 0
 
-                        if sum(game.score_array) == 3:
+                        if sum(game.score_array) >= ARRAY_LENGTH:  # All tricks completed
                             done = True
                         
                         if agents[player_idx] is not None:
@@ -99,10 +98,9 @@ if __name__ == "__main__":
 
                     for agent_idx, agent in enumerate(agents):
                         if agent is not None:
-                            agent.train(done, count)
+                            agent.train(done, trick_count)
 
                     pending_transitions = []
-                count += 1
 
                 if done:
                     break
@@ -111,7 +109,7 @@ if __name__ == "__main__":
 
         for agent_idx, agent in enumerate(agents):
             if agent is not None:
-                agent.train(True, count)
+                agent.train(True, trick_count)
 
         if episode % SAVE_EVERY == 0:
             for i, agent in enumerate(agents):
