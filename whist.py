@@ -431,6 +431,36 @@ class Whist:
         
         return winner
 
+def reset_to_fixed(self):
+        self.deck = wg.Deck()
+        self.deck.shuffle()
+        self.trick_winner = None
+        self.turn_counter = 0
+        self.score_array = [0] * 4
+        self.next_player_is_winner = None  # Reset winner tracking
+        for player in self.players:
+            player.resetting_observation()
+
+        for player in self.players:
+            player.hand = []
+
+        self.static_hands = {}
+        self.deal_cards()
+        self.round_list = []
+        self.current_player_idx = np.random.randint(0, 4)
+        self.cards_array = [0] * ARRAY_LENGTH
+        self.round_array = [0] * ARRAY_LENGTH
+        self.player1_cards = [0] * ARRAY_LENGTH
+        self.player2_cards = [0] * ARRAY_LENGTH
+        self.player3_cards = [0] * ARRAY_LENGTH
+        self.player4_cards = [0] * ARRAY_LENGTH
+        self._initialize_player_card_tracking()
+        
+        # Reset reward statistics for new episode
+        self.reset_reward_stats()
+
+        init_state = self.get_init_state()
+        return init_state
 
 
 if __name__ == '__main__':

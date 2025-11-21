@@ -13,7 +13,7 @@ def load_full_agent(filename):
     return agent
 
 
-def load_agent_weights(agent, filename="whist_dqn_agent_.weights.h5"):
+def load_agent_weights(agent, filename="Models/full_agent_player_0_ep500.keras"):
     agent.model.load_weights(filename)
     print("Agent weights loaded successfully")
 
