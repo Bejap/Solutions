@@ -17,6 +17,8 @@ GAMMA_VALUES = [0.99, 0.95, 0.90, 0.85]
 SAVE_EVERY = 500
 LOG_GAME_EVERY = 50  # Save detailed game logs every 50 games
 LOG_START_AFTER = 249  # Start logging after first 250 games
+BENCHMARK_GAME_EVERY = 100  # Use fixed seed every 100 games for benchmarking
+BENCHMARK_SEED = 42  # Fixed seed for reproducible benchmark games
 
 # Configure logging for monitoring
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -43,7 +45,15 @@ if __name__ == "__main__":
         trick_count = 0
         episode_rewards = [0, 0, 0, 0]
 
-        start_state = game.reset()
+        # Use fixed seed for every 100th game (benchmark games)
+        # This allows tracking model improvement on identical scenarios
+        is_benchmark_game = (episode % BENCHMARK_GAME_EVERY == 0)
+        if is_benchmark_game:
+            start_state = game.reset(seed=BENCHMARK_SEED)
+            logger.info(f"Episode {episode}: BENCHMARK GAME (using fixed seed {BENCHMARK_SEED})")
+        else:
+            start_state = game.reset()
+        
         episode_rewards = [0, 0, 0, 0]
         done = False
         pending_transitions = []
@@ -54,7 +64,7 @@ if __name__ == "__main__":
         # Start logging if this is a logged game
         if should_log_game:
             starting_player_idx = game.current_player_idx
-            game_logger.start_game(episode, starting_player_idx, game.players, trump_suit='Spades')
+            game_logger.start_game(episode, starting_player_idx, game.players, trump_suit='Spades', is_benchmark=is_benchmark_game)
 
         while trick_count < ARRAY_LENGTH and not done:  # Complete all tricks
             for _ in range(4):
