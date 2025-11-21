@@ -11,7 +11,7 @@ UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
 MODEL_NAME = 'smalle'
 MIN_REWARD = -200  # For model save
 MEMORY_FRACTION = 0.35
-ARRAY_LENGTH = 13
+ARRAY_LENGTH = 52
 
 class DQNAgent:
     def __init__(self, input_size: int, gamma):
@@ -133,7 +133,7 @@ class DQNAgent:
                 new_q = reward
 
             # Update Q value for given state
-            current_qs = current_qs_list[index].copy()
+            current_qs = current_qs_list[index].numpy().copy()
             current_qs[action] = new_q
 
             # And append to training data
@@ -185,7 +185,7 @@ class DQNAgent:
             [game_data, player_data, tracking_data, score_data],
             verbose=0,
             batch_size=1
-        )[0]
+        )
 
     def predict_action(self, state):
         state_input = self._flat_the_state(state)  # Ensure correct shape

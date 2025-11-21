@@ -15,10 +15,22 @@ This is a machine learning project that implements a Deep Q-Network (DQN) agent 
 
 ## Game Configuration
 
-The game uses **13 cards per player** (13 total cards: ranks 2-A in Hearts suit):
+The game uses a **full 52-card deck** with **Spades as the locked trump suit**:
 
-- Each game consists of **13 tricks** (one per card)
-- Each player gets 3 cards dealt at the start (12 total, with 1 card remaining)
+- **Full standard deck**: 13 ranks × 4 suits = 52 cards
+- **Suits**: Clubs, Diamonds, Hearts, and Spades
+- **Trump suit**: Spades (locked, cannot be changed)
+- **Cards per player**: 13 (52 ÷ 4 players)
+- **Tricks per game**: 13 (one per card in each player's hand)
+
+### Trump Rules
+
+- **Trump beats everything**: Any Spade beats any non-Spade card
+- **Highest trump wins**: When multiple Spades are played, highest rank wins
+- **No trump**: When no Spades played, highest card in led suit wins
+- **Following suit**: Players must follow the led suit if able
+
+See `docs/trump_system.md` for complete trump rules and examples.
 
 ## Team Structure
 
@@ -29,10 +41,22 @@ The game uses a traditional 4-player setup with two teams:
 
 North and South agents learn to cooperate as partners on the same team. East and West provide consistent, challenging opponents using bridge-like playing strategies. See `docs/team_structure.md` for more details.
 
+## Reward System
+
+The game uses a sophisticated reward structure to train the agents:
+
+- **+1** for winning a trick
+- **+0.8** for partner winning a trick  
+- **-1** for losing a trick
+- **+10** for winning the game
+- **-20** for losing the game
+
+Only the two DQN agents (positions 0 and 2) receive rewards. The system includes comprehensive monitoring and statistics tracking. See `docs/reward_system.md` for complete details.
+
 ## Files
 
 - `whist_game.py` - Core game classes (Card, Deck, Player)
-- `whist.py` - Main Whist game environment implementation
+- `whist.py` - Main Whist game environment implementation with reward system
 - `simple_whist_DQN.py` - DQN agent implementation
 - `ew_strategy.py` - Strategic rule-based player for East-West positions
 - `model_training.py` - Training loop for the DQN agents
@@ -40,7 +64,11 @@ North and South agents learn to cooperate as partners on the same team. East and
 - `loading_model.py` - Load and use saved models
 - `model_plotting.py` - Visualization tools for training results
 - `game.py` - Simple game initialization script
-- `docs/` - Documentation folder with architecture details, optimization suggestions and team structure info
+- `test_reward_system.py` - Test script to verify reward distribution
+- `test_trump_system.py` - Test script to verify trump system
+- `Weights/` - Directory for saving model weights (*.h5 files)
+- `Models/` - Directory for saving full models (*.keras files)
+- `docs/` - Documentation folder with architecture, optimization, team structure, reward system, and trump system info
 
 ## Requirements
 
@@ -88,8 +116,9 @@ The DQN agent uses a multi-input neural network architecture that processes:
 
 The agent learns through experience replay and uses a target network for stable training. The network architecture includes:
 - 3 hidden layers (128, 64, and 32 units) with dropout (rate=0.35)
-- Input dimensions for 13-card game
-- Approximately ~28,000 parameters
+- **Input dimensions for 52-card game** (full deck with trump)
+- Input size: (52 * 7) + 4 + 4 = **372 features**
+- Approximately ~56,000 parameters (adjusted for 52-card deck)
 - Batch size of 32 for stable gradient updates
 
 ### Performance Optimizations
