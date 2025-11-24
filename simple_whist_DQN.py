@@ -194,7 +194,7 @@ class DQNAgent:
             [game_data, player_data, tracking_data, score_data],
             verbose=0,
             batch_size=1
-        )[0]
+        )
 
     def predict_action(self, state):
         state_input = self._flat_the_state(state)  # Ensure correct shape

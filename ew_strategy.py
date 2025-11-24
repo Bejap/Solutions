@@ -32,7 +32,7 @@ class EWStrategy:
         
         Args:
             player: The player object
-            valid_actions: List of valid action indices (not used, we determine from hand)
+            valid_actions: List of valid action indices that respect follow suit rules
             
         Returns:
             The chosen action index (0, 1, or 2 for position in sorted hand)
@@ -40,31 +40,32 @@ class EWStrategy:
         # Make sure hand is sorted
         player._sort_hand()
         
-        if not player.hand:
-            return 0
+        if not player.hand or not valid_actions:
+            return valid_actions[0] if valid_actions else 0
         
-        # 20% of the time, play randomly
+        # 20% of the time, play randomly (from valid actions only)
         if random.random() < self.random_play_probability:
-            return random.randint(0, len(player.hand) - 1)
+            return random.choice(valid_actions)
         
-        # 80% of the time, use strategic play
-        return self._strategic_action(player)
+        # 80% of the time, use strategic play (from valid actions only)
+        return self._strategic_action(player, valid_actions)
     
-    def _strategic_action(self, player):
+    def _strategic_action(self, player, valid_actions):
         """
         Choose an action based on strategic rules.
         
         Args:
             player: The player object (with sorted hand)
+            valid_actions: List of valid action indices that follow suit rules
             
         Returns:
-            The chosen action index (0-2, position in sorted hand)
+            The chosen action index from valid_actions
         """
-        # Get all cards in hand
-        valid_cards = player.hand
+        # Get only the valid cards (those that follow suit rules)
+        valid_cards = [player.hand[i] for i in valid_actions]
         
         if not valid_cards:
-            return 0
+            return valid_actions[0] if valid_actions else 0
         
         # Determine if we're leading or following
         is_leading = len(self.game_state.round_list) == 0
@@ -74,13 +75,13 @@ class EWStrategy:
         else:
             chosen_card = self._choose_follow(player, valid_cards)
         
-        # Return the index of the chosen card in the sorted hand
-        for i, card in enumerate(player.hand):
-            if card == chosen_card:
+        # Return the index of the chosen card in the sorted hand (must be in valid_actions)
+        for i in valid_actions:
+            if player.hand[i] == chosen_card:
                 return i
         
-        # Fallback to first card
-        return 0
+        # Fallback to first valid action
+        return valid_actions[0]
     
     def _choose_lead(self, valid_cards):
         """

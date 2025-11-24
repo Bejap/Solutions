@@ -6,7 +6,9 @@ class Card:
                    '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14
                    }
 
-    SUIT_VALUES = {'Hearts': 0}
+    # Full set of 4 suits: Spades is trump (value 3)
+    SUIT_VALUES = {'Clubs': 0, 'Diamonds': 1, 'Hearts': 2, 'Spades': 3}
+    TRUMP_SUIT = 'Spades'  # Trump suit is locked to Spades
 
     def __init__(self, suit, rank):
         self.suit = suit
@@ -21,6 +23,10 @@ class Card:
     def _get_suit_value(self):
         """Convert suit to numerical value for sorting."""
         return self.SUIT_VALUES[self.suit]
+    
+    def is_trump(self):
+        """Check if this card is a trump card."""
+        return self.suit == Card.TRUMP_SUIT
 
     def __repr__(self):
         return f"{self.rank} of {self.suit}"
