@@ -112,7 +112,7 @@ class WhistTrainer:
         
         # Only train agents for North (0) and South (2) positions, which are on the same team
         self.agents = [
-            DQNAgent((self.ARRAY_LENGTH * 7) + 4 + 4, gamma=self.GAMMA_VALUES[i]) if i in DQN_AGENT_POSITIONS else None 
+            DQNAgent((self.ARRAY_LENGTH * 7) + 4 + 4, gamma=self.GAMMA_VALUES[i], agent_id=i) if i in DQN_AGENT_POSITIONS else None 
             for i in range(NUM_PLAYERS)
         ]
         

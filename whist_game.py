@@ -1,7 +1,8 @@
 import random
+from base_classes import BaseCard, BaseDeck, BasePlayer
 
 
-class Card:
+class Card(BaseCard):
     RANK_VALUES = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8,
                    '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14
                    }
@@ -30,11 +31,49 @@ class Card:
 
     def __repr__(self):
         return f"{self.rank} of {self.suit}"
+    
+    def compare_to(self, other, led_suit=None):
+        """
+        Compare this card to another card considering trump and led suit.
+        
+        Args:
+            other: Another Card object
+            led_suit: The suit that was led in the trick
+            
+        Returns:
+            Positive if this card wins, negative if it loses, 0 if equal
+        """
+        # Trump always beats non-trump
+        if self.is_trump() and not other.is_trump():
+            return 1
+        if not self.is_trump() and other.is_trump():
+            return -1
+        
+        # Both trump or both not trump
+        if self.is_trump() and other.is_trump():
+            # Compare trump ranks
+            return self.rank_value - other.rank_value
+        
+        # Neither is trump - check if following led suit
+        if led_suit:
+            if self.suit == led_suit and other.suit != led_suit:
+                return 1
+            if self.suit != led_suit and other.suit == led_suit:
+                return -1
+            # Both following or both not following led suit
+            if self.suit == other.suit:
+                return self.rank_value - other.rank_value
+        
+        # Default comparison by rank if same suit
+        if self.suit == other.suit:
+            return self.rank_value - other.rank_value
+        
+        return 0
 
 
-class Deck:
+class Deck(BaseDeck):
     def __init__(self):
-        self.card_deck = []
+        super().__init__()
         for suit in Card.SUIT_VALUES:
             for rank in Card.RANK_VALUES:
                 self.card_deck.append(Card(suit, rank))
@@ -45,17 +84,10 @@ class Deck:
     def deal(self, num_cards: int):
         return [self.card_deck.pop() for _ in range(num_cards)]
 
-    def get_deck(self):
-        return self.card_deck
 
-
-class Player:
+class Player(BasePlayer):
     def __init__(self, id):
-        self.last_played_card = None
-        self.hand = []
-        self.tricks_won = 0
-        self.id = id
-        self.known_actions = []
+        super().__init__(id)
 
     def action(self, choice):
         self._sort_hand()
@@ -63,10 +95,6 @@ class Player:
             return self.hand[choice]
         # Fallback to first card if choice is out of range
         return self.hand[0] if self.hand else None
-
-    def observe(self, player_id, action):
-        if player_id != self.id:
-            self.known_actions.append((player_id, action))
 
     def return_other_hand(self, hand, list_length):
         player_card_list = [[0] * list_length for _ in range(4)]
@@ -82,9 +110,6 @@ class Player:
         # print(player_card_list[0], player_card_list[1], player_card_list[2], player_card_list[3], "\n")
 
         return player_card_list[0], player_card_list[1], player_card_list[2], player_card_list[3]
-
-    def resetting_observation(self):
-        self.known_actions = []
 
     def _sort_hand(self):
         self.hand.sort(key=lambda card: (card.suit_value, card.rank_value))

@@ -2,6 +2,8 @@ import numpy as np
 import tensorflow as tf
 from collections import deque
 import random
+from typing import List, Optional, Any, Tuple
+from base_classes import BaseAgent
 from constants import (
     DEFAULT_GAMMA,
     REPLAY_MEMORY_SIZE,
@@ -22,8 +24,9 @@ from constants import (
     DROPOUT_RATE
 )
 
-class DQNAgent:
-    def __init__(self, input_size: int, gamma):
+class DQNAgent(BaseAgent):
+    def __init__(self, input_size: int, gamma, agent_id: int = 0):
+        super().__init__(agent_id)
         self.input_shape = input_size
         self.model = self.create_model()
         self.gamma = gamma
@@ -200,6 +203,38 @@ class DQNAgent:
         state_input = self._flat_the_state(state)  # Ensure correct shape
         q_values = self.model.predict(state_input, verbose=0)  # Get Q-values
         return np.argmax(q_values)  # Choose best action
+    
+    def choose_action(self, state: Any, valid_actions: List[int], epsilon: Optional[float] = None) -> int:
+        """
+        Choose an action using epsilon-greedy strategy.
+        
+        Args:
+            state: The current game state
+            valid_actions: List of valid action indices
+            epsilon: Exploration rate (if None, always exploit)
+            
+        Returns:
+            The chosen action index
+        """
+        if epsilon is not None and np.random.random() < epsilon:
+            # Explore: choose random valid action
+            return np.random.choice(valid_actions) if valid_actions else 0
+        else:
+            # Exploit: choose best valid action based on Q-values
+            qs = self.get_qs(state)[0]
+            valid_qs = [(action, qs[action]) for action in valid_actions if action < len(qs)]
+            if valid_qs:
+                return max(valid_qs, key=lambda x: x[1])[0]
+            return valid_actions[0] if valid_actions else 0
+    
+    def update(self, transition: Tuple) -> None:
+        """
+        Update the agent with a new transition (for BaseAgent compatibility).
+        
+        Args:
+            transition: Tuple of (state, action, reward, next_state, done)
+        """
+        self.update_replay_memory(transition)
 
     def save_agent(agent, filename):
         agent.model.save_weights(filename)

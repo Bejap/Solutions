@@ -1,6 +1,13 @@
 import whist_game as wg
 import numpy as np
-from constants import LEGACY_EPISODES, LEGACY_EPSILON_DECAY, DEFAULT_MIN_EPSILON, ARRAY_LENGTH
+import random
+import logging
+from base_classes import BaseGame
+from constants import LEGACY_EPISODES, LEGACY_EPSILON_DECAY, DEFAULT_MIN_EPSILON, ARRAY_LENGTH, NUM_PLAYERS
+
+# Configure logger for reward monitoring
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
 
 EPISODES = LEGACY_EPISODES
 
@@ -9,8 +16,9 @@ EPSILON_DECAY = LEGACY_EPSILON_DECAY
 MIN_EPSILON = DEFAULT_MIN_EPSILON
 
 
-class Whist:
+class Whist(BaseGame):
     def __init__(self, player_names: list):
+        super().__init__(NUM_PLAYERS)
         self.deck = wg.Deck()
         self.players = [wg.Player(name) for name in player_names]
         self.team_1 = [self.players[0], self.players[2]]

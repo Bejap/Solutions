@@ -8,10 +8,11 @@ randomly 20% of the time.
 
 import random
 import whist_game as wg
+from base_classes import BaseStrategy, BasePlayer
 from constants import EW_RANDOM_PLAY_PROBABILITY
 
 
-class EWStrategy:
+class EWStrategy(BaseStrategy):
     """Strategic player for East-West positions following bridge-like rules."""
     
     def __init__(self, player_id, game_state):
@@ -22,11 +23,11 @@ class EWStrategy:
             player_id: The ID of the player (1-4)
             game_state: The current game state object
         """
-        self.player_id = player_id
+        super().__init__(player_id)
         self.game_state = game_state
         self.random_play_probability = EW_RANDOM_PLAY_PROBABILITY  # 20% random play
     
-    def choose_action(self, player, valid_actions):
+    def choose_action(self, player: BasePlayer, valid_actions):
         """
         Choose an action based on strategic rules or random play.
         

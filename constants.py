@@ -12,8 +12,9 @@ This module contains all constants used across the project, including:
 # GAME CONFIGURATION
 # =============================================================================
 
-# Number of cards in the game (Hearts 2-A)
-ARRAY_LENGTH = 13
+# Number of cards in the game (Full 52-card deck: 13 ranks × 4 suits)
+# This represents the state array size for tracking all possible cards
+ARRAY_LENGTH = 52
 
 # Number of players
 NUM_PLAYERS = 4
@@ -75,16 +76,17 @@ DEFAULT_GAMMA = 0.99
 # MODEL ARCHITECTURE
 # =============================================================================
 
-# State size calculation: (ARRAY_LENGTH * 7) + 4 + 4 = 91 + 4 + 4 = 99
+# State size calculation: (ARRAY_LENGTH * 7) + 4 + 4 = 364 + 4 + 4 = 372
 # Breaking down:
-# - ARRAY_LENGTH * 2: cards_array + round_array = 26
-# - ARRAY_LENGTH + 4: hand_array + player_array = 17
-# - ARRAY_LENGTH * 4: tracking for 4 players = 52
+# - ARRAY_LENGTH * 2: cards_array + round_array = 104
+# - ARRAY_LENGTH + 4: hand_array + player_array = 56
+# - ARRAY_LENGTH * 4: tracking for 4 players = 208
 # - 4: score_array
-STATE_SIZE = 91  # Used in model_testing.py
+STATE_SIZE = 372  # Updated for 52-card deck
 
-# Action size (number of possible card actions)
-ACTION_SIZE = 13  # Same as ARRAY_LENGTH
+# Action size (number of possible card actions) 
+# Note: In practice, action space is dynamic based on hand size (13 cards per player)
+ACTION_SIZE = 13  # Cards per player in a 4-player game
 
 # Input dimensions for multi-input neural network
 GAME_INPUT_SIZE = ARRAY_LENGTH * 2  # cards_array + round_array
@@ -118,3 +120,25 @@ FULL_AGENT_PATTERN = "{dir}/full_agent_player_{player}_ep{episode}.keras"
 
 # Probability of random play for EW strategy players
 EW_RANDOM_PLAY_PROBABILITY = 0.2  # 20% random, 80% strategic
+
+
+# =============================================================================
+# INHERITANCE & CLASS STRUCTURE
+# =============================================================================
+
+# Base class configuration
+BASE_CLASSES_MODULE = "base_classes"
+
+# Agent types for polymorphic behavior
+AGENT_TYPE_DQN = "DQN"
+AGENT_TYPE_STRATEGY = "STRATEGY"
+AGENT_TYPE_RANDOM = "RANDOM"
+
+# Strategy types
+STRATEGY_EW = "EW_STRATEGY"  # East-West bridge-like strategy
+STRATEGY_RANDOM = "RANDOM_STRATEGY"  # Random play strategy
+
+# Player types
+PLAYER_TYPE_HUMAN = "HUMAN"
+PLAYER_TYPE_AI = "AI"
+PLAYER_TYPE_STRATEGY = "STRATEGY"
