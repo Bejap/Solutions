@@ -2,16 +2,25 @@ import numpy as np
 import tensorflow as tf
 from collections import deque
 import random
-
-GAMMA = 0.99
-REPLAY_MEMORY_SIZE = 100  # How many last steps to keep for model training
-MIN_REPLAY_MEMORY_SIZE = 100  # Reduced from 1000 to 100 for faster training startup
-MINIBATCH_SIZE = 32  # Increased from 8 to 32 for more stable and faster training
-UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
-MODEL_NAME = 'smalle'
-MIN_REWARD = -200  # For model save
-MEMORY_FRACTION = 0.35
-ARRAY_LENGTH = 52
+from constants import (
+    DEFAULT_GAMMA,
+    REPLAY_MEMORY_SIZE,
+    MIN_REPLAY_MEMORY_SIZE,
+    MINIBATCH_SIZE,
+    UPDATE_TARGET_EVERY,
+    MODEL_NAME,
+    MIN_REWARD,
+    MEMORY_FRACTION,
+    ARRAY_LENGTH,
+    GAME_INPUT_SIZE,
+    PLAYER_INPUT_SIZE,
+    TRACKING_INPUT_SIZE,
+    SCORE_INPUT_SIZE,
+    HIDDEN_LAYER_1_SIZE,
+    HIDDEN_LAYER_2_SIZE,
+    HIDDEN_LAYER_3_SIZE,
+    DROPOUT_RATE
+)
 
 class DQNAgent:
     def __init__(self, input_size: int, gamma):
@@ -27,24 +36,24 @@ class DQNAgent:
         self.target_update_counter = 0
 
     def create_model(self):
-        game_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH * 2,))
-        player_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH + 4,))
-        tracking_input = tf.keras.layers.Input(shape=(ARRAY_LENGTH * 4,))
-        score_input = tf.keras.layers.Input(shape=(4,))
+        game_input = tf.keras.layers.Input(shape=(GAME_INPUT_SIZE,))
+        player_input = tf.keras.layers.Input(shape=(PLAYER_INPUT_SIZE,))
+        tracking_input = tf.keras.layers.Input(shape=(TRACKING_INPUT_SIZE,))
+        score_input = tf.keras.layers.Input(shape=(SCORE_INPUT_SIZE,))
 
-        game_features = tf.keras.layers.Dense(ARRAY_LENGTH * 2, activation='relu')(game_input)
-        player_features = tf.keras.layers.Dense(ARRAY_LENGTH + 4, activation='relu')(player_input)
-        tracking_features = tf.keras.layers.Dense(ARRAY_LENGTH * 4, activation='relu')(tracking_input)
+        game_features = tf.keras.layers.Dense(GAME_INPUT_SIZE, activation='relu')(game_input)
+        player_features = tf.keras.layers.Dense(PLAYER_INPUT_SIZE, activation='relu')(player_input)
+        tracking_features = tf.keras.layers.Dense(TRACKING_INPUT_SIZE, activation='relu')(tracking_input)
         score_features = tf.keras.layers.Dense(ARRAY_LENGTH, activation='relu')(score_input)
 
         combined = tf.keras.layers.Concatenate()([game_features, player_features, tracking_features, score_features])
 
-        hidden1 = tf.keras.layers.Dense(128, activation='relu')(combined)
-        dropout1 = tf.keras.layers.Dropout(0.35)(hidden1)
-        hidden2 = tf.keras.layers.Dense(64, activation='relu')(dropout1)
-        dropout2 = tf.keras.layers.Dropout(0.35)(hidden2)
-        hidden3 = tf.keras.layers.Dense(32, activation='relu')(dropout2)
-        dropout3 = tf.keras.layers.Dropout(0.35)(hidden3)
+        hidden1 = tf.keras.layers.Dense(HIDDEN_LAYER_1_SIZE, activation='relu')(combined)
+        dropout1 = tf.keras.layers.Dropout(DROPOUT_RATE)(hidden1)
+        hidden2 = tf.keras.layers.Dense(HIDDEN_LAYER_2_SIZE, activation='relu')(dropout1)
+        dropout2 = tf.keras.layers.Dropout(DROPOUT_RATE)(hidden2)
+        hidden3 = tf.keras.layers.Dense(HIDDEN_LAYER_3_SIZE, activation='relu')(dropout2)
+        dropout3 = tf.keras.layers.Dropout(DROPOUT_RATE)(hidden3)
 
         # Output layer for Q-values
         output = tf.keras.layers.Dense(ARRAY_LENGTH, activation='linear')(dropout3)  # 13 possible card actions
@@ -133,7 +142,7 @@ class DQNAgent:
                 new_q = reward
 
             # Update Q value for given state
-            current_qs = current_qs_list[index].numpy().copy()
+            current_qs = np.array(current_qs_list[index])
             current_qs[action] = new_q
 
             # And append to training data

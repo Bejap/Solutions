@@ -1,18 +1,12 @@
 import whist_game as wg
 import numpy as np
-import logging
-import random
+from constants import LEGACY_EPISODES, LEGACY_EPSILON_DECAY, DEFAULT_MIN_EPSILON, ARRAY_LENGTH
 
-EPISODES = 250
+EPISODES = LEGACY_EPISODES
 
 epsilon = 1
-EPSILON_DECAY = 0.99
-MIN_EPSILON = 0.001
-ARRAY_LENGTH = 52  # Full deck: 13 ranks * 4 suits
-
-# Configure logging for monitoring reward system
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+EPSILON_DECAY = LEGACY_EPSILON_DECAY
+MIN_EPSILON = DEFAULT_MIN_EPSILON
 
 
 class Whist:

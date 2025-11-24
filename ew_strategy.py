@@ -8,6 +8,7 @@ randomly 20% of the time.
 
 import random
 import whist_game as wg
+from constants import EW_RANDOM_PLAY_PROBABILITY
 
 
 class EWStrategy:
@@ -23,7 +24,7 @@ class EWStrategy:
         """
         self.player_id = player_id
         self.game_state = game_state
-        self.random_play_probability = 0.2  # 20% random play
+        self.random_play_probability = EW_RANDOM_PLAY_PROBABILITY  # 20% random play
     
     def choose_action(self, player, valid_actions):
         """
