@@ -14,6 +14,7 @@ from constants import (
     MIN_REWARD,
     MEMORY_FRACTION,
     ARRAY_LENGTH,
+    ACTION_SIZE,
     GAME_INPUT_SIZE,
     PLAYER_INPUT_SIZE,
     TRACKING_INPUT_SIZE,
@@ -59,7 +60,7 @@ class DQNAgent(BaseAgent):
         dropout3 = tf.keras.layers.Dropout(DROPOUT_RATE)(hidden3)
 
         # Output layer for Q-values
-        output = tf.keras.layers.Dense(ARRAY_LENGTH, activation='linear')(dropout3)  # 13 possible card actions
+        output = tf.keras.layers.Dense(ACTION_SIZE, activation='linear')(dropout3)  # ACTION_SIZE card actions
 
         # Create model with multiple inputs
         model = tf.keras.Model(

@@ -3,7 +3,14 @@ import numpy as np
 import random
 import logging
 from base_classes import BaseGame
-from constants import LEGACY_EPISODES, LEGACY_EPSILON_DECAY, DEFAULT_MIN_EPSILON, ARRAY_LENGTH, NUM_PLAYERS
+from constants import (
+    LEGACY_EPISODES, 
+    LEGACY_EPSILON_DECAY, 
+    DEFAULT_MIN_EPSILON, 
+    ARRAY_LENGTH, 
+    NUM_PLAYERS,
+    CARDS_PER_PLAYER
+)
 
 # Configure logger for reward monitoring
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -88,7 +95,9 @@ class Whist(BaseGame):
 
     def deal_cards(self):
         self.deck.shuffle()
-        cards_per_player = len(self.deck.get_deck()) // len(self.players)  # CHANGE THIS
+        # Use CARDS_PER_PLAYER from constants instead of calculating from deck size
+        # This allows for smaller game variants (e.g., 9 or 11 cards per player)
+        cards_per_player = CARDS_PER_PLAYER
 
         for player in self.players:
             player.hand = self.deck.deal(cards_per_player)

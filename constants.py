@@ -12,12 +12,18 @@ This module contains all constants used across the project, including:
 # GAME CONFIGURATION
 # =============================================================================
 
-# Number of cards in the game (Full 52-card deck: 13 ranks × 4 suits)
-# This represents the state array size for tracking all possible cards
-ARRAY_LENGTH = 52
-
 # Number of players
 NUM_PLAYERS = 4
+
+# Cards dealt to each player (adjust this for smaller games)
+# For full whist game: 13 cards per player (52 total)
+# For smaller games: 9 or 11 cards per player
+CARDS_PER_PLAYER = 13
+
+# Total number of cards in the game (calculated from cards per player)
+# This represents the state array size for tracking all possible cards
+# Note: Set CARDS_PER_PLAYER to adjust game size, not ARRAY_LENGTH directly
+ARRAY_LENGTH = CARDS_PER_PLAYER * NUM_PLAYERS  # e.g., 13 * 4 = 52
 
 # Player positions (teams: 0-2 and 1-3 are partners)
 NORTH = 0
@@ -76,18 +82,20 @@ DEFAULT_GAMMA = 0.99
 # MODEL ARCHITECTURE
 # =============================================================================
 
-# State size calculation: (ARRAY_LENGTH * 7) + 4 + 4 = 372
-# Breaking down for 52-card deck:
-# - ARRAY_LENGTH * 2 = 52 * 2 = 104: cards_array + round_array
-# - ARRAY_LENGTH + 4 = 52 + 4 = 56: hand_array + player_array
-# - ARRAY_LENGTH * 4 = 52 * 4 = 208: tracking for 4 players
+# State size calculation: (ARRAY_LENGTH * 7) + 4 + 4
+# Breaking down:
+# - ARRAY_LENGTH * 2: cards_array + round_array
+# - ARRAY_LENGTH + 4: hand_array + player_array
+# - ARRAY_LENGTH * 4: tracking for 4 players
 # - 4: score_array
-# Total: 104 + 56 + 208 + 4 = 372
-STATE_SIZE = 372  # Updated for 52-card deck
+# Total: (ARRAY_LENGTH * 7) + 8
+# Example for 52 cards: (52 * 7) + 8 = 372
+# Example for 44 cards (11 per player): (44 * 7) + 8 = 316
+STATE_SIZE = (ARRAY_LENGTH * 7) + 8  # Automatically calculated based on ARRAY_LENGTH
 
 # Action size (number of possible card actions) 
-# Note: In practice, action space is dynamic based on hand size (13 cards per player)
-ACTION_SIZE = 13  # Cards per player in a 4-player game
+# Note: In practice, action space is dynamic based on hand size
+ACTION_SIZE = CARDS_PER_PLAYER  # Cards per player
 
 # Input dimensions for multi-input neural network
 GAME_INPUT_SIZE = ARRAY_LENGTH * 2  # cards_array + round_array
@@ -96,10 +104,17 @@ TRACKING_INPUT_SIZE = ARRAY_LENGTH * 4  # All 4 players' card tracking
 SCORE_INPUT_SIZE = 4  # score_array for 4 players
 
 # Network architecture
+# Note: These can be adjusted based on game size
+# Smaller games (9-11 cards) may benefit from smaller networks
 HIDDEN_LAYER_1_SIZE = 128
 HIDDEN_LAYER_2_SIZE = 64
 HIDDEN_LAYER_3_SIZE = 32
 DROPOUT_RATE = 0.35
+
+# For smaller games, you might want to use:
+# HIDDEN_LAYER_1_SIZE = 64
+# HIDDEN_LAYER_2_SIZE = 32
+# HIDDEN_LAYER_3_SIZE = 16
 
 
 # =============================================================================
