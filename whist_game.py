@@ -13,8 +13,7 @@ class Card(BaseCard):
 
     def __init__(self, suit, rank):
         super().__init__(suit, rank)
-        self.suit = suit
-        self.rank = rank
+        # Note: suit and rank are already set by BaseCard.__init__
         self.rank_value = self._get_rank_value()
         self.suit_value = self._get_suit_value()
 

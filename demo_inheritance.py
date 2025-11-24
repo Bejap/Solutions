@@ -97,7 +97,8 @@ def demonstrate_inheritance():
     ew_strategy = EWStrategy(2, game)
     print(f"   Created EWStrategy for player ID {ew_strategy.player_id}")
     print(f"   EWStrategy is BaseStrategy: {isinstance(ew_strategy, BaseStrategy)}")
-    print(f"   EWStrategy is BaseAgent: {isinstance(ew_strategy, BaseAgent)}")
+    print(f"   EWStrategy is NOT BaseAgent (by design): {isinstance(ew_strategy, BaseAgent)}")
+    print(f"   Note: Strategies and Agents have different interfaces intentionally")
     print(f"   Random play probability: {ew_strategy.random_play_probability}")
     print()
     

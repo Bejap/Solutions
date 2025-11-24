@@ -104,7 +104,16 @@ class BasePlayer(ABC):
 
 
 class BaseStrategy(ABC):
-    """Abstract base class for all playing strategies."""
+    """Abstract base class for all playing strategies.
+    
+    Note: BaseStrategy and BaseAgent have different choose_action signatures by design:
+    - BaseAgent.choose_action(state, valid_actions, epsilon) - works with encoded states
+    - BaseStrategy.choose_action(player, valid_actions) - works with player objects
+    
+    This is intentional: agents learn from abstract states, while strategies need
+    to inspect the actual player object (hand, observations, etc.) to make decisions.
+    They are not meant to be polymorphic with each other, as they serve different purposes.
+    """
     
     def __init__(self, player_id: int):
         """
