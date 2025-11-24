@@ -12,6 +12,7 @@ class Card(BaseCard):
     TRUMP_SUIT = 'Spades'  # Trump suit is locked to Spades
 
     def __init__(self, suit, rank):
+        super().__init__(suit, rank)
         self.suit = suit
         self.rank = rank
         self.rank_value = self._get_rank_value()

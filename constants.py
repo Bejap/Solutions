@@ -76,12 +76,13 @@ DEFAULT_GAMMA = 0.99
 # MODEL ARCHITECTURE
 # =============================================================================
 
-# State size calculation: (ARRAY_LENGTH * 7) + 4 + 4 = 364 + 4 + 4 = 372
-# Breaking down:
-# - ARRAY_LENGTH * 2: cards_array + round_array = 104
-# - ARRAY_LENGTH + 4: hand_array + player_array = 56
-# - ARRAY_LENGTH * 4: tracking for 4 players = 208
+# State size calculation: (ARRAY_LENGTH * 7) + 4 + 4 = 372
+# Breaking down for 52-card deck:
+# - ARRAY_LENGTH * 2 = 52 * 2 = 104: cards_array + round_array
+# - ARRAY_LENGTH + 4 = 52 + 4 = 56: hand_array + player_array
+# - ARRAY_LENGTH * 4 = 52 * 4 = 208: tracking for 4 players
 # - 4: score_array
+# Total: 104 + 56 + 208 + 4 = 372
 STATE_SIZE = 372  # Updated for 52-card deck
 
 # Action size (number of possible card actions) 

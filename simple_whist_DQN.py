@@ -216,16 +216,19 @@ class DQNAgent(BaseAgent):
         Returns:
             The chosen action index
         """
+        if not valid_actions:
+            return 0
+        
         if epsilon is not None and np.random.random() < epsilon:
             # Explore: choose random valid action
-            return np.random.choice(valid_actions) if valid_actions else 0
+            return np.random.choice(valid_actions)
         else:
             # Exploit: choose best valid action based on Q-values
             qs = self.get_qs(state)[0]
             valid_qs = [(action, qs[action]) for action in valid_actions if action < len(qs)]
             if valid_qs:
                 return max(valid_qs, key=lambda x: x[1])[0]
-            return valid_actions[0] if valid_actions else 0
+            return valid_actions[0]
     
     def update(self, transition: Tuple) -> None:
         """
@@ -236,10 +239,12 @@ class DQNAgent(BaseAgent):
         """
         self.update_replay_memory(transition)
 
+    @staticmethod
     def save_agent(agent, filename):
         agent.model.save_weights(filename)
         print(f"Agent weights saved to {filename}")
 
+    @staticmethod
     def save_full_agent(agent, filename):
         agent.model.save(filename)
         print(f"Full agent model saved to {filename}")
