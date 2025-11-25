@@ -136,10 +136,11 @@ The game uses a sophisticated reward structure to train the agents:
 - **-1** for losing a trick
 
 ### End-Game Rewards (New)
-The end-game reward is now based on `(tricks_won - max_tricks)` where `max_tricks = 13` (CARDS_PER_PLAYER). This means:
-- If an agent wins 5 tricks: reward = 5 - 13 = **-8**
-- If an agent wins 10 tricks: reward = 10 - 13 = **-3**
-- If an agent wins 13 tricks: reward = 13 - 13 = **0** (best possible)
+The end-game reward uses the formula: `(tricks_won - max_tricks) × (1 - tricks_won / 13) + team_bonus`
+
+- **Score multiplier**: Each agent's reward is multiplied by `(1 - tricks_won / 13)`
+- **Team bonus**: +2 if the team (agents combined) wins over 7 tricks
+- Example: Agent wins 5 tricks, team total 9: `(5-13) × (1-5/13) + 2 = -8 × 0.615 + 2 ≈ -2.9`
 
 ### Per-Card Rewards (New, Configurable)
 Agents can receive small rewards/penalties on each card play based on whether their choice matches what the EW strategy would play:

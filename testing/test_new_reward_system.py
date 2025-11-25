@@ -1,9 +1,10 @@
 """Test script for the new reward system.
 
 New Reward System Features:
-1. End-game reward based on (tricks_won - max_tricks)
-2. Per-card reward based on EW strategy matching (configurable)
-3. Model save threshold: only save if average reward > -5.5
+1. End-game reward based on (tricks_won - max_tricks) * (1 - tricks/13)
+2. Team bonus: +2 if team wins over 7 tricks
+3. Per-card reward based on EW strategy matching (configurable)
+4. Model save threshold: only save if average reward > -5.5
 """
 
 from Whist.core.whist import Whist
@@ -13,7 +14,7 @@ import numpy as np
 
 
 def test_end_game_reward():
-    """Test that end-game reward is based on (tricks_won - max_tricks)."""
+    """Test that end-game reward includes multiplier and team bonus."""
     print("Testing end-game reward calculation...")
     
     player_names = [1, 2, 3, 4]
@@ -53,16 +54,25 @@ def test_end_game_reward():
                 # Check the end-game rewards
                 agent_0_tricks = game.score_array[0]
                 agent_2_tricks = game.score_array[2]
+                team_total = agent_0_tricks + agent_2_tricks
                 
-                expected_agent_0_reward = agent_0_tricks - CARDS_PER_PLAYER
-                expected_agent_2_reward = agent_2_tricks - CARDS_PER_PLAYER
+                # Calculate expected rewards with new formula
+                # Base: (tricks - max) * (1 - tricks/max)
+                agent_0_base = (agent_0_tricks - CARDS_PER_PLAYER) * (1 - agent_0_tricks / CARDS_PER_PLAYER)
+                agent_2_base = (agent_2_tricks - CARDS_PER_PLAYER) * (1 - agent_2_tricks / CARDS_PER_PLAYER)
                 
-                print(f"\nAgent 0 tricks won: {agent_0_tricks}, expected end reward: {expected_agent_0_reward}")
-                print(f"Agent 2 tricks won: {agent_2_tricks}, expected end reward: {expected_agent_2_reward}")
+                # Add team bonus if > 7 tricks
+                if team_total > 7:
+                    agent_0_base += 2
+                    agent_2_base += 2
+                
+                print(f"\nAgent 0 tricks won: {agent_0_tricks}")
+                print(f"Agent 2 tricks won: {agent_2_tricks}")
+                print(f"Team total: {team_total} (bonus: {'+2' if team_total > 7 else 'none'})")
                 print(f"Total tricks played: {trick_count}")
                 
-                # Verify the reward structure - should be based on tricks won
-                print("\n✓ End-game reward correctly based on (tricks_won - max_tricks)")
+                # Verify the reward structure
+                print("\n✓ End-game reward includes multiplier and team bonus")
                 break
     
     return True

@@ -39,20 +39,27 @@ This feature:
 
 ### Game-Level Rewards (Updated)
 
-When the game ends (all cards played), reward is now based on `(tricks_won - max_tricks)`:
+When the game ends (all cards played), reward is calculated using:
 
-| Agent Tricks Won | End-Game Reward | Description |
-|------------------|-----------------|-------------|
-| 13 (max) | **0** | Perfect performance |
-| 10 | **-3** | Good performance |
-| 7 | **-6** | Average performance |
-| 3 | **-10** | Below average |
-| 0 | **-13** | Worst case |
+**Formula**: `(tricks_won - max_tricks) × (1 - tricks_won / max_tricks) + team_bonus`
+
+Where:
+- `max_tricks = 13` (CARDS_PER_PLAYER)
+- `team_bonus = +2` if team total tricks > 7, otherwise 0
+
+| Agent Tricks Won | Multiplier | Base Reward | With Team Bonus (if applicable) |
+|------------------|------------|-------------|--------------------------------|
+| 13 (max) | 0.00 | **0** | +2 (team wins) |
+| 10 | 0.23 | **-0.69** | +1.31 (team wins) |
+| 7 | 0.46 | **-2.77** | depends on team total |
+| 3 | 0.77 | **-7.69** | depends on team total |
+| 0 | 1.00 | **-13** | -13 (team likely loses) |
 
 This reward structure:
 - Provides granular feedback about individual agent performance
-- Ranges from -13 (won 0 tricks) to 0 (won all 13 tricks)
-- Uses `END_GAME_REWARD_MULTIPLIER` constant for scaling (default: 1.0)
+- Applies a diminishing multiplier `(1 - tricks/13)` to scale rewards
+- Awards +2 bonus to both agents if their team wins over 7 tricks total
+- Uses `END_GAME_REWARD_MULTIPLIER` constant for additional scaling (default: 1.0)
 
 ### Model Save Threshold
 

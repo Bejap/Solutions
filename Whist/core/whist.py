@@ -320,23 +320,34 @@ class Whist(BaseGame):
             # Calculate end-game reward for each agent based on their individual tricks won
             agent_0_tricks = self.score_array[0]
             agent_2_tricks = self.score_array[2]
+            team_1_score = agent_0_tricks + agent_2_tricks  # Agents' team total
+            team_2_score = self.score_array[1] + self.score_array[3]  # Opponents' team
             
-            # Reward is (tricks_won - max_tricks) * multiplier
-            # This gives a range from -max_tricks to 0 (since max possible is max_tricks)
+            # Base reward is (tricks_won - max_tricks) * multiplier
             agent_0_end_reward = (agent_0_tricks - max_tricks) * END_GAME_REWARD_MULTIPLIER
             agent_2_end_reward = (agent_2_tricks - max_tricks) * END_GAME_REWARD_MULTIPLIER
+            
+            # Apply score multiplier: (1 - amount_of_tricks / 13)
+            # This reduces reward as more tricks are won (encouraging efficiency)
+            agent_0_multiplier = 1 - (agent_0_tricks / max_tricks)
+            agent_2_multiplier = 1 - (agent_2_tricks / max_tricks)
+            agent_0_end_reward *= agent_0_multiplier
+            agent_2_end_reward *= agent_2_multiplier
+            
+            # Team bonus: +2 if team wins over 7 tricks
+            if team_1_score > 7:
+                agent_0_end_reward += 2
+                agent_2_end_reward += 2
             
             reward[0] += agent_0_end_reward
             reward[2] += agent_2_end_reward
             self.reward_stats['agent_0_total'] += agent_0_end_reward
             self.reward_stats['agent_2_total'] += agent_2_end_reward
             
-            team_1_score = self.score_array[0] + self.score_array[2]  # Agents' team
-            team_2_score = self.score_array[1] + self.score_array[3]  # Opponents' team
-            
             logger.info(f"Game ended. Team 1 Score: {team_1_score}, Team 2 Score: {team_2_score}. "
                        f"Agent 0 end reward: {agent_0_end_reward:.1f} (tricks: {agent_0_tricks}/{max_tricks}), "
-                       f"Agent 2 end reward: {agent_2_end_reward:.1f} (tricks: {agent_2_tricks}/{max_tricks})")
+                       f"Agent 2 end reward: {agent_2_end_reward:.1f} (tricks: {agent_2_tricks}/{max_tricks})"
+                       f"{' [+2 team bonus]' if team_1_score > 7 else ''}")
 
         # Update current_player_idx
         # If a trick was just completed, the winner should lead the next trick
