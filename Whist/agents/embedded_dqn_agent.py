@@ -233,7 +233,7 @@ class EmbeddedDQNAgent(BaseAgent):
             verbose=0
         )
     
-    def choose_action(self, state: Any, valid_actions: List[int], epsilon: Optional[float] = None) -> int:
+    def choose_action(self, state: Any, valid_actions: List[int], epsilon: Optional[float] = None, return_info: bool = False):
         """
         Choose an action using epsilon-greedy strategy.
         
@@ -241,22 +241,33 @@ class EmbeddedDQNAgent(BaseAgent):
             state: The current embedded state
             valid_actions: List of valid action indices
             epsilon: Exploration rate
+            return_info: If True, return (action, is_exploration, q_value) tuple
         
         Returns:
-            The chosen action index
+            The chosen action index, or tuple (action, is_exploration, q_value) if return_info=True
         """
         if not valid_actions:
+            if return_info:
+                return 0, False, None
             return 0
         
         if epsilon is not None and np.random.random() < epsilon:
             # Explore
-            return np.random.choice(valid_actions)
+            action = np.random.choice(valid_actions)
+            if return_info:
+                return action, True, None
+            return action
         else:
             # Exploit
             qs = self.get_qs(state)[0]
             valid_qs = [(action, qs[action]) for action in valid_actions if action < len(qs)]
             if valid_qs:
-                return max(valid_qs, key=lambda x: x[1])[0]
+                best_action, best_q = max(valid_qs, key=lambda x: x[1])
+                if return_info:
+                    return best_action, False, float(best_q)
+                return best_action
+            if return_info:
+                return valid_actions[0], False, None
             return valid_actions[0]
     
     def update(self, transition: Tuple) -> None:

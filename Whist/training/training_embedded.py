@@ -27,7 +27,7 @@ from Whist.utils.constants import (
 )
 
 
-def choose_embedded_agent_action(agent, current_state, epsilon: float, valid_actions) -> int:
+def choose_embedded_agent_action(agent, current_state, epsilon: float, valid_actions, return_info: bool = False):
     """
     Choose an action for an embedded agent using epsilon-greedy strategy.
     
@@ -36,14 +36,15 @@ def choose_embedded_agent_action(agent, current_state, epsilon: float, valid_act
         current_state: Current embedded state
         epsilon: Exploration rate
         valid_actions: List of valid action indices
+        return_info: If True, return (action, is_exploration, q_value) tuple
     
     Returns:
-        Chosen action index
+        Chosen action index, or tuple (action, is_exploration, q_value) if return_info=True
     """
     if agent is None:
         raise ValueError("agent must not be None")
     
-    return agent.choose_action(current_state, valid_actions, epsilon)
+    return agent.choose_action(current_state, valid_actions, epsilon, return_info=return_info)
 
 
 class EmbeddedWhistTrainer:
@@ -131,13 +132,22 @@ class EmbeddedWhistTrainer:
 
                     # Only use agent for North (0) and South (2)
                     if agent is not None:
-                        action = choose_embedded_agent_action(agent, current_state, self.epsilon, valid_actions)
-                        decision_type = 'agent'
+                        action, is_exploration, q_value = choose_embedded_agent_action(
+                            agent, current_state, self.epsilon, valid_actions, return_info=True
+                        )
+                        # Set decision_type based on whether agent explored or exploited
+                        if is_exploration:
+                            decision_type = 'random'
+                            certainty = None
+                        else:
+                            decision_type = 'agent'
+                            certainty = q_value
                     else:
                         # Use strategic play for East (1) and West (3)
                         ew_strategy = self.ew_strategies[current_player_index]
                         action = ew_strategy.choose_action(current_player, valid_actions)
                         decision_type = 'strategy'
+                        certainty = None
                     
                     # Get the card being played for logging
                     card_played = current_player.hand[action] if action < len(current_player.hand) else None
@@ -146,7 +156,7 @@ class EmbeddedWhistTrainer:
                     
                     # Log the card played
                     if should_log and card_played is not None:
-                        self.logger.log_card_played(current_player_index, card_played, decision_type=decision_type)
+                        self.logger.log_card_played(current_player_index, card_played, decision_type=decision_type, certainty=certainty)
                     
                     if rewards != 0:
                         episode_rewards[current_player_index] += rewards[current_player_index]
