@@ -136,7 +136,9 @@ class Whist(BaseGame):
         # Get EW strategy's preferred action
         try:
             ew_action = reference_strategy._strategic_action(current_player, valid_actions)
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError) as e:
+            # Log the error for debugging but don't crash - just return no reward
+            logger.debug(f"Per-card reward calculation failed: {e}")
             return 0.0
         
         # Reward if agent matches EW strategy
