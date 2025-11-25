@@ -1,3 +1,20 @@
+"""
+Model Training Script for DQN Agent
+
+This script trains the Whist DQN agent using one-hot encoding.
+
+Usage:
+    python model_training.py
+    
+    OR from project root:
+    python -m Whist.training.model_training
+"""
+
+# Add project root to path for direct script execution
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
 from Whist.training.training_logic import WhistTrainer
 from Whist.utils.constants import (
     DEFAULT_NUM_GAMES,

@@ -7,7 +7,15 @@ the number of cards per player, making it more flexible and compact.
 
 Usage:
     python model_training_embedded.py
+    
+    OR from project root:
+    python -m Whist.training.model_training_embedded
 """
+
+# Add project root to path for direct script execution
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from Whist.training.training_embedded import EmbeddedWhistTrainer
 from Whist.utils.constants import (
