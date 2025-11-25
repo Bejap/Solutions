@@ -12,7 +12,6 @@ from Whist.utils.constants import (
     CARDS_PER_PLAYER,
     ENABLE_PER_CARD_REWARD,
     PER_CARD_EW_STRATEGY_REWARD,
-    PER_CARD_EW_STRATEGY_PENALTY,
     END_GAME_REWARD_MULTIPLIER
 )
 
@@ -56,7 +55,7 @@ class Whist(BaseGame):
         # Per-card reward configuration
         self.enable_per_card_reward = enable_per_card_reward
         self.per_card_reward = PER_CARD_EW_STRATEGY_REWARD
-        self.per_card_penalty = PER_CARD_EW_STRATEGY_PENALTY
+        # No penalty for not matching EW strategy
         
         # Store EW strategy reference for per-card rewards (set externally)
         self.ew_strategies = None
@@ -141,13 +140,15 @@ class Whist(BaseGame):
             logger.debug(f"Per-card reward calculation failed: {e}")
             return 0.0
         
-        # Reward if agent matches EW strategy
+        # Reward only if agent matches EW strategy (no penalty for mismatch)
         if action == ew_action:
             self.reward_stats['per_card_rewards'] += self.per_card_reward
+            logger.debug(f"Player {player_idx} matched EW strategy [+{self.per_card_reward} EW match bonus]")
             return self.per_card_reward
         else:
-            self.reward_stats['per_card_rewards'] += self.per_card_penalty
-            return self.per_card_penalty
+            # No penalty for not matching - just return 0
+            logger.debug(f"Player {player_idx} did not match EW strategy [no penalty]")
+            return 0.0
     
     @staticmethod
     def _get_card_position(card: wg.Card):
@@ -334,8 +335,8 @@ class Whist(BaseGame):
             agent_0_end_reward *= agent_0_multiplier
             agent_2_end_reward *= agent_2_multiplier
             
-            # Team bonus: +2 if team wins over 7 tricks
-            if team_1_score > 7:
+            # Team bonus: +2 if team wins 7 or more tricks (wins the game)
+            if team_1_score >= 7:
                 agent_0_end_reward += 2
                 agent_2_end_reward += 2
             
@@ -347,7 +348,7 @@ class Whist(BaseGame):
             logger.info(f"Game ended. Team 1 Score: {team_1_score}, Team 2 Score: {team_2_score}. "
                        f"Agent 0 end reward: {agent_0_end_reward:.1f} (tricks: {agent_0_tricks}/{max_tricks}), "
                        f"Agent 2 end reward: {agent_2_end_reward:.1f} (tricks: {agent_2_tricks}/{max_tricks})"
-                       f"{' [+2 team bonus]' if team_1_score > 7 else ''}")
+                       f"{' [+2 team bonus]' if team_1_score >= 7 else ''}")
 
         # Update current_player_idx
         # If a trick was just completed, the winner should lead the next trick

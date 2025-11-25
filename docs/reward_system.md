@@ -23,17 +23,17 @@ This reward structure encourages:
 
 ### Per-Card Rewards (New, Configurable)
 
-Agents can receive small rewards/penalties on each card play based on whether their choice matches what the EW strategy would play:
+Agents can receive a small reward on each card play when their choice matches what the EW strategy would play:
 
 | Outcome | Reward | Description |
 |---------|--------|-------------|
-| Match EW strategy | **+0.1** | Agent plays the same card EW strategy would choose |
-| Differ from EW strategy | **-0.1** | Agent plays a different card |
+| Match EW strategy | **+0.2** | Agent plays the same card EW strategy would choose [+0.2 EW match bonus] |
+| Differ from EW strategy | **0** | No penalty for playing differently |
 
 This feature:
 - Can be disabled by setting `enable_per_card_reward=False` in the trainer
 - Can be configured via `ENABLE_PER_CARD_REWARD` in `constants.py`
-- Uses `PER_CARD_EW_STRATEGY_REWARD` and `PER_CARD_EW_STRATEGY_PENALTY` for customization
+- Uses `PER_CARD_EW_STRATEGY_REWARD = 0.2` for the reward amount
 
 **Note**: This feature is designed to be removable so the model doesn't become a copy of the EW strategy.
 
@@ -45,7 +45,7 @@ When the game ends (all cards played), reward is calculated using:
 
 Where:
 - `max_tricks = 13` (CARDS_PER_PLAYER)
-- `team_bonus = +2` if team total tricks > 7, otherwise 0
+- `team_bonus = +2` if team total tricks >= 7 (wins the game), otherwise 0
 
 | Agent Tricks Won | Multiplier | Base Reward | With Team Bonus (if applicable) |
 |------------------|------------|-------------|--------------------------------|
@@ -58,7 +58,7 @@ Where:
 This reward structure:
 - Provides granular feedback about individual agent performance
 - Applies a diminishing multiplier `(1 - tricks/13)` to scale rewards
-- Awards +2 bonus to both agents if their team wins over 7 tricks total
+- Awards +2 bonus to both agents if their team wins 7 or more tricks total (wins the game)
 - Uses `END_GAME_REWARD_MULTIPLIER` constant for additional scaling (default: 1.0)
 
 ### Model Save Threshold

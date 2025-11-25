@@ -61,14 +61,14 @@ def test_end_game_reward():
                 agent_0_base = (agent_0_tricks - CARDS_PER_PLAYER) * (1 - agent_0_tricks / CARDS_PER_PLAYER)
                 agent_2_base = (agent_2_tricks - CARDS_PER_PLAYER) * (1 - agent_2_tricks / CARDS_PER_PLAYER)
                 
-                # Add team bonus if > 7 tricks
-                if team_total > 7:
+                # Add team bonus if >= 7 tricks (wins the game)
+                if team_total >= 7:
                     agent_0_base += 2
                     agent_2_base += 2
                 
                 print(f"\nAgent 0 tricks won: {agent_0_tricks}")
                 print(f"Agent 2 tricks won: {agent_2_tricks}")
-                print(f"Team total: {team_total} (bonus: {'+2' if team_total > 7 else 'none'})")
+                print(f"Team total: {team_total} (bonus: {'+2' if team_total >= 7 else 'none'})")
                 print(f"Total tricks played: {trick_count}")
                 
                 # Verify the reward structure

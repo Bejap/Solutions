@@ -91,8 +91,8 @@ MODEL_SAVE_MIN_GAMES = 200  # Only start checking after 200 games
 
 # Per-card reward based on EW strategy matching (can be disabled)
 ENABLE_PER_CARD_REWARD = True
-PER_CARD_EW_STRATEGY_REWARD = 0.1  # Reward for matching EW strategy decision
-PER_CARD_EW_STRATEGY_PENALTY = -0.1  # Penalty for not matching EW strategy decision
+PER_CARD_EW_STRATEGY_REWARD = 0.2  # Reward for matching EW strategy decision
+# No penalty for not matching EW strategy (set to 0)
 
 # End-game reward multiplier (applied to tricks_won - max_tricks)
 END_GAME_REWARD_MULTIPLIER = 1.0

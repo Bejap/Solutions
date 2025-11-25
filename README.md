@@ -139,13 +139,13 @@ The game uses a sophisticated reward structure to train the agents:
 The end-game reward uses the formula: `(tricks_won - max_tricks) × (1 - tricks_won / 13) + team_bonus`
 
 - **Score multiplier**: Each agent's reward is multiplied by `(1 - tricks_won / 13)`
-- **Team bonus**: +2 if the team (agents combined) wins over 7 tricks
+- **Team bonus**: +2 if the team (agents combined) wins 7 or more tricks (wins the game)
 - Example: Agent wins 5 tricks, team total 9: `(5-13) × (1-5/13) + 2 = -8 × 0.615 + 2 ≈ -2.9`
 
 ### Per-Card Rewards (New, Configurable)
-Agents can receive small rewards/penalties on each card play based on whether their choice matches what the EW strategy would play:
-- **+0.1** if agent plays the same card EW strategy would choose
-- **-0.1** if agent plays a different card
+Agents receive a reward when their card choice matches what the EW strategy would play:
+- **+0.2** if agent plays the same card EW strategy would choose [+0.2 EW match bonus]
+- **No penalty** for playing a different card
 
 This feature can be disabled by setting `enable_per_card_reward=False` in the trainer or `ENABLE_PER_CARD_REWARD=False` in constants.
 
