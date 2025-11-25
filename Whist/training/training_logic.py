@@ -1,0 +1,351 @@
+from Whist.core.whist import Whist
+from Whist.agents.simple_whist_DQN import DQNAgent
+from Whist.agents.ew_strategy import EWStrategy
+from Whist.logger.game_logger import GameLogger
+import matplotlib.pyplot as plt
+from tqdm import tqdm
+import numpy as np
+from Whist.utils.constants import (
+    DEFAULT_NUM_GAMES,
+    DEFAULT_EPSILON,
+    DEFAULT_EPSILON_DECAY,
+    DEFAULT_MIN_EPSILON,
+    ARRAY_LENGTH,
+    DEFAULT_GAMMA_VALUES,
+    DEFAULT_SAVE_EVERY,
+    NUM_PLAYERS,
+    DQN_AGENT_POSITIONS,
+    EAST,
+    WEST,
+    CARDS_PER_PLAYER
+)
+
+
+def _as_list(actions):
+    """Return a list copy of actions if not None, otherwise None."""
+    if actions is None:
+        return None
+    return list(actions)
+
+
+def choose_agent_action(
+    agent,
+    current_state,
+    epsilon: float,
+    action_space: int,
+    valid_actions,
+    return_info: bool = False,
+):
+    """
+    Choose an action for an agent using epsilon-greedy strategy.
+    
+    Args:
+        agent: The DQN agent
+        current_state: Current game state
+        epsilon: Exploration rate
+        action_space: Size of the action space
+        valid_actions: List of valid action indices
+        return_info: If True, return (action, is_exploration, q_value) tuple
+    
+    Returns:
+        Chosen action index, or tuple (action, is_exploration, q_value) if return_info=True
+    """
+    if agent is None:
+        raise ValueError("agent must not be None for choose_agent_action")
+    if action_space <= 0:
+        raise ValueError("action_space must be a positive integer")
+    
+    if np.random.random() > epsilon:
+        # Exploit
+        qs = agent.get_qs(current_state)
+        best = _best_valid_action_from_qs(qs, valid_actions)
+        if best is not None:
+            if return_info:
+                q_value = float(qs[best]) if best < len(qs) else None
+                return best, False, q_value
+            return best
+        # No valid action in range -> fallback to uniform random
+        action = _random_action(action_space, valid_actions=None)
+        if return_info:
+            return action, True, None
+        return action
+    else:
+        # Explore: prefer sampling among valid_actions if present
+        action = _random_action(action_space, valid_actions=valid_actions)
+        if return_info:
+            return action, True, None
+        return action
+
+
+def _random_action(action_space: int, valid_actions) -> int:
+    """
+    Sample a random action.
+
+    If valid_actions is provided and non-empty, sample from it. Otherwise sample uniformly
+    from [0, action_space).
+    """
+    if valid_actions:
+        valid_list = _as_list(valid_actions)
+        return int(np.random.choice(valid_list))
+    # fallback to uniform sample over action_space
+    return int(np.random.randint(action_space))
+
+
+def _best_valid_action_from_qs(qs: np.ndarray, valid_actions):
+    """
+    Given Q-values array and an iterable of valid action indices, return the valid action index
+    with the highest Q-value. If no valid actions or none in range, return None.
+    """
+    if not valid_actions:
+        return None
+    valid_list = [int(a) for a in valid_actions if 0 <= int(a) < len(qs)]
+    if not valid_list:
+        return None
+    # Choose the action (original id) with max Q-value
+    best_action = max(valid_list, key=lambda a: qs[a])
+    return int(best_action)
+
+
+class WhistTrainer:
+    """Trainer class for Whist DQN agents."""
+    
+    def __init__(self, num_games=DEFAULT_NUM_GAMES, epsilon=DEFAULT_EPSILON, 
+                 epsilon_decay=DEFAULT_EPSILON_DECAY, min_epsilon=DEFAULT_MIN_EPSILON, 
+                 array_length=ARRAY_LENGTH, gamma_values=None, save_every=DEFAULT_SAVE_EVERY,
+                 log_every=100, log_dir='game_logs'):
+        """
+        Initialize the Whist trainer.
+        
+        Args:
+            num_games: Number of training episodes
+            epsilon: Initial exploration rate
+            epsilon_decay: Decay rate for epsilon
+            min_epsilon: Minimum exploration rate
+            array_length: Number of cards (13 for Hearts 2-A)
+            gamma_values: List of gamma values for different agents
+            save_every: Save models every N episodes
+            log_every: Log detailed game info every N episodes (default: 100)
+            log_dir: Directory for game logs (default: 'game_logs')
+        """
+        self.NUM_GAMES = num_games
+        self.epsilon = epsilon
+        self.EPSILON_DECAY = epsilon_decay
+        self.MIN_EPSILON = min_epsilon
+        self.ARRAY_LENGTH = array_length
+        self.GAMMA_VALUES = gamma_values if gamma_values is not None else DEFAULT_GAMMA_VALUES
+        self.SAVE_EVERY = save_every
+        self.LOG_EVERY = log_every
+        
+        # Initialize game logger
+        self.logger = GameLogger(log_dir=log_dir)
+        
+        # Initialize game and agents
+        player_names = [1, 2, 3, 4]
+        self.game = Whist(player_names)
+        
+        # Only train agents for North (0) and South (2) positions, which are on the same team
+        self.agents = [
+            DQNAgent((self.ARRAY_LENGTH * 7) + 4 + 4, gamma=self.GAMMA_VALUES[i], agent_id=i) if i in DQN_AGENT_POSITIONS else None 
+            for i in range(NUM_PLAYERS)
+        ]
+        
+        # Create EW strategy players for positions 1 (East) and 3 (West)
+        self.ew_strategies = {
+            EAST: EWStrategy(2, self.game),  # Player 2 is at position 1 (East)
+            WEST: EWStrategy(4, self.game)   # Player 4 is at position 3 (West)
+        }
+        
+        self.all_episode_rewards = []
+    
+    def train(self):
+        """Run the training loop."""
+        print(f"Starting training with DQN agents")
+        print(f"Logging detailed games every {self.LOG_EVERY} episodes to '{self.logger.log_dir}/'")
+        print()
+        
+        for episode in tqdm(range(1, self.NUM_GAMES + 1), ascii=True, unit='episodes'):
+            trick_count = 0
+            episode_rewards = [0, 0, 0, 0]
+            should_log = (episode % self.LOG_EVERY == 0)
+
+            start_state = self.game.reset()
+            done = False
+            pending_transitions = []
+            
+            # Start logging for this game if needed
+            if should_log:
+                self.logger.start_game(episode, self.game.current_player_idx, self.game.players, trump_suit='Spades')
+
+            while trick_count < self.ARRAY_LENGTH and not done:  # Complete all tricks
+                for _ in range(4):
+                    current_player_index = self.game.current_player_idx
+                    current_player = self.game.players[current_player_index]
+                    agent = self.agents[current_player_index]
+                    current_state = self.game.get_init_state()
+
+                    # Get valid actions based on follow suit rules (returns indices 0 to len(hand)-1)
+                    valid_actions = self.game.get_valid_actions(current_player)
+                    
+                    # Calculate action_space as number of cards in hand (dynamic)
+                    action_space = len(current_player.hand)
+
+                    # Only use agent for North (0) and South (2)
+                    if agent is not None:
+                        action, is_exploration, q_value = choose_agent_action(
+                            agent, current_state, self.epsilon, action_space, valid_actions, return_info=True
+                        )
+                        # Set decision_type based on whether agent explored or exploited
+                        if is_exploration:
+                            decision_type = 'random'
+                            certainty = None
+                        else:
+                            decision_type = 'agent'
+                            certainty = q_value
+                    else:
+                        # Use strategic play for East (1) and West (3)
+                        ew_strategy = self.ew_strategies[current_player_index]
+                        action = ew_strategy.choose_action(current_player, valid_actions)
+                        decision_type = 'strategy'
+                        certainty = None
+                    
+                    # Get the card being played for logging
+                    card_played = current_player.hand[action] if action < len(current_player.hand) else None
+
+                    new_state, rewards, done = self.game.step(action)
+                    
+                    # Log the card played
+                    if should_log and card_played is not None:
+                        self.logger.log_card_played(current_player_index, card_played, decision_type=decision_type, certainty=certainty)
+                    
+                    if rewards != 0:
+                        episode_rewards[current_player_index] += rewards[current_player_index]
+
+                    # Only store transitions for agents
+                    if agent is not None and len(valid_actions) >= 1:
+                        pending_transitions.append((current_state, action, None, new_state, False, current_player_index))
+
+                    if new_state is not None:
+                        current_state = new_state
+
+                    if len(self.game.round_list) == 0:  # Trick is complete
+                        trick_count += 1
+                        
+                        # Log trick completion
+                        if should_log:
+                            winner_idx = self._get_last_trick_winner()
+                            self.logger.complete_trick(winner_idx)
+                        
+                        for s, a, _, ns, _, player_idx in pending_transitions:
+                            if rewards != 0:
+                                reward_value = rewards[player_idx]
+                            else:
+                                reward_value = 0
+
+                            if sum(self.game.score_array) >= self.ARRAY_LENGTH:  # All tricks completed
+                                done = True
+                            
+                            if self.agents[player_idx] is not None:
+                                self.agents[player_idx].update_replay_memory((s, a, reward_value, ns, done))
+
+                        for agent_idx, agent_obj in enumerate(self.agents):
+                            if agent_obj is not None:
+                                agent_obj.train(done, trick_count)
+
+                        pending_transitions = []
+
+                    if done:
+                        break
+            
+            # End game logging
+            if should_log:
+                self.logger.end_game(episode, self.game.score_array)
+                        
+            self.all_episode_rewards.append(np.mean(episode_rewards))
+            self.epsilon = max(self.MIN_EPSILON, self.epsilon * self.EPSILON_DECAY)
+
+            for agent_idx, agent_obj in enumerate(self.agents):
+                if agent_obj is not None:
+                    agent_obj.train(True, trick_count)
+
+            if episode % self.SAVE_EVERY == 0:
+                for i, agent_obj in enumerate(self.agents):
+                    if agent_obj is not None:
+                        agent_obj.save_agent(f"Weights/agent_player_{i}_ep{episode}.weights.h5")
+                        agent_obj.save_full_agent(f"Models/full_agent_player_{i}_ep{episode}.keras")
+    
+    def _get_last_trick_winner(self):
+        """Determine who won the last trick based on score changes."""
+        scores = self.game.score_array
+        max_score = max(scores)
+        for i, score in enumerate(scores):
+            if score == max_score:
+                return i
+        return 0  # Default to first player
+    
+    def plot_results(self, plot_dir='plots'):
+        """Plot and save the training results.
+        
+        Args:
+            plot_dir: Directory to save plots (default: 'plots')
+        """
+        import os
+        from datetime import datetime
+        
+        # Create plots directory if it doesn't exist
+        os.makedirs(plot_dir, exist_ok=True)
+        
+        # Generate timestamp for unique filenames
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        # Plot 1: Average reward over episodes
+        plt.figure(figsize=(12, 6))
+        plt.plot(self.all_episode_rewards, alpha=0.7, label='Episode Reward')
+        
+        # Add rolling average
+        if len(self.all_episode_rewards) >= 100:
+            rolling_avg = np.convolve(self.all_episode_rewards, np.ones(100)/100, mode='valid')
+            plt.plot(range(99, len(self.all_episode_rewards)), rolling_avg, 
+                    color='red', linewidth=2, label='100-Episode Rolling Avg')
+        
+        plt.xlabel("Episode")
+        plt.ylabel("Average Reward")
+        plt.title("DQN Agent Learning Over Time")
+        plt.legend()
+        plt.grid(True)
+        
+        filename = os.path.join(plot_dir, f'reward_over_time_{timestamp}.png')
+        plt.savefig(filename, dpi=150, bbox_inches='tight')
+        print(f"Saved: {filename}")
+        plt.close()
+        
+        # Plot 2: Reward distribution histogram
+        plt.figure(figsize=(10, 6))
+        plt.hist(self.all_episode_rewards, bins=50, edgecolor='black', alpha=0.7)
+        plt.xlabel("Average Reward")
+        plt.ylabel("Frequency")
+        plt.title("Reward Distribution")
+        plt.axvline(np.mean(self.all_episode_rewards), color='red', linestyle='--', 
+                   label=f'Mean: {np.mean(self.all_episode_rewards):.2f}')
+        plt.legend()
+        plt.grid(True, alpha=0.3)
+        
+        filename = os.path.join(plot_dir, f'reward_distribution_{timestamp}.png')
+        plt.savefig(filename, dpi=150, bbox_inches='tight')
+        print(f"Saved: {filename}")
+        plt.close()
+        
+        # Plot 3: Cumulative reward
+        plt.figure(figsize=(12, 6))
+        cumulative_rewards = np.cumsum(self.all_episode_rewards)
+        plt.plot(cumulative_rewards)
+        plt.xlabel("Episode")
+        plt.ylabel("Cumulative Reward")
+        plt.title("Cumulative Reward Over Training")
+        plt.grid(True)
+        
+        filename = os.path.join(plot_dir, f'cumulative_reward_{timestamp}.png')
+        plt.savefig(filename, dpi=150, bbox_inches='tight')
+        print(f"Saved: {filename}")
+        plt.close()
+        
+        print(f"\nAll plots saved to '{plot_dir}/' folder")

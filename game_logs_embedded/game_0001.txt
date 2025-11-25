@@ -1,0 +1,121 @@
+=== Game 1 ===
+Date: 2025-11-25 09:38:07
+Trump: Spades
+Starting player: East
+
+North hand: Diamonds: 5 6 7 K | Hearts: 2 4 5 6 7 9 A | Spades: 9 Q
+East hand: Clubs: 2 4 6 8 | Diamonds: 3 8 9 | Hearts: 3 8 K | Spades: 5 7 8
+South hand: Clubs: 7 9 J | Diamonds: 4 J Q A | Hearts: 10 Q | Spades: 2 4 6 J
+West hand: Clubs: 3 5 10 Q K A | Diamonds: 2 10 | Hearts: J | Spades: 3 10 K A
+
+Trick 1:
+  E: 2 of Clubs [Strategy]
+  S: J of Clubs
+  W: 3 of Clubs [Strategy]
+  N: 2 of Hearts
+
+S winner
+
+Trick 2:
+  S: 10 of Hearts
+  W: J of Hearts [Strategy]
+  N: 7 of Hearts
+  E: K of Hearts [Strategy]
+
+E winner
+
+Trick 3:
+  E: 9 of Diamonds [Strategy]
+  S: A of Diamonds
+  W: 2 of Diamonds [Strategy]
+  N: 5 of Diamonds
+
+S winner
+
+Trick 4:
+  S: 7 of Clubs
+  W: 5 of Clubs [Strategy]
+  N: 4 of Hearts
+  E: 8 of Clubs [Strategy]
+
+E winner
+
+Trick 5:
+  E: 3 of Diamonds [Strategy]
+  S: J of Diamonds
+  W: 10 of Diamonds [Strategy]
+  N: 7 of Diamonds
+
+S winner
+
+Trick 6:
+  S: 4 of Diamonds
+  W: Q of Clubs [Strategy]
+  N: K of Diamonds
+  E: 8 of Diamonds [Strategy]
+
+S winner
+
+Trick 7:
+  N: 6 of Hearts
+  E: 8 of Hearts [Strategy]
+  S: Q of Hearts
+  W: 3 of Spades [Strategy]
+
+S winner
+
+Trick 8:
+  W: A of Clubs [Strategy]
+  N: 6 of Diamonds
+  E: 4 of Clubs [Strategy]
+  S: 9 of Clubs
+
+S winner
+
+Trick 9:
+  W: A of Spades [Strategy]
+  N: 9 of Spades
+  E: 5 of Spades [Strategy]
+  S: 6 of Spades
+
+S winner
+
+Trick 10:
+  W: K of Clubs [Strategy]
+  N: A of Hearts
+  E: 6 of Clubs [Strategy]
+  S: J of Spades
+
+S winner
+
+Trick 11:
+  S: 4 of Spades
+  W: 10 of Spades [Strategy]
+  N: Q of Spades
+  E: 7 of Spades [Strategy]
+
+S winner
+
+Trick 12:
+  N: 9 of Hearts
+  E: 3 of Hearts [Strategy]
+  S: 2 of Spades
+  W: 10 of Clubs [Strategy]
+
+S winner
+
+Trick 13:
+  S: Q of Diamonds
+  W: K of Spades [Strategy]
+  N: 5 of Hearts
+  E: 8 of Spades [Strategy]
+
+S winner
+
+Final Scores:
+  North: 2 tricks
+  East: 2 tricks
+  South: 5 tricks
+  West: 4 tricks
+
+Winner: Team 1 (North-South) - 7 vs 6

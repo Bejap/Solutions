@@ -1,0 +1,121 @@
+=== Game 2 ===
+Date: 2025-11-25 09:38:08
+Trump: Spades
+Starting player: South
+
+North hand: Clubs: 3 5 Q K A | Diamonds: 9 | Hearts: 2 9 J | Spades: 5 6 8 A
+East hand: Clubs: 4 7 10 | Diamonds: 5 8 A | Hearts: 5 6 7 10 | Spades: 9 10 J
+South hand: Clubs: 6 J | Diamonds: 7 J Q | Hearts: 3 4 8 Q | Spades: 3 7 Q K
+West hand: Clubs: 2 8 9 | Diamonds: 2 3 4 6 10 K | Hearts: K A | Spades: 2 4
+
+Trick 1:
+  S: 3 of Hearts
+  W: K of Hearts [Strategy]
+  N: J of Hearts
+  E: 5 of Hearts [Strategy]
+
+W winner
+
+Trick 2:
+  W: 4 of Diamonds [Strategy]
+  N: 9 of Diamonds
+  E: A of Diamonds [Strategy]
+  S: J of Diamonds
+
+E winner
+
+Trick 3:
+  E: 7 of Hearts [Strategy]
+  S: 8 of Hearts
+  W: A of Hearts [Strategy]
+  N: 2 of Hearts
+
+W winner
+
+Trick 4:
+  W: 3 of Diamonds [Strategy]
+  N: A of Clubs
+  E: 5 of Diamonds [Strategy]
+  S: 7 of Diamonds
+
+W winner
+
+Trick 5:
+  S: 6 of Clubs
+  W: 2 of Clubs [Strategy]
+  N: 5 of Clubs
+  E: 7 of Clubs [Strategy]
+
+E winner
+
+Trick 6:
+  E: J of Spades [Strategy]
+  S: 7 of Spades
+  W: 2 of Spades [Strategy]
+  N: 8 of Spades
+
+E winner
+
+Trick 7:
+  E: 10 of Spades [Strategy]
+  S: 3 of Spades
+  W: 4 of Spades [Strategy]
+  N: A of Spades
+
+E winner
+
+Trick 8:
+  N: 5 of Spades
+  E: 9 of Spades [Strategy]
+  S: Q of Spades
+  W: 2 of Diamonds [Strategy]
+
+E winner
+
+Trick 9:
+  S: K of Spades
+  W: 6 of Diamonds [Strategy]
+  N: 6 of Spades
+  E: 8 of Diamonds [Strategy]
+
+E winner
+
+Trick 10:
+  S: 4 of Hearts
+  W: 8 of Clubs [Strategy]
+  N: 9 of Hearts
+  E: 6 of Hearts [Strategy]
+
+E winner
+
+Trick 11:
+  N: 3 of Clubs
+  E: 4 of Clubs [Strategy]
+  S: J of Clubs
+  W: 9 of Clubs [Strategy]
+
+S winner
+
+Trick 12:
+  S: Q of Diamonds
+  W: 10 of Diamonds [Strategy]
+  N: Q of Clubs
+  E: 10 of Hearts [Strategy]
+
+S winner
+
+Trick 13:
+  S: Q of Hearts
+  W: K of Diamonds [Strategy]
+  N: K of Clubs
+  E: 10 of Clubs [Strategy]
+
+S winner
+
+Final Scores:
+  North: 2 tricks
+  East: 3 tricks
+  South: 6 tricks
+  West: 2 tricks
+
+Winner: Team 1 (North-South) - 8 vs 5

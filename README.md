@@ -1,6 +1,90 @@
 # Deep Simple Whist - DQN Implementation
 
+**🎉 Recently Refactored: Now featuring comprehensive OOP inheritance structure and organized folder layout!**
+
 This repository contains a Deep Q-Network (DQN) implementation for playing the Whist card game. The project uses reinforcement learning to train agents to play the game effectively.
+
+## 📁 Project Structure
+
+The project is organized into clear, descriptive folders:
+
+```
+Solutions/
+├── Whist/                          # Main game package
+│   ├── core/                       # Core game logic
+│   │   ├── whist.py               # Main game environment
+│   │   ├── whist_game.py          # Card, Deck, Player classes
+│   │   ├── whist_embedded.py      # Embedding-based game adapter
+│   │   └── game.py                # Simple game initialization
+│   │
+│   ├── agents/                     # AI agents
+│   │   ├── simple_whist_DQN.py    # DQN agent implementation
+│   │   ├── embedded_dqn_agent.py  # Embedding-based DQN agent
+│   │   └── ew_strategy.py         # East-West strategy player
+│   │
+│   ├── training/                   # Training scripts
+│   │   ├── training_logic.py      # WhistTrainer class
+│   │   ├── training_embedded.py   # EmbeddedWhistTrainer class
+│   │   ├── model_training.py      # Original training entry point
+│   │   ├── model_training_embedded.py  # Embedded training entry point
+│   │   └── loading_model.py       # Model loading utilities
+│   │
+│   ├── embedding/                  # Card embedding system
+│   │   └── card_embedding.py      # CardEmbedding class
+│   │
+│   ├── utils/                      # Utilities and constants
+│   │   ├── constants.py           # Centralized constants
+│   │   └── base_classes.py        # Abstract base classes
+│   │
+│   ├── logger/                     # Logging and visualization
+│   │   ├── game_logger.py         # Game logging
+│   │   └── model_plotting.py      # Training visualization
+│   │
+│   └── demos/                      # Demo scripts
+│       ├── demo_inheritance.py    # Inheritance demonstration
+│       ├── demo_features.py       # Feature demonstration
+│       └── model_testing.py       # Model testing script
+│
+├── testing/                        # Test files
+│   ├── test_reward_system.py
+│   ├── test_trump_system.py
+│   ├── test_follow_suit.py
+│   └── ...
+│
+├── docs/                           # Documentation
+│   ├── INHERITANCE_STRUCTURE.md
+│   ├── CARD_EMBEDDING_GUIDE.md
+│   ├── CONSTANTS_GUIDE.md
+│   └── ...
+│
+├── Models/                         # Saved full models (*.keras)
+├── Weights/                        # Saved model weights (*.h5)
+├── plots/                          # Training plots and visualizations
+├── game_logs/                      # Regular training game logs
+├── game_logs_embedded/             # Embedded training game logs
+└── README.md
+```
+
+## 🆕 Recent Major Updates
+
+### Folder Reorganization
+- **Whist/**: Main package with clear subfolders (core, agents, training, embedding, utils, logger, demos)
+- **testing/**: All test files in one place
+- **docs/**: All documentation files organized
+
+### Object-Oriented Refactoring
+- **6 Abstract Base Classes** providing clear contracts for all components
+- **Complete Inheritance Hierarchy** with proper polymorphism
+
+### Card Embedding System
+- **Fixed 64-dim state** independent of card count
+- **Same model works** for 9, 11, or 13 cards per player
+- Run: `python -m Whist.training.model_training_embedded`
+
+📖 **Documentation in docs/**:
+- [INHERITANCE_STRUCTURE.md](docs/INHERITANCE_STRUCTURE.md) - Architecture guide  
+- [CARD_EMBEDDING_GUIDE.md](docs/CARD_EMBEDDING_GUIDE.md) - Embedding system  
+- [CONSTANTS_GUIDE.md](docs/CONSTANTS_GUIDE.md) - Constants reference
 
 ## Project Overview
 
@@ -8,6 +92,7 @@ This is a machine learning project that implements a Deep Q-Network (DQN) agent 
 
 - **Game Engine**: Full implementation of Whist game logic
 - **DQN Agent**: Deep reinforcement learning agent using TensorFlow
+- **Card Embeddings**: Vector-based card representations for flexible game sizes
 - **Training System**: Optimized training loop with epsilon-greedy exploration
 - **Model Management**: Save/load trained models
 - **Visualization**: Plot training progress and model performance
@@ -53,25 +138,6 @@ The game uses a sophisticated reward structure to train the agents:
 
 Only the two DQN agents (positions 0 and 2) receive rewards. The system includes comprehensive monitoring and statistics tracking. See `docs/reward_system.md` for complete details.
 
-## Files
-
-- `whist_game.py` - Core game classes (Card, Deck, Player)
-- `whist.py` - Main Whist game environment implementation with reward system
-- `simple_whist_DQN.py` - DQN agent implementation
-- `ew_strategy.py` - Strategic rule-based player for East-West positions
-- `constants.py` - Centralized constants for game configuration, training hyperparameters, and model architecture
-- `training_logic.py` - WhistTrainer class with training logic and helper functions
-- `model_training.py` - Entry point script to run training using WhistTrainer class
-- `model_testing.py` - Test trained models
-- `loading_model.py` - Load and use saved models
-- `model_plotting.py` - Visualization tools for training results
-- `game.py` - Simple game initialization script
-- `test_reward_system.py` - Test script to verify reward distribution
-- `test_trump_system.py` - Test script to verify trump system
-- `Weights/` - Directory for saving model weights (*.h5 files)
-- `Models/` - Directory for saving full models (*.keras files)
-- `docs/` - Documentation folder with architecture, optimization, team structure, reward system, and trump system info
-
 ## Requirements
 
 - Python 3.7+
@@ -88,73 +154,77 @@ Only the two DQN agents (positions 0 and 2) receive rewards. The system includes
 pip install -r requirements.txt
 ```
 
+## Usage
+
+### Training with Original Agent (One-Hot)
+
+```bash
+python -m Whist.training.model_training
+```
+
+### Training with Embedded Agent (Recommended)
+
+```bash
+python -m Whist.training.model_training_embedded
+```
+
+### Running Tests
+
+```bash
+python -m testing.test_reward_system
+python -m testing.test_trump_system
+```
+
+### Importing in Code
+
+```python
+# Import from the organized structure
+from Whist.core.whist import Whist
+from Whist.agents.simple_whist_DQN import DQNAgent
+from Whist.agents.embedded_dqn_agent import EmbeddedDQNAgent
+from Whist.utils.constants import CARDS_PER_PLAYER, STATE_SIZE
+from Whist.training.training_embedded import EmbeddedWhistTrainer
+```
+
 ## Configuration
 
-All project constants are centralized in `constants.py`, including:
+All project constants are centralized in `Whist/utils/constants.py`, including:
 
-- **Game Configuration**: Number of cards (13), player positions, team setup
+- **Game Configuration**: Number of cards, player positions, team setup
 - **Training Hyperparameters**: Learning rates, epsilon decay, gamma values
 - **DQN Parameters**: Replay memory size, batch size, update frequency
 - **Model Architecture**: Network layer sizes, dropout rates, input dimensions
 
-To customize training behavior, modify values in `constants.py` or pass parameters when instantiating `WhistTrainer`:
+To customize training behavior:
 
 ```python
-from training_logic import WhistTrainer
+from Whist.training.training_embedded import EmbeddedWhistTrainer
 
-trainer = WhistTrainer(
-    num_games=2000,        # Override default
-    epsilon=0.95,          # Custom starting exploration
-    save_every=1000        # Save less frequently
+trainer = EmbeddedWhistTrainer(
+    embedding_dim=8,       # Card embedding dimensions
+    num_games=2000,        # Number of training episodes
+    epsilon=0.95,          # Starting exploration rate
+    save_every=500,        # Save model frequency
+    log_every=100,         # Log game details frequency
+    log_dir='game_logs_embedded'  # Game log directory
 )
+trainer.train()
+
+# Generate and save plots to 'plots/' folder
+trainer.plot_results(plot_dir='plots')
 ```
 
-## Usage
+### Output Folders
 
-### Training a Model
+- **`plots/`**: Training visualization plots
+  - `reward_over_time_*.png` - Reward progression with rolling average
+  - `reward_distribution_*.png` - Histogram of rewards
+  - `cumulative_reward_*.png` - Cumulative reward over training
 
-```python
-python model_training.py
-```
+- **`game_logs/`**: Detailed game logs for regular training
+- **`game_logs_embedded/`**: Detailed game logs for embedded training
 
-### Testing a Model
-
-```python
-python model_testing.py
-```
-
-### Loading a Saved Model
-
-```python
-python loading_model.py
-```
-
-## Project Structure
-
-The DQN agent uses a multi-input neural network architecture that processes:
-- Game state (cards played in current round)
-- Player's hand
-- Tracking information (cards played throughout the game)
-- Score information
-
-The agent learns through experience replay and uses a target network for stable training. The network architecture includes:
-- 3 hidden layers (128, 64, and 32 units) with dropout (rate=0.35)
-- **Input dimensions for 52-card game** (full deck with trump)
-- Input size: (52 * 7) + 4 + 4 = **372 features**
-- Approximately ~56,000 parameters (adjusted for 52-card deck)
-- Batch size of 32 for stable gradient updates
-
-### Performance Optimizations
-
-This version includes several optimizations for faster training:
-- **Dynamic action space** based on hand size (no hardcoded values)
-- **Increased batch size** (32 instead of 8) for more stable learning
-- **Reduced replay memory threshold** (100 instead of 1000) for faster startup
-- **Improved trick counting** using proper trick counter instead of action counter
-- **Better action selection** using max Q-value from valid actions
-- **Optimized predictions** with explicit batch_size parameters
-
-For detailed architecture information, see `docs/architecture.md`.
+Each log includes starting hands, every card played (with decision type: Agent/Random/Strategy), trick winners, and final scores.
 
 ## License
 
