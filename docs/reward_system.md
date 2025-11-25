@@ -21,19 +21,45 @@ This reward structure encourages:
 - Supporting the partner to win (+0.8)
 - Avoiding letting opponents win (-1)
 
-### Game-Level Rewards
+### Per-Card Rewards (New, Configurable)
 
-When the game ends (all cards played):
+Agents can receive small rewards/penalties on each card play based on whether their choice matches what the EW strategy would play:
 
 | Outcome | Reward | Description |
 |---------|--------|-------------|
-| Team 1 wins game | **+10** | Agents' team has more total tricks than opponents |
-| Team 1 loses game | **-20** | Opponents' team has more total tricks |
-| Tie game | **0** | Equal number of tricks won by both teams |
+| Match EW strategy | **+0.1** | Agent plays the same card EW strategy would choose |
+| Differ from EW strategy | **-0.1** | Agent plays a different card |
 
-The asymmetric game-ending rewards (-20 for loss vs +10 for win) encourages:
-- Strong penalty for losing to motivate better play
-- Moderate reward for winning to balance the learning signal
+This feature:
+- Can be disabled by setting `enable_per_card_reward=False` in the trainer
+- Can be configured via `ENABLE_PER_CARD_REWARD` in `constants.py`
+- Uses `PER_CARD_EW_STRATEGY_REWARD` and `PER_CARD_EW_STRATEGY_PENALTY` for customization
+
+**Note**: This feature is designed to be removable so the model doesn't become a copy of the EW strategy.
+
+### Game-Level Rewards (Updated)
+
+When the game ends (all cards played), reward is now based on `(tricks_won - max_tricks)`:
+
+| Agent Tricks Won | End-Game Reward | Description |
+|------------------|-----------------|-------------|
+| 13 (max) | **0** | Perfect performance |
+| 10 | **-3** | Good performance |
+| 7 | **-6** | Average performance |
+| 3 | **-10** | Below average |
+| 0 | **-13** | Worst case |
+
+This reward structure:
+- Provides granular feedback about individual agent performance
+- Ranges from -13 (won 0 tricks) to 0 (won all 13 tricks)
+- Uses `END_GAME_REWARD_MULTIPLIER` constant for scaling (default: 1.0)
+
+### Model Save Threshold
+
+Models are only saved during training if the average reward over the last 100 episodes exceeds **-5.5**. This prevents saving poorly performing models.
+
+- Configurable via `MODEL_SAVE_REWARD_THRESHOLD` in `constants.py`
+- Can be overridden in trainer constructor with `model_save_threshold` parameter
 
 ## Agent Positions
 
@@ -70,7 +96,8 @@ stats = game.get_reward_stats()
 #     'agent_2_total': <cumulative reward for agent 2>,
 #     'agent_0_wins': <tricks won by agent 0>,
 #     'agent_2_wins': <tricks won by agent 2>,
-#     'tricks_completed': <total tricks completed>
+#     'tricks_completed': <total tricks completed>,
+#     'per_card_rewards': <cumulative per-card rewards given>
 # }
 ```
 
@@ -81,46 +108,45 @@ Statistics are automatically reset when `game.reset()` is called at the start of
 ### Location
 
 The reward system is implemented in `whist.py`:
-- Trick-level rewards: `_get_game_state()` method (lines ~213-255)
-- Game-level rewards: `step()` method (lines ~163-213)
+- Per-card rewards: `calculate_per_card_reward()` method
+- Trick-level rewards: `_get_game_state()` method
+- Game-level rewards: `step()` method
 
-### Monitoring
+### Constants
 
-Monitoring capabilities include:
-- Logging configuration (lines 12-14)
-- Reward statistics tracking (lines 41-71)
-- Methods: `set_monitoring_level()`, `get_reward_stats()`, `reset_reward_stats()`
+Reward constants in `constants.py`:
+- `ENABLE_PER_CARD_REWARD`: Enable/disable per-card rewards (default: True)
+- `PER_CARD_EW_STRATEGY_REWARD`: Reward for matching EW strategy (default: 0.1)
+- `PER_CARD_EW_STRATEGY_PENALTY`: Penalty for not matching (default: -0.1)
+- `END_GAME_REWARD_MULTIPLIER`: Multiplier for end-game reward (default: 1.0)
+- `MODEL_SAVE_REWARD_THRESHOLD`: Minimum average reward to save model (default: -5.5)
 
 ### Training Integration
 
-The rewards are used in `model_training.py`:
-- Agents receive rewards after each step
-- Rewards are stored in replay memory for training
-- Statistics are logged every 100 episodes
+The rewards are used in training files (`training_logic.py` and `training_embedded.py`):
+- Per-card rewards are calculated before each step for agent positions
+- Trick rewards are combined with per-card rewards in replay memory
+- Model saving checks the average reward against the threshold
 
 ## Testing
 
 Run the test script to verify the reward system:
 
 ```bash
-python test_reward_system.py
+python -m testing.test_new_reward_system
 ```
 
 The test verifies:
-1. Only agents at positions 0 and 2 receive rewards
-2. Positions 1 and 3 always receive 0 rewards
-3. Reward values match the expected structure
-4. Monitoring functionality works correctly
+1. End-game reward is based on (tricks_won - max_tricks)
+2. Per-card rewards work based on EW strategy matching
+3. Per-card rewards can be disabled
+4. Model save threshold is correctly set to -5.5
+5. Per-card rewards are correctly tracked in stats
 
 ## Example Output
 
 ```
-Trick 1 completed. Winner: Player 0.
-Agent rewards: Agent 0: 1, Agent 2: 0.8
-
-Trick 2 completed. Winner: Player 1.  
-Agent rewards: Agent 0: -1, Agent 2: -1
-
-Game ended. Team 1 (Agents) WINS! Score: 7-6.
-Agents receive +10 bonus each.
+Game ended. Team 1 Score: 5, Team 2 Score: 8.
+Agent 0 end reward: -12.0 (tricks: 1/13)
+Agent 2 end reward: -9.0 (tricks: 4/13)
 ```
