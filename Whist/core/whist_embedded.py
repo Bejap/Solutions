@@ -8,7 +8,7 @@ and converts states from one-hot encoding to embedded representations.
 import numpy as np
 from Whist.core.whist import Whist
 from Whist.embedding.card_embedding import CardEmbedding, cards_to_ids
-from Whist.utils.constants import CARDS_PER_PLAYER
+from Whist.utils.constants import CARDS_PER_PLAYER, ENABLE_PER_CARD_REWARD
 import tensorflow as tf
 
 
@@ -21,15 +21,17 @@ class WhistEmbedded(Whist):
     EmbeddedDQNAgent.
     """
     
-    def __init__(self, player_names: list, embedding_dim: int = 8):
+    def __init__(self, player_names: list, embedding_dim: int = 8, 
+                 enable_per_card_reward: bool = ENABLE_PER_CARD_REWARD):
         """
         Initialize the embedded Whist game.
         
         Args:
             player_names: List of player names/IDs
             embedding_dim: Dimension of card embeddings (default: 8)
+            enable_per_card_reward: Enable per-card reward based on EW strategy (default: True)
         """
-        super().__init__(player_names)
+        super().__init__(player_names, enable_per_card_reward=enable_per_card_reward)
         self.embedding_dim = embedding_dim
         self.card_embedding = CardEmbedding(embedding_dim=embedding_dim)
     

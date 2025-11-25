@@ -77,6 +77,22 @@ MEMORY_FRACTION = 0.35  # GPU memory fraction to use
 # Default gamma value for DQN (if not using agent-specific values)
 DEFAULT_GAMMA = 0.99
 
+# Model save threshold: only save model if average reward is above this value
+MODEL_SAVE_REWARD_THRESHOLD = -5.5
+
+
+# =============================================================================
+# REWARD SYSTEM CONFIGURATION
+# =============================================================================
+
+# Per-card reward based on EW strategy matching (can be disabled)
+ENABLE_PER_CARD_REWARD = True
+PER_CARD_EW_STRATEGY_REWARD = 0.1  # Reward for matching EW strategy decision
+PER_CARD_EW_STRATEGY_PENALTY = -0.1  # Penalty for not matching EW strategy decision
+
+# End-game reward multiplier (applied to tricks_won - max_tricks)
+END_GAME_REWARD_MULTIPLIER = 1.0
+
 
 # =============================================================================
 # MODEL ARCHITECTURE
