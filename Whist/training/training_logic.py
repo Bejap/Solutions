@@ -19,7 +19,9 @@ from Whist.utils.constants import (
     WEST,
     CARDS_PER_PLAYER,
     MODEL_SAVE_REWARD_THRESHOLD,
-    ENABLE_PER_CARD_REWARD
+    ENABLE_PER_CARD_REWARD,
+    MODEL_SAVE_CHECK_EVERY,
+    MODEL_SAVE_MIN_GAMES
 )
 
 
@@ -286,7 +288,8 @@ class WhistTrainer:
                     agent_obj.train(True, trick_count)
 
             # Only save model if average reward is above threshold
-            if episode % self.SAVE_EVERY == 0:
+            # Check every MODEL_SAVE_CHECK_EVERY games after MODEL_SAVE_MIN_GAMES
+            if episode >= MODEL_SAVE_MIN_GAMES and episode % MODEL_SAVE_CHECK_EVERY == 0:
                 # Calculate average reward over recent episodes
                 recent_window = min(100, len(self.all_episode_rewards))
                 avg_reward = np.mean(self.all_episode_rewards[-recent_window:])

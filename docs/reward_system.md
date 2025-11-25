@@ -58,7 +58,11 @@ This reward structure:
 
 Models are only saved during training if the average reward over the last 100 episodes exceeds **-5.5**. This prevents saving poorly performing models.
 
-- Configurable via `MODEL_SAVE_REWARD_THRESHOLD` in `constants.py`
+**Timing**: The check is performed every 25 games, but only after 200 games have been played.
+
+- `MODEL_SAVE_REWARD_THRESHOLD = -5.5`: Minimum average reward to save model
+- `MODEL_SAVE_CHECK_EVERY = 25`: Check every 25 games
+- `MODEL_SAVE_MIN_GAMES = 200`: Only start checking after 200 games
 - Can be overridden in trainer constructor with `model_save_threshold` parameter
 
 ## Agent Positions

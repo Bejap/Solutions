@@ -149,7 +149,7 @@ Agents can receive small rewards/penalties on each card play based on whether th
 This feature can be disabled by setting `enable_per_card_reward=False` in the trainer or `ENABLE_PER_CARD_REWARD=False` in constants.
 
 ### Model Save Threshold
-Models are only saved if the average reward over the last 100 episodes is above **-5.5**. This prevents saving poorly performing models.
+Models are only saved if the average reward over the last 100 episodes is above **-5.5**. The check is performed every 25 games, but only after 200 games have been played. This prevents saving poorly performing models.
 
 Only the two DQN agents (positions 0 and 2) receive rewards. The system includes comprehensive monitoring and statistics tracking. See `docs/reward_system.md` for complete details.
 
