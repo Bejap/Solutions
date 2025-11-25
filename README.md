@@ -59,6 +59,9 @@ Solutions/
 │
 ├── Models/                         # Saved full models (*.keras)
 ├── Weights/                        # Saved model weights (*.h5)
+├── plots/                          # Training plots and visualizations
+├── game_logs/                      # Regular training game logs
+├── game_logs_embedded/             # Embedded training game logs
 └── README.md
 ```
 
@@ -201,10 +204,27 @@ trainer = EmbeddedWhistTrainer(
     embedding_dim=8,       # Card embedding dimensions
     num_games=2000,        # Number of training episodes
     epsilon=0.95,          # Starting exploration rate
-    save_every=500         # Save frequency
+    save_every=500,        # Save model frequency
+    log_every=100,         # Log game details frequency
+    log_dir='game_logs_embedded'  # Game log directory
 )
 trainer.train()
+
+# Generate and save plots to 'plots/' folder
+trainer.plot_results(plot_dir='plots')
 ```
+
+### Output Folders
+
+- **`plots/`**: Training visualization plots
+  - `reward_over_time_*.png` - Reward progression with rolling average
+  - `reward_distribution_*.png` - Histogram of rewards
+  - `cumulative_reward_*.png` - Cumulative reward over training
+
+- **`game_logs/`**: Detailed game logs for regular training
+- **`game_logs_embedded/`**: Detailed game logs for embedded training
+
+Each log includes starting hands, every card played (with decision type: Agent/Random/Strategy), trick winners, and final scores.
 
 ## License
 

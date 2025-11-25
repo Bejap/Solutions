@@ -227,14 +227,70 @@ class EmbeddedWhistTrainer:
                 return i
         return 0  # Default to first player
     
-    def plot_results(self):
-        """Plot the training results."""
-        plt.figure(figsize=(10, 6))
-        plt.plot(self.all_episode_rewards)
+    def plot_results(self, plot_dir='plots'):
+        """Plot and save the training results.
+        
+        Args:
+            plot_dir: Directory to save plots (default: 'plots')
+        """
+        import os
+        from datetime import datetime
+        
+        # Create plots directory if it doesn't exist
+        os.makedirs(plot_dir, exist_ok=True)
+        
+        # Generate timestamp for unique filenames
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        # Plot 1: Average reward over episodes
+        plt.figure(figsize=(12, 6))
+        plt.plot(self.all_episode_rewards, alpha=0.7, label='Episode Reward')
+        
+        # Add rolling average
+        if len(self.all_episode_rewards) >= 100:
+            rolling_avg = np.convolve(self.all_episode_rewards, np.ones(100)/100, mode='valid')
+            plt.plot(range(99, len(self.all_episode_rewards)), rolling_avg, 
+                    color='red', linewidth=2, label='100-Episode Rolling Avg')
+        
         plt.xlabel("Episode")
         plt.ylabel("Average Reward")
-        plt.title("Embedded Agent Learning Over Time")
+        plt.title("Embedded DQN Agent Learning Over Time")
+        plt.legend()
         plt.grid(True)
-        plt.savefig("embedded_training_results.png")
-        print("Results saved to embedded_training_results.png")
-        plt.show()
+        
+        filename = os.path.join(plot_dir, f'embedded_reward_over_time_{timestamp}.png')
+        plt.savefig(filename, dpi=150, bbox_inches='tight')
+        print(f"Saved: {filename}")
+        plt.close()
+        
+        # Plot 2: Reward distribution histogram
+        plt.figure(figsize=(10, 6))
+        plt.hist(self.all_episode_rewards, bins=50, edgecolor='black', alpha=0.7)
+        plt.xlabel("Average Reward")
+        plt.ylabel("Frequency")
+        plt.title("Embedded Agent Reward Distribution")
+        plt.axvline(np.mean(self.all_episode_rewards), color='red', linestyle='--', 
+                   label=f'Mean: {np.mean(self.all_episode_rewards):.2f}')
+        plt.legend()
+        plt.grid(True, alpha=0.3)
+        
+        filename = os.path.join(plot_dir, f'embedded_reward_distribution_{timestamp}.png')
+        plt.savefig(filename, dpi=150, bbox_inches='tight')
+        print(f"Saved: {filename}")
+        plt.close()
+        
+        # Plot 3: Cumulative reward
+        plt.figure(figsize=(12, 6))
+        cumulative_rewards = np.cumsum(self.all_episode_rewards)
+        plt.plot(cumulative_rewards)
+        plt.xlabel("Episode")
+        plt.ylabel("Cumulative Reward")
+        plt.title("Embedded Agent Cumulative Reward Over Training")
+        plt.grid(True)
+        
+        filename = os.path.join(plot_dir, f'embedded_cumulative_reward_{timestamp}.png')
+        plt.savefig(filename, dpi=150, bbox_inches='tight')
+        print(f"Saved: {filename}")
+        plt.close()
+        
+        print(f"\nAll plots saved to '{plot_dir}/' folder")
