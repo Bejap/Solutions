@@ -25,36 +25,41 @@ This reward structure encourages:
 
 Agents receive penalties for suboptimal trump usage to encourage strategic play:
 
-| Violation | Penalty | Description |
-|-----------|---------|-------------|
-| **Not using trump when should** | **-7.0** | Agent has trump cards but doesn't use them when opponent is winning and partner is not winning |
-| **Trump overplay** | **-5.0** | Agent uses unnecessarily high trump when a lower trump would win |
-| **Taking trick from partner** | **-8.0** | Agent plays a higher card to take a trick that partner was already winning |
+| Violation | Penalty Constant | Description |
+|-----------|------------------|-------------|
+| **Not using trump when should** | `TRUMP_NOT_USED_PENALTY` | Agent has trump cards but doesn't use them when opponent is winning and partner is not winning |
+| **Trump overplay** | `TRUMP_OVERPLAY_PENALTY` | Agent uses unnecessarily high trump when a lower trump would win |
+| **Taking trick from partner** | `PARTNER_OVERPLAY_PENALTY` | Agent plays a higher card to take a trick that partner was already winning |
+
+**Note**: Stronger (more negative) penalties accelerate learning of proper trump usage but may increase initial training variance.
 
 #### Penalty Details
 
-**1. Not Using Trump (-7.0)**
+**1. Not Using Trump**
 - Applied when:
   - Opponent is currently winning the trick
   - Agent has trump cards in hand
   - Partner is not winning
   - Agent plays a non-trump card when unable to follow suit
 - Example: Opponent leads Ace of Hearts, agent has no hearts but has Spades (trump), plays Diamond instead
+- **Impact**: Higher penalty values punish this mistake more severely, encouraging agents to use trump appropriately
 
-**2. Trump Overplay (-5.0)**
+**2. Trump Overplay**
 - Applied when:
   - Agent plays a trump card
   - Agent had lower trump cards that would also win
   - Works even when overtrumping partner unnecessarily
 - Example: Opponent plays 5 of Hearts, agent has 2, 5, and King of Spades, plays King instead of 2
+- **Impact**: Penalty teaches card conservation; adjust magnitude based on how critical this is for your strategy
 
-**3. Taking Trick from Partner (-8.0)**
+**3. Taking Trick from Partner**
 - Applied when:
   - Partner is currently winning the trick
   - Agent plays a higher card that beats partner's card
   - Agent had lower cards available that wouldn't win
 - Example: Partner plays King of Hearts (winning), agent plays Ace of Hearts instead of lower card
-- **Most severe penalty** because it's wasteful - team was already going to win the trick
+- **Note**: Typically the strongest penalty since it's most wasteful - team was already going to win
+- **Impact**: Adjust relative to other penalties based on importance of partner coordination
 
 These penalties teach agents:
 - When to use trump cards strategically
@@ -66,15 +71,16 @@ These penalties teach agents:
 
 Agents can receive a small reward on each card play when their choice matches what the EW strategy would play:
 
-| Outcome | Reward | Description |
-|---------|--------|-------------|
-| Match EW strategy | **+0.2** | Agent plays the same card EW strategy would choose [+0.2 EW match bonus] |
-| Differ from EW strategy | **0** | No penalty for playing differently |
+| Outcome | Reward Constant | Description |
+|---------|-----------------|-------------|
+| Match EW strategy | `PER_CARD_EW_STRATEGY_REWARD` | Agent plays the same card EW strategy would choose |
+| Differ from EW strategy | No penalty | No penalty for playing differently |
 
 This feature:
 - Can be disabled by setting `enable_per_card_reward=False` in the trainer
 - Can be configured via `ENABLE_PER_CARD_REWARD` in `constants.py`
-- Uses `PER_CARD_EW_STRATEGY_REWARD = 0.2` for the reward amount
+- Reward value controlled by `PER_CARD_EW_STRATEGY_REWARD` constant
+- **Impact**: Higher values provide stronger immediate feedback but may cause agents to mimic EW strategy too closely
 
 **Note**: This feature is designed to be removable so the model doesn't become a copy of the EW strategy.
 
@@ -85,28 +91,34 @@ When the game ends (all cards played), reward is calculated using:
 **Formula**: `(tricks_won - max_tricks) × (1 - tricks_won / max_tricks) + team_bonus`
 
 Where:
-- `max_tricks = 13` (CARDS_PER_PLAYER)
-- `team_bonus = +2` if team total tricks >= 7 (wins the game), otherwise 0
+- `max_tricks = CARDS_PER_PLAYER` (number of cards each player has)
+- `team_bonus` applied if team total tricks meets winning threshold, otherwise 0
+
+**Example reward progression** (assuming 13 cards per player and team bonus of +2 for winning):
 
 | Agent Tricks Won | Multiplier | Base Reward | With Team Bonus (if applicable) |
 |------------------|------------|-------------|--------------------------------|
-| 13 (max) | 0.00 | **0** | +2 (team wins) |
-| 10 | 0.23 | **-0.69** | +1.31 (team wins) |
-| 7 | 0.46 | **-2.77** | depends on team total |
-| 3 | 0.77 | **-7.69** | depends on team total |
-| 0 | 1.00 | **-13** | -13 (team likely loses) |
+| max_tricks | 0.00 | **0** | +bonus (team wins) |
+| ~77% of max | ~0.23 | negative | +bonus (team wins) |
+| ~54% of max | ~0.46 | negative | depends on team total |
+| ~23% of max | ~0.77 | very negative | depends on team total |
+| 0 | 1.00 | most negative | likely loses |
 
 This reward structure:
 - Provides granular feedback about individual agent performance
-- Applies a diminishing multiplier `(1 - tricks/13)` to scale rewards
-- Awards +2 bonus to both agents if their team wins 7 or more tricks total (wins the game)
-- Uses `END_GAME_REWARD_MULTIPLIER` constant for additional scaling (default: 1.0)
+- Applies a diminishing multiplier `(1 - tricks/max_tricks)` to scale rewards
+- Awards team bonus to both agents if their team wins (controlled by threshold)
+- Uses `END_GAME_REWARD_MULTIPLIER` constant for additional scaling
+- **Impact**: Adjust `END_GAME_REWARD_MULTIPLIER` to change relative importance of end-game rewards vs per-trick rewards
 
 ### Model Save Threshold
 
-Models are only saved during training if the average reward over the last 100 episodes exceeds **-5.5**. This prevents saving poorly performing models.
+Models are only saved during training if the average reward over recent episodes exceeds the threshold set by `MODEL_SAVE_REWARD_THRESHOLD`. This prevents saving poorly performing models.
 
-**Timing**: The check is performed every 25 games, but only after 200 games have been played.
+**Timing**: The check is performed every `MODEL_SAVE_CHECK_EVERY` games, but only after `MODEL_SAVE_MIN_GAMES` have been played.
+**Impact**: 
+- Lower (more negative) threshold means more models saved, including mediocre ones
+- Higher (less negative) threshold means only better models saved, but may miss intermediate progress
 
 - `MODEL_SAVE_REWARD_THRESHOLD = -5.5`: Minimum average reward to save model
 - `MODEL_SAVE_CHECK_EVERY = 25`: Check every 25 games
@@ -167,14 +179,22 @@ The reward system is implemented in `whist.py`:
 
 ### Constants
 
-Reward constants in `constants.py`:
-- `ENABLE_PER_CARD_REWARD`: Enable/disable per-card rewards (default: True)
-- `PER_CARD_EW_STRATEGY_REWARD`: Reward for matching EW strategy (default: 0.2)
-- `END_GAME_REWARD_MULTIPLIER`: Multiplier for end-game reward (default: 1.0)
-- `MODEL_SAVE_REWARD_THRESHOLD`: Minimum average reward to save model (default: -0.5)
-- **`TRUMP_NOT_USED_PENALTY`**: Penalty for not using trump when should (default: -7.0)
-- **`TRUMP_OVERPLAY_PENALTY`**: Penalty for using unnecessarily high trump (default: -5.0)
-- **`PARTNER_OVERPLAY_PENALTY`**: Penalty for taking trick from winning partner (default: -8.0)
+Reward constants in `constants.py` (values determined by code, not documentation):
+- `ENABLE_PER_CARD_REWARD`: Boolean flag to enable/disable per-card rewards
+- `PER_CARD_EW_STRATEGY_REWARD`: Reward magnitude for matching EW strategy
+  - **Effect**: Higher values increase imitation of EW strategy; lower values allow more independent learning
+- `END_GAME_REWARD_MULTIPLIER`: Scaling factor for end-game rewards
+  - **Effect**: Increase to emphasize long-term performance; decrease to focus on per-trick rewards
+- `MODEL_SAVE_REWARD_THRESHOLD`: Minimum average reward required to save model
+  - **Effect**: More negative values save more models; less negative values save only better models
+- `TRUMP_NOT_USED_PENALTY`: Penalty for not using trump when optimal
+  - **Effect**: More negative values punish this mistake more severely
+- `TRUMP_OVERPLAY_PENALTY`: Penalty for using unnecessarily high trump
+  - **Effect**: More negative values emphasize card conservation
+- `PARTNER_OVERPLAY_PENALTY`: Penalty for taking trick from winning partner
+  - **Effect**: More negative values emphasize partner coordination
+- `MODEL_SAVE_CHECK_EVERY`: Frequency of model save checks
+- `MODEL_SAVE_MIN_GAMES`: Minimum games before starting model save checks
 
 ### Training Integration
 

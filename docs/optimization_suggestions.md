@@ -2,82 +2,92 @@
 
 This document provides light and simple optimization suggestions for the Deep Simple Whist DQN implementation.
 
+**Note**: All constant values are determined by the code in `constants.py`, not by this documentation. This document describes the effects of adjusting constants, not their current values.
+
 ## Training Optimizations
 
 ### 1. Batch Size Tuning
 - **Status**: ✅ Implemented
-- **Current**: `MINIBATCH_SIZE = 32` (increased from 8)
-- **Impact**: Better gradient estimates, faster convergence
-- **Notes**: Already optimized for more stable learning
+- **Constant**: `MINIBATCH_SIZE`
+- **Effect of increasing**: Better gradient estimates, more stable learning, but slower updates and more memory
+- **Effect of decreasing**: Faster updates, less memory, but noisier gradients and less stable learning
+- **Trade-off**: Balance between training stability and computational efficiency
 
 ### 2. Replay Memory Size
-- **Current**: `REPLAY_MEMORY_SIZE = 100`
-- **Suggestion**: Consider increasing to 1000-5000 for better experience diversity
-- **Impact**: More diverse training experiences, but requires more memory
-- **Notes**: Current size is small; increasing could improve learning
+- **Constant**: `REPLAY_MEMORY_SIZE`
+- **Effect of increasing**: More diverse training experiences, better exploration of past states, but more memory usage
+- **Effect of decreasing**: Less memory usage, faster sampling, but less experience diversity
+- **Trade-off**: Balance between experience diversity and memory constraints
 
 ### 3. Learning Rate
-- **Current**: Default Adam optimizer learning rate (0.001)
-- **Suggestion**: Try 0.0001 or use learning rate scheduling
-- **Impact**: More stable training, better final performance
-- **Notes**: Consider exponential decay or step-based scheduling
+- **Configuration**: Adam optimizer learning rate
+- **Effect of increasing**: Faster initial learning but risk of instability and overshooting optima
+- **Effect of decreasing**: More stable training, better final performance, but slower convergence
+- **Suggestion**: Consider exponential decay or step-based scheduling for best results
 
 ## Model Architecture Optimizations
 
 ### 4. Dropout Regularization
 - **Status**: ✅ Implemented
-- **Current**: 3 hidden layers (128, 64, 32 units) with dropout rate of 0.35
-- **Implementation**: Dropout layers added after each hidden layer
-- **Impact**: Better generalization to unseen game states, prevents overfitting
+- **Constant**: `DROPOUT_RATE`
+- **Effect of increasing**: Better generalization, less overfitting, but slower learning and potential underfitting
+- **Effect of decreasing**: Faster learning, better training performance, but risk of overfitting
+- **Trade-off**: Balance between generalization and learning speed
 
 ### 5. Activation Functions
 - **Current**: ReLU activation
 - **Suggestion**: Try LeakyReLU or ELU for better gradient flow
-- **Impact**: Reduced dead neuron problem
-- **Notes**: ELU can provide smoother gradients with negative values
+- **Impact**: Alternative activations can reduce dead neuron problem
+- **Notes**: ELU provides smoother gradients with negative values
 
 ## Reward System Optimizations
 
 ### 6. Trump Play Penalties
 - **Status**: ✅ Implemented
-- **Implementation**: 
-  - Not using trump when opponent winning: -7.0 penalty
-  - Using unnecessarily high trump: -5.0 penalty
-  - Taking trick from winning partner: -8.0 penalty
-- **Impact**: Teaches agents optimal trump usage and partner coordination
-- **Notes**: Significantly improves strategic play quality
+- **Constants**: `TRUMP_NOT_USED_PENALTY`, `TRUMP_OVERPLAY_PENALTY`, `PARTNER_OVERPLAY_PENALTY`
+- **Effect of more negative values**: Stronger punishment for mistakes, faster learning of proper behavior, but higher initial variance
+- **Effect of less negative values**: Gentler learning, more exploration of alternatives, but slower convergence to optimal strategy
+- **Trade-off**: Balance between learning speed and training stability
+- **Impact**: Teaches optimal trump usage and partner coordination
 
 ### 7. Per-Card Rewards
 - **Status**: ✅ Implemented (Configurable)
-- **Current**: +0.2 reward for matching EW strategy
-- **Configuration**: Can be disabled via `ENABLE_PER_CARD_REWARD`
-- **Impact**: Provides immediate feedback, but may limit creativity
+- **Constants**: `ENABLE_PER_CARD_REWARD`, `PER_CARD_EW_STRATEGY_REWARD`
+- **Effect of increasing reward**: Stronger immediate feedback, faster initial learning, but may cause over-imitation of EW strategy
+- **Effect of decreasing reward**: More independent learning, diverse strategies, but slower initial progress
+- **Trade-off**: Balance between guided learning and strategic independence
 - **Suggestion**: Consider disabling after initial training to encourage independent strategy
 
 ### 8. Exploration Phase
 - **Status**: ✅ Implemented
-- **Current**: 200 games of pure exploration before training
-- **Impact**: Better initial experience diversity
-- **Notes**: Already optimized for cold-start problem
+- **Constant**: `EXPLORATION_GAMES`
+- **Effect of increasing**: More initial experience diversity, better coverage of state space, but delayed actual learning
+- **Effect of decreasing**: Faster start to actual training, but potentially poor initial experience distribution
+- **Trade-off**: Balance between initial exploration and training time
 
 ## Training Loop Optimizations
 
 ### 9. Epsilon Decay
-- **Current**: `EPSILON_DECAY = 0.996`
-- **Suggestion**: Use exponential or linear decay schedule with warmup
-- **Impact**: Better exploration-exploitation balance
-- **Notes**: Could implement stepped decay (e.g., reduce every N episodes)
+- **Constant**: `EPSILON_DECAY`
+- **Effect of faster decay**: Quicker transition to exploitation, faster convergence, but may miss important explorations
+- **Effect of slower decay**: More thorough exploration, better final policy, but slower convergence
+- **Trade-off**: Balance between exploration and exploitation
+- **Suggestion**: Consider stepped decay or scheduled reduction
 
 ### 10. Target Network Updates
-- **Current**: Updates every 5 episodes
-- **Suggestion**: Try soft updates (τ = 0.001) at each step instead
-- **Impact**: More stable Q-value estimates
-- **Implementation**: `target_weights = τ * online_weights + (1-τ) * target_weights`
+- **Constant**: `UPDATE_TARGET_EVERY`
+- **Effect of more frequent updates**: Faster adaptation to policy changes, but less stable Q-value estimates
+- **Effect of less frequent updates**: More stable Q-values, but slower adaptation
+- **Alternative**: Try soft updates with small τ parameter at each step
+- **Trade-off**: Balance between stability and adaptability
 
 ### 11. Model Save Threshold
 - **Status**: ✅ Implemented
-- **Current**: Only save if average reward > -0.5 (should be -5.5 per docs)
-- **Action Required**: Fix MODEL_SAVE_REWARD_THRESHOLD constant to match documentation
+- **Constant**: `MODEL_SAVE_REWARD_THRESHOLD`
+- **Effect of higher (less negative) threshold**: Only better models saved, less disk usage, but may miss intermediate progress
+- **Effect of lower (more negative) threshold**: More models saved including mediocre ones, better tracking of progress, but more disk usage
+- **Related**: `MODEL_SAVE_CHECK_EVERY`, `MODEL_SAVE_MIN_GAMES`
+- **Trade-off**: Balance between model quality and progress tracking
 - **Impact**: Prevents saving poorly performing models
 
 ## Performance Optimizations
