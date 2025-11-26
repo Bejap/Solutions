@@ -41,10 +41,14 @@ EW_STRATEGY_POSITIONS = [EAST, WEST]  # Positions 1 and 3
 # =============================================================================
 
 # Default training configuration
-DEFAULT_NUM_GAMES = 1000
-DEFAULT_EPSILON = 1.0  # Initial exploration rate
+DEFAULT_NUM_GAMES = 1200  # 200 exploration + 1000 training
+DEFAULT_EPSILON = 1.0  # Initial exploration rate (always random during exploration phase)
 DEFAULT_EPSILON_DECAY = 0.996
 DEFAULT_MIN_EPSILON = 0.001
+
+# Exploration phase configuration
+EXPLORATION_GAMES = 200  # Number of games with pure random exploration
+# After exploration, epsilon starts at 1.0 and decays normally
 
 # Gamma values for different agents (discount factor for future rewards)
 DEFAULT_GAMMA_VALUES = [0.99, 0.95, 0.90, 0.85]
@@ -82,7 +86,7 @@ MODEL_SAVE_REWARD_THRESHOLD = -5.5
 
 # Model save check frequency: check every N games after minimum games played
 MODEL_SAVE_CHECK_EVERY = 25  # Check every 25 games
-MODEL_SAVE_MIN_GAMES = 200  # Only start checking after 200 games
+MODEL_SAVE_MIN_GAMES = 400  # Only start checking after 400 games (200 exploration + 200 training)
 
 
 # =============================================================================
