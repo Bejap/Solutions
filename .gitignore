@@ -150,6 +150,7 @@ Thumbs.db
 
 # Game logs
 game_logs/
+game_logs_embedded/
 
 # Plots (keep folder with .gitkeep, ignore generated plots)
 plots/*.png
