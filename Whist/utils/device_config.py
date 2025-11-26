@@ -12,6 +12,16 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+print("TF version:", tf.__version__)
+print("Physical GPUs:", tf.config.list_physical_devices('GPU'))
+print("Built with CUDA:", tf.test.is_built_with_cuda())
+try:
+    build = tf.sysconfig.get_build_info()
+    print("CUDA version:", build.get("cuda_version"))
+    print("cuDNN version:", build.get("cudnn_version"))
+except Exception as e:
+    print("Build info unavailable:", e)
+print("CUDA_VISIBLE_DEVICES:", os.environ.get("CUDA_VISIBLE_DEVICES"))
 
 def configure_device(prefer_gpu=True, memory_growth=True, memory_limit_mb=None):
     """
