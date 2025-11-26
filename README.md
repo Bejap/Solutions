@@ -1,8 +1,10 @@
 # Deep Simple Whist - DQN Implementation
 
+**🎉 Recently Updated: GPU/NPU acceleration support for faster training!**
+
 **🎉 Recently Refactored: Now featuring comprehensive OOP inheritance structure and organized folder layout!**
 
-This repository contains a Deep Q-Network (DQN) implementation for playing the Whist card game. The project uses reinforcement learning to train agents to play the game effectively.
+This repository contains a Deep Q-Network (DQN) implementation for playing the Whist card game. The project uses reinforcement learning to train agents to play the game effectively, with optional GPU/NPU acceleration for improved performance.
 
 ## 📁 Project Structure
 
@@ -67,6 +69,17 @@ Solutions/
 
 ## 🆕 Recent Major Updates
 
+### GPU/NPU Acceleration ⚡
+- **Automatic GPU detection** and configuration for faster training
+- **Memory management** with growth control and limits
+- **Mixed precision training** support (experimental)
+- **Multi-GPU support** for distributed training
+- See [GPU_NPU_GUIDE.md](docs/GPU_NPU_GUIDE.md) for details
+
+### Model Saving Improvements
+- **Average reward in filenames** for easy performance tracking
+- Format: `embedded_agent_player_0_ep1000_avgR-3.45.keras`
+
 ### Folder Reorganization
 - **Whist/**: Main package with clear subfolders (core, agents, training, embedding, utils, logger, demos)
 - **testing/**: All test files in one place
@@ -82,6 +95,7 @@ Solutions/
 - Run: `python -m Whist.training.model_training_embedded`
 
 📖 **Documentation in docs/**:
+- [GPU_NPU_GUIDE.md](docs/GPU_NPU_GUIDE.md) - GPU/NPU acceleration guide
 - [INHERITANCE_STRUCTURE.md](docs/INHERITANCE_STRUCTURE.md) - Architecture guide  
 - [CARD_EMBEDDING_GUIDE.md](docs/CARD_EMBEDDING_GUIDE.md) - Embedding system  
 - [CONSTANTS_GUIDE.md](docs/CONSTANTS_GUIDE.md) - Constants reference
@@ -92,9 +106,10 @@ This is a machine learning project that implements a Deep Q-Network (DQN) agent 
 
 - **Game Engine**: Full implementation of Whist game logic
 - **DQN Agent**: Deep reinforcement learning agent using TensorFlow
+- **GPU/NPU Acceleration**: Optional hardware acceleration for faster training
 - **Card Embeddings**: Vector-based card representations for flexible game sizes
 - **Training System**: Optimized training loop with epsilon-greedy exploration
-- **Model Management**: Save/load trained models
+- **Model Management**: Save/load trained models with performance metrics
 - **Visualization**: Plot training progress and model performance
 - **Testing**: Test trained agents against each other
 

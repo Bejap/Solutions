@@ -22,13 +22,30 @@ from Whist.utils.constants import (
     HIDDEN_LAYER_1_SIZE,
     HIDDEN_LAYER_2_SIZE,
     HIDDEN_LAYER_3_SIZE,
-    DROPOUT_RATE
+    DROPOUT_RATE,
+    USE_GPU,
+    GPU_MEMORY_GROWTH,
+    GPU_MEMORY_LIMIT_MB,
+    USE_MIXED_PRECISION
 )
+from Whist.utils.device_config import configure_device, enable_mixed_precision
 
 class DQNAgent(BaseAgent):
     def __init__(self, input_size: int, gamma, agent_id: int = 0):
         super().__init__(agent_id)
         self.input_shape = input_size
+        
+        # Configure GPU/NPU if requested (only once per process)
+        if USE_GPU and not hasattr(DQNAgent, '_device_configured'):
+            self.device = configure_device(
+                prefer_gpu=USE_GPU,
+                memory_growth=GPU_MEMORY_GROWTH,
+                memory_limit_mb=GPU_MEMORY_LIMIT_MB
+            )
+            if USE_MIXED_PRECISION:
+                enable_mixed_precision()
+            DQNAgent._device_configured = True
+        
         self.model = self.create_model()
         self.gamma = gamma
 

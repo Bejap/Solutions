@@ -27,7 +27,8 @@ from Whist.utils.constants import (
     MODEL_SAVE_REWARD_THRESHOLD,
     ENABLE_PER_CARD_REWARD,
     MODEL_SAVE_CHECK_EVERY,
-    MODEL_SAVE_MIN_GAMES
+    MODEL_SAVE_MIN_GAMES,
+    EXPLORATION_GAMES
 )
 
 
@@ -57,7 +58,8 @@ class EmbeddedWhistTrainer:
     def __init__(self, embedding_dim=8, num_games=DEFAULT_NUM_GAMES, epsilon=DEFAULT_EPSILON, 
                  epsilon_decay=DEFAULT_EPSILON_DECAY, min_epsilon=DEFAULT_MIN_EPSILON, 
                  gamma_values=None, save_every=DEFAULT_SAVE_EVERY, log_every=100, log_dir='game_logs_embedded',
-                 enable_per_card_reward=ENABLE_PER_CARD_REWARD, model_save_threshold=MODEL_SAVE_REWARD_THRESHOLD):
+                 enable_per_card_reward=ENABLE_PER_CARD_REWARD, model_save_threshold=MODEL_SAVE_REWARD_THRESHOLD,
+                 exploration_games=EXPLORATION_GAMES):
         """
         Initialize the Embedded Whist trainer.
         
@@ -73,6 +75,7 @@ class EmbeddedWhistTrainer:
             log_dir: Directory for game logs (default: 'game_logs_embedded')
             enable_per_card_reward: Enable per-card reward based on EW strategy (default: True)
             model_save_threshold: Only save model if average reward > this value (default: -5.5)
+            exploration_games: Number of games with pure random exploration (default: 200)
         """
         self.embedding_dim = embedding_dim
         self.NUM_GAMES = num_games
@@ -84,6 +87,7 @@ class EmbeddedWhistTrainer:
         self.LOG_EVERY = log_every
         self.enable_per_card_reward = enable_per_card_reward
         self.model_save_threshold = model_save_threshold
+        self.exploration_games = exploration_games
         
         # Initialize game logger
         self.logger = GameLogger(log_dir=log_dir)
@@ -115,13 +119,22 @@ class EmbeddedWhistTrainer:
         """Run the training loop with embedded representations."""
         print(f"Starting training with embedded agents (embedding_dim={self.embedding_dim})")
         print(f"State size: ~{self.embedding_dim * 7 + 8} dimensions (fixed, independent of cards)")
-        print(f"Logging detailed games every {self.LOG_EVERY} episodes to '{self.logger.log_dir}/'")
+        print(f"Total episodes: {self.NUM_GAMES}")
+        print(f"  - Exploration phase: {self.exploration_games} episodes (pure random)")
+        print(f"  - Training phase: {self.NUM_GAMES - self.exploration_games} episodes (epsilon decay)")
+        print(f"Logging will start after exploration phase (from episode {self.exploration_games + 1})")
+        print(f"Model saving will start from episode {MODEL_SAVE_MIN_GAMES}")
         print()
         
         for episode in tqdm(range(1, self.NUM_GAMES + 1), ascii=True, unit='episodes'):
             trick_count = 0
             episode_rewards = [0, 0, 0, 0]
-            should_log = (episode % self.LOG_EVERY == 0)
+            
+            # Determine if we're in exploration phase or training phase
+            in_exploration = episode <= self.exploration_games
+            
+            # Only log games after exploration phase ends
+            should_log = (not in_exploration) and (episode % self.LOG_EVERY == 0)
 
             start_state = self.game.reset()
             done = False
@@ -145,8 +158,11 @@ class EmbeddedWhistTrainer:
 
                     # Only use agent for North (0) and South (2)
                     if agent is not None:
+                        # During exploration phase, always use epsilon=1.0 (pure random)
+                        current_epsilon = 1.0 if in_exploration else self.epsilon
+                        
                         action, is_exploration, q_value = choose_embedded_agent_action(
-                            agent, current_state, self.epsilon, valid_actions, return_info=True
+                            agent, current_state, current_epsilon, valid_actions, return_info=True
                         )
                         # Set decision_type based on whether agent explored or exploited
                         if is_exploration:
@@ -156,11 +172,14 @@ class EmbeddedWhistTrainer:
                             decision_type = 'agent'
                             certainty = q_value
                         
-                        # Calculate per-card reward based on EW strategy matching
-                        per_card_reward = self.game.calculate_per_card_reward(
-                            current_player_index, action, valid_actions
-                        )
-                        episode_rewards[current_player_index] += per_card_reward
+                        # Only calculate per-card reward during training phase (not during exploration)
+                        if not in_exploration:
+                            per_card_reward = self.game.calculate_per_card_reward(
+                                current_player_index, action, valid_actions
+                            )
+                            episode_rewards[current_player_index] += per_card_reward
+                        else:
+                            per_card_reward = 0
                     else:
                         # Use strategic play for East (1) and West (3)
                         ew_strategy = self.ew_strategies[current_player_index]
@@ -210,9 +229,11 @@ class EmbeddedWhistTrainer:
                             if self.agents[player_idx] is not None:
                                 self.agents[player_idx].update_replay_memory((s, a, reward_value, ns, done))
 
-                        for agent_idx, agent_obj in enumerate(self.agents):
-                            if agent_obj is not None:
-                                agent_obj.train(done, trick_count)
+                        # Only train agents during training phase (not during exploration)
+                        if not in_exploration:
+                            for agent_idx, agent_obj in enumerate(self.agents):
+                                if agent_obj is not None:
+                                    agent_obj.train(done, trick_count)
 
                         pending_transitions = []
 
@@ -224,11 +245,16 @@ class EmbeddedWhistTrainer:
                 self.logger.end_game(episode, self.game.score_array)
                         
             self.all_episode_rewards.append(np.mean(episode_rewards))
-            self.epsilon = max(self.MIN_EPSILON, self.epsilon * self.EPSILON_DECAY)
+            
+            # Only decay epsilon after exploration phase
+            if not in_exploration:
+                self.epsilon = max(self.MIN_EPSILON, self.epsilon * self.EPSILON_DECAY)
 
-            for agent_idx, agent_obj in enumerate(self.agents):
-                if agent_obj is not None:
-                    agent_obj.train(True, trick_count)
+            # Only train agents at episode end during training phase (not during exploration)
+            if not in_exploration:
+                for agent_idx, agent_obj in enumerate(self.agents):
+                    if agent_obj is not None:
+                        agent_obj.train(True, trick_count)
 
             # Only save model if average reward is above threshold
             # Check every MODEL_SAVE_CHECK_EVERY games after MODEL_SAVE_MIN_GAMES
@@ -238,24 +264,22 @@ class EmbeddedWhistTrainer:
                 avg_reward = np.mean(self.all_episode_rewards[-recent_window:])
                 
                 if avg_reward > self.model_save_threshold:
+                    # Format avg_reward for filename (e.g., -3.45 -> "avgR-3.45")
+                    avg_reward_str = f"avgR{avg_reward:.2f}"
                     for i, agent_obj in enumerate(self.agents):
                         if agent_obj is not None:
-                            agent_obj.save_agent(f"Weights/embedded_agent_player_{i}_ep{episode}.weights.h5")
-                            agent_obj.save_full_agent(f"Models/embedded_agent_player_{i}_ep{episode}.keras")
+                            agent_obj.save_agent(f"Weights/embedded_agent_player_{i}_ep{episode}_{avg_reward_str}.weights.h5")
+                            agent_obj.save_full_agent(f"Models/embedded_agent_player_{i}_ep{episode}_{avg_reward_str}.keras")
                     print(f"\nEpisode {episode}: Saved models (avg reward: {avg_reward:.2f} > {self.model_save_threshold})")
                 else:
                     print(f"\nEpisode {episode}: Skipped saving (avg reward: {avg_reward:.2f} <= {self.model_save_threshold})")
     
     def _get_last_trick_winner(self):
-        """Determine who won the last trick based on score changes."""
-        # This is a simple approach - find the player with highest score change
-        # In the actual game, the score_array shows cumulative wins
-        scores = self.game.score_array
-        max_score = max(scores)
-        for i, score in enumerate(scores):
-            if score == max_score:
-                return i
-        return 0  # Default to first player
+        """Determine who won the last trick."""
+        # Use the trick_winner attribute set by the game
+        if self.game.trick_winner is not None:
+            return self.game.players.index(self.game.trick_winner)
+        return 0  # Default to first player if no winner set
     
     def plot_results(self, plot_dir='plots'):
         """Plot and save the training results.
