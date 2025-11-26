@@ -304,13 +304,11 @@ class WhistTrainer:
                     print(f"\nEpisode {episode}: Skipped saving (avg reward: {avg_reward:.2f} <= {self.model_save_threshold})")
     
     def _get_last_trick_winner(self):
-        """Determine who won the last trick based on score changes."""
-        scores = self.game.score_array
-        max_score = max(scores)
-        for i, score in enumerate(scores):
-            if score == max_score:
-                return i
-        return 0  # Default to first player
+        """Determine who won the last trick."""
+        # Use the trick_winner attribute set by the game
+        if self.game.trick_winner is not None:
+            return self.game.players.index(self.game.trick_winner)
+        return 0  # Default to first player if no winner set
     
     def plot_results(self, plot_dir='plots'):
         """Plot and save the training results.
