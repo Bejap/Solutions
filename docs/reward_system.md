@@ -21,7 +21,48 @@ This reward structure encourages:
 - Supporting the partner to win (+0.8)
 - Avoiding letting opponents win (-1)
 
-### Per-Card Rewards (New, Configurable)
+### Trump Play Penalties (New)
+
+Agents receive penalties for suboptimal trump usage to encourage strategic play:
+
+| Violation | Penalty | Description |
+|-----------|---------|-------------|
+| **Not using trump when should** | **-7.0** | Agent has trump cards but doesn't use them when opponent is winning and partner is not winning |
+| **Trump overplay** | **-5.0** | Agent uses unnecessarily high trump when a lower trump would win |
+| **Taking trick from partner** | **-8.0** | Agent plays a higher card to take a trick that partner was already winning |
+
+#### Penalty Details
+
+**1. Not Using Trump (-7.0)**
+- Applied when:
+  - Opponent is currently winning the trick
+  - Agent has trump cards in hand
+  - Partner is not winning
+  - Agent plays a non-trump card when unable to follow suit
+- Example: Opponent leads Ace of Hearts, agent has no hearts but has Spades (trump), plays Diamond instead
+
+**2. Trump Overplay (-5.0)**
+- Applied when:
+  - Agent plays a trump card
+  - Agent had lower trump cards that would also win
+  - Works even when overtrumping partner unnecessarily
+- Example: Opponent plays 5 of Hearts, agent has 2, 5, and King of Spades, plays King instead of 2
+
+**3. Taking Trick from Partner (-8.0)**
+- Applied when:
+  - Partner is currently winning the trick
+  - Agent plays a higher card that beats partner's card
+  - Agent had lower cards available that wouldn't win
+- Example: Partner plays King of Hearts (winning), agent plays Ace of Hearts instead of lower card
+- **Most severe penalty** because it's wasteful - team was already going to win the trick
+
+These penalties teach agents:
+- When to use trump cards strategically
+- To conserve high cards when not needed
+- To avoid competing with their partner
+- To coordinate effectively as a team
+
+### Per-Card Rewards (Configurable)
 
 Agents can receive a small reward on each card play when their choice matches what the EW strategy would play:
 
@@ -119,6 +160,7 @@ Statistics are automatically reset when `game.reset()` is called at the start of
 ### Location
 
 The reward system is implemented in `whist.py`:
+- Trump penalties: `calculate_trump_penalty()` method
 - Per-card rewards: `calculate_per_card_reward()` method
 - Trick-level rewards: `_get_game_state()` method
 - Game-level rewards: `step()` method
@@ -127,10 +169,12 @@ The reward system is implemented in `whist.py`:
 
 Reward constants in `constants.py`:
 - `ENABLE_PER_CARD_REWARD`: Enable/disable per-card rewards (default: True)
-- `PER_CARD_EW_STRATEGY_REWARD`: Reward for matching EW strategy (default: 0.1)
-- `PER_CARD_EW_STRATEGY_PENALTY`: Penalty for not matching (default: -0.1)
+- `PER_CARD_EW_STRATEGY_REWARD`: Reward for matching EW strategy (default: 0.2)
 - `END_GAME_REWARD_MULTIPLIER`: Multiplier for end-game reward (default: 1.0)
-- `MODEL_SAVE_REWARD_THRESHOLD`: Minimum average reward to save model (default: -5.5)
+- `MODEL_SAVE_REWARD_THRESHOLD`: Minimum average reward to save model (default: -0.5)
+- **`TRUMP_NOT_USED_PENALTY`**: Penalty for not using trump when should (default: -7.0)
+- **`TRUMP_OVERPLAY_PENALTY`**: Penalty for using unnecessarily high trump (default: -5.0)
+- **`PARTNER_OVERPLAY_PENALTY`**: Penalty for taking trick from winning partner (default: -8.0)
 
 ### Training Integration
 
