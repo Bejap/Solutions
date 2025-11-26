@@ -3,6 +3,8 @@ Embedded DQN Agent for Whist
 
 This agent uses card embeddings instead of one-hot encoding for a more
 flexible and expressive representation that works with any number of cards.
+
+Supports GPU/NPU acceleration for faster training.
 """
 
 import numpy as np
@@ -18,8 +20,13 @@ from Whist.utils.constants import (
     MIN_REPLAY_MEMORY_SIZE,
     MINIBATCH_SIZE,
     UPDATE_TARGET_EVERY,
-    CARDS_PER_PLAYER
+    CARDS_PER_PLAYER,
+    USE_GPU,
+    GPU_MEMORY_GROWTH,
+    GPU_MEMORY_LIMIT_MB,
+    USE_MIXED_PRECISION
 )
+from Whist.utils.device_config import configure_device, enable_mixed_precision
 
 
 class EmbeddedDQNAgent(BaseAgent):
@@ -42,6 +49,17 @@ class EmbeddedDQNAgent(BaseAgent):
         super().__init__(agent_id)
         self.embedding_dim = embedding_dim
         self.gamma = gamma
+        
+        # Configure GPU/NPU if requested (only once per process)
+        if USE_GPU and not hasattr(EmbeddedDQNAgent, '_device_configured'):
+            self.device = configure_device(
+                prefer_gpu=USE_GPU,
+                memory_growth=GPU_MEMORY_GROWTH,
+                memory_limit_mb=GPU_MEMORY_LIMIT_MB
+            )
+            if USE_MIXED_PRECISION:
+                enable_mixed_precision()
+            EmbeddedDQNAgent._device_configured = True
         
         # Create card embedding layer (shared between model and target)
         self.card_embedding = CardEmbedding(embedding_dim=embedding_dim)

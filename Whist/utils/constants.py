@@ -178,3 +178,21 @@ STRATEGY_RANDOM = "RANDOM_STRATEGY"  # Random play strategy
 PLAYER_TYPE_HUMAN = "HUMAN"
 PLAYER_TYPE_AI = "AI"
 PLAYER_TYPE_STRATEGY = "STRATEGY"
+
+
+# =============================================================================
+# DEVICE CONFIGURATION (GPU/NPU Support)
+# =============================================================================
+
+# Enable GPU acceleration if available
+USE_GPU = True  # Set to False to force CPU usage
+
+# GPU memory configuration
+GPU_MEMORY_GROWTH = True  # Allow gradual memory allocation (recommended)
+GPU_MEMORY_LIMIT_MB = None  # Set to limit GPU memory usage (e.g., 4096 for 4GB)
+
+# Mixed precision training for better GPU performance
+USE_MIXED_PRECISION = False  # Enable float16 for faster training (experimental)
+
+# Specific GPU device to use (-1 for all, 0+ for specific device)
+GPU_DEVICE_ID = -1  # -1 means use all available GPUs

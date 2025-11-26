@@ -295,10 +295,12 @@ class WhistTrainer:
                 avg_reward = np.mean(self.all_episode_rewards[-recent_window:])
                 
                 if avg_reward > self.model_save_threshold:
+                    # Format avg_reward for filename (e.g., -3.45 -> "avgR-3.45")
+                    avg_reward_str = f"avgR{avg_reward:.2f}"
                     for i, agent_obj in enumerate(self.agents):
                         if agent_obj is not None:
-                            agent_obj.save_agent(f"Weights/agent_player_{i}_ep{episode}.weights.h5")
-                            agent_obj.save_full_agent(f"Models/full_agent_player_{i}_ep{episode}.keras")
+                            agent_obj.save_agent(f"Weights/agent_player_{i}_ep{episode}_{avg_reward_str}.weights.h5")
+                            agent_obj.save_full_agent(f"Models/full_agent_player_{i}_ep{episode}_{avg_reward_str}.keras")
                     print(f"\nEpisode {episode}: Saved models (avg reward: {avg_reward:.2f} > {self.model_save_threshold})")
                 else:
                     print(f"\nEpisode {episode}: Skipped saving (avg reward: {avg_reward:.2f} <= {self.model_save_threshold})")
