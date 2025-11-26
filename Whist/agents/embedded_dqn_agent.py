@@ -37,7 +37,7 @@ class EmbeddedDQNAgent(BaseAgent):
     embeddings to represent cards, hands, and game state.
     """
     
-    def __init__(self, embedding_dim: int = 8, gamma: float = 0.99, agent_id: int = 0):
+    def __init__(self, embedding_dim: int = 8, gamma: float = 0.99, agent_id: int = 0, use_double_dqn: bool = True):
         """
         Initialize the Embedded DQN Agent.
         
@@ -45,10 +45,12 @@ class EmbeddedDQNAgent(BaseAgent):
             embedding_dim: Dimension of card embedding vectors (default: 8)
             gamma: Discount factor for future rewards
             agent_id: Unique identifier for this agent
+            use_double_dqn: Use Double DQN algorithm (default: True)
         """
         super().__init__(agent_id)
         self.embedding_dim = embedding_dim
         self.gamma = gamma
+        self.use_double_dqn = use_double_dqn
         
         # Configure GPU/NPU if requested (only once per process)
         if USE_GPU and not hasattr(EmbeddedDQNAgent, '_device_configured'):
@@ -178,18 +180,40 @@ class EmbeddedDQNAgent(BaseAgent):
         )
         
         # Get future Q values
-        future_qs_list = self.target_model.predict(
-            [next_states['hand'], next_states['round'], next_states['played'],
-             next_states['player_id'], next_states['tracking'], next_states['scores']],
-            verbose=0
-        )
+        # Double DQN: use online network to select actions, target network to evaluate
+        if self.use_double_dqn:
+            # Use online network to select best actions
+            future_qs_online = self.model.predict(
+                [next_states['hand'], next_states['round'], next_states['played'],
+                 next_states['player_id'], next_states['tracking'], next_states['scores']],
+                verbose=0
+            )
+            # Use target network to evaluate those actions
+            future_qs_target = self.target_model.predict(
+                [next_states['hand'], next_states['round'], next_states['played'],
+                 next_states['player_id'], next_states['tracking'], next_states['scores']],
+                verbose=0
+            )
+        else:
+            # Standard DQN
+            future_qs_list = self.target_model.predict(
+                [next_states['hand'], next_states['round'], next_states['played'],
+                 next_states['player_id'], next_states['tracking'], next_states['scores']],
+                verbose=0
+            )
         
         X = {key: [] for key in current_states.keys()}
         y = []
         
         for index, (state, action, reward, next_state, done) in enumerate(minibatch):
             if not done:
-                max_future_q = np.max(future_qs_list[index])
+                if self.use_double_dqn:
+                    # Double DQN: select action with online, evaluate with target
+                    best_action = np.argmax(future_qs_online[index])
+                    max_future_q = future_qs_target[index][best_action]
+                else:
+                    # Standard DQN
+                    max_future_q = np.max(future_qs_list[index])
                 new_q = reward + self.gamma * max_future_q
             else:
                 new_q = reward
