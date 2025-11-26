@@ -101,6 +101,10 @@ PER_CARD_EW_STRATEGY_REWARD = 0.2  # Reward for matching EW strategy decision
 # End-game reward multiplier (applied to tricks_won - max_tricks)
 END_GAME_REWARD_MULTIPLIER = 1.0
 
+# Trump play penalties (for suboptimal trump usage)
+TRUMP_NOT_USED_PENALTY = -7.0  # Penalty for not using trump when should (opponent winning, agent has trump, partner not winning)
+TRUMP_OVERPLAY_PENALTY = -5.0  # Penalty for using unnecessarily high trump when lower trump would win
+
 
 # =============================================================================
 # MODEL ARCHITECTURE
