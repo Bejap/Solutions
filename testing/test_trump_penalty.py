@@ -218,6 +218,145 @@ def test_no_penalty_when_partner_winning():
     return True
 
 
+def test_overtrumping_partner_penalty():
+    """Test penalty when agent overtrumps partner with unnecessarily high trump."""
+    print("\nTesting overtrumping partner penalty...")
+    
+    player_names = [1, 2, 3, 4]
+    game = Whist(player_names, enable_per_card_reward=False)
+    
+    # Set up EW strategies
+    ew_strategies = {
+        1: EWStrategy(2, game),
+        3: EWStrategy(4, game)
+    }
+    game.set_ew_strategies(ew_strategies)
+    
+    game.reset()
+    
+    # Set up scenario matching the new requirement:
+    # Player 2 (South, partner) leads with King of Spades (trump)
+    # Player 0 (North, agent) has Ace and Queen of Spades
+    # Player 0 plays Ace (unnecessarily high) when Queen would also beat any remaining cards
+    
+    game.players[0].hand = [
+        wg.Card('Diamonds', '5'),
+        wg.Card('Spades', 'Q'),  # Lower trump option
+        wg.Card('Spades', 'A'),  # High trump (unnecessarily high)
+    ]
+    
+    game.players[1].hand = [
+        wg.Card('Clubs', '3'),
+        wg.Card('Diamonds', '4'),
+        wg.Card('Hearts', '5')
+    ]
+    
+    game.players[2].hand = [
+        wg.Card('Spades', 'K'),  # Partner leads with this
+        wg.Card('Clubs', '6'),
+        wg.Card('Diamonds', '7')
+    ]
+    
+    game.players[3].hand = [
+        wg.Card('Clubs', '8'),
+        wg.Card('Diamonds', '9'),
+        wg.Card('Hearts', '10')
+    ]
+    
+    # Player 2 (South) leads with King of Spades
+    game.current_player_idx = 2
+    game.step(0)  # King of Spades
+    
+    # Player 3 (West) plays something
+    game.step(0)  # Clubs 8
+    
+    # Player 0 (North, agent) plays
+    # Hand after sorting: [Diamonds 5, Spades Q, Spades A]
+    # Should play Queen (action 1) but plays Ace (action 2)
+    state, rewards, done = game.step(2)
+    
+    # Check if penalty was applied
+    if rewards[0] < 0:
+        print(f"✓ Agent 0 received penalty: {rewards[0]:.1f} for overtrumping partner")
+        assert abs(rewards[0] - TRUMP_OVERPLAY_PENALTY) < 0.01, \
+            f"Expected penalty {TRUMP_OVERPLAY_PENALTY}, got {rewards[0]}"
+    else:
+        print(f"✗ No penalty applied, reward: {rewards[0]}")
+        return False
+    
+    return True
+
+
+def test_taking_trick_from_partner_penalty():
+    """Test penalty when agent takes trick from partner who is already winning."""
+    print("\nTesting taking trick from winning partner penalty...")
+    
+    player_names = [1, 2, 3, 4]
+    game = Whist(player_names, enable_per_card_reward=False)
+    
+    # Set up EW strategies
+    ew_strategies = {
+        1: EWStrategy(2, game),
+        3: EWStrategy(4, game)
+    }
+    game.set_ew_strategies(ew_strategies)
+    
+    game.reset()
+    
+    # Set up scenario:
+    # Player 2 (South, partner) is winning with highest card
+    # Player 0 (North, agent) takes the trick by playing even higher
+    # This is wasteful since partner was already winning
+    
+    game.players[0].hand = [
+        wg.Card('Hearts', 'A'),  # Highest hearts - takes from partner
+        wg.Card('Hearts', '5'),  # Lower hearts - would let partner win
+        wg.Card('Clubs', '3'),
+    ]
+    
+    game.players[1].hand = [
+        wg.Card('Hearts', '7'),
+        wg.Card('Diamonds', '4'),
+        wg.Card('Clubs', '5')
+    ]
+    
+    game.players[2].hand = [
+        wg.Card('Hearts', 'K'),  # Partner leads with King (high card)
+        wg.Card('Clubs', '6'),
+        wg.Card('Diamonds', '7')
+    ]
+    
+    game.players[3].hand = [
+        wg.Card('Hearts', '6'),
+        wg.Card('Diamonds', '8'),
+        wg.Card('Clubs', '9')
+    ]
+    
+    # Player 2 (South) leads with King of Hearts
+    game.current_player_idx = 2
+    game.step(2)  # King of Hearts (action 2 after sorting: Clubs 6, Diamonds 7, Hearts K)
+    
+    # Player 3 (West) plays lower hearts
+    game.step(2)  # 6 of Hearts (action 2 after sorting: Clubs 9, Diamonds 8, Hearts 6)
+    
+    # Player 0 (North, agent) plays
+    # Hand after sorting: [Clubs 3, Hearts 5, Hearts A]
+    # Partner is winning with K. Agent should play 5 but plays Ace (action 2)
+    state, rewards, done = game.step(2)
+    
+    # Check if penalty was applied
+    if rewards[0] < 0:
+        print(f"✓ Agent 0 received penalty: {rewards[0]:.1f} for taking trick from partner")
+        from Whist.utils.constants import PARTNER_OVERPLAY_PENALTY
+        assert abs(rewards[0] - PARTNER_OVERPLAY_PENALTY) < 0.01, \
+            f"Expected penalty {PARTNER_OVERPLAY_PENALTY}, got {rewards[0]}"
+    else:
+        print(f"✗ No penalty applied, reward: {rewards[0]}")
+        return False
+    
+    return True
+
+
 def run_all_tests():
     """Run all trump penalty tests."""
     print("=" * 60)
@@ -227,7 +366,9 @@ def run_all_tests():
     tests = [
         test_trump_not_used_penalty,
         test_trump_overplay_penalty,
-        test_no_penalty_when_partner_winning
+        test_no_penalty_when_partner_winning,
+        test_overtrumping_partner_penalty,
+        test_taking_trick_from_partner_penalty
     ]
     
     results = []

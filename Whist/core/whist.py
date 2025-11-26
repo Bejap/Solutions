@@ -14,7 +14,8 @@ from Whist.utils.constants import (
     PER_CARD_EW_STRATEGY_REWARD,
     END_GAME_REWARD_MULTIPLIER,
     TRUMP_NOT_USED_PENALTY,
-    TRUMP_OVERPLAY_PENALTY
+    TRUMP_OVERPLAY_PENALTY,
+    PARTNER_OVERPLAY_PENALTY
 )
 
 # Configure logger for reward monitoring
@@ -219,6 +220,56 @@ class Whist(BaseGame):
                     f"can_follow={can_follow_suit}, partner_winning={partner_winning}, "
                     f"winning_card={winning_card}")
         
+        # Check if agent's card will beat partner's winning card
+        # This happens when:
+        # 1. Partner is currently winning
+        # 2. Agent plays a card that beats partner's card
+        if partner_winning:
+            agent_card_beats_partner = False
+            
+            # Compare cards considering trump and led suit
+            if card_played.is_trump() and not winning_card.is_trump():
+                # Agent trumps when partner winning with non-trump
+                agent_card_beats_partner = True
+            elif card_played.is_trump() and winning_card.is_trump():
+                # Both trump - compare ranks
+                if card_played.rank_value > winning_card.rank_value:
+                    agent_card_beats_partner = True
+            elif not card_played.is_trump() and not winning_card.is_trump():
+                # Both non-trump - check if same suit and agent's is higher
+                if card_played.suit == winning_card.suit and card_played.rank_value > winning_card.rank_value:
+                    agent_card_beats_partner = True
+            
+            # If agent takes trick from partner, apply penalty
+            if agent_card_beats_partner:
+                # Check if there are remaining players who could beat partner's card
+                # If this is the last card (4th player), definitely wasteful
+                num_players_after = 4 - len(trick_cards_before) - 1  # -1 for current player
+                
+                if num_players_after == 0:
+                    # Last player - definitely wasteful to take from partner
+                    logger.debug(f"Player {player_idx} penalty: took trick from winning partner ({winning_card}) as last player [{PARTNER_OVERPLAY_PENALTY} partner overplay]")
+                    return PARTNER_OVERPLAY_PENALTY
+                else:
+                    # Not last player, but still generally wasteful unless there's a good reason
+                    # Apply penalty if agent had lower cards that wouldn't win
+                    cards_that_wouldnt_win = [
+                        card for card in player_hand 
+                        if card != card_played
+                        and (
+                            # Non-trump that wouldn't beat partner
+                            (not card.is_trump() and (card.suit != winning_card.suit or card.rank_value < winning_card.rank_value))
+                            or
+                            # Trump lower than partner's trump
+                            (card.is_trump() and winning_card.is_trump() and card.rank_value < winning_card.rank_value)
+                        )
+                    ]
+                    
+                    if cards_that_wouldnt_win and can_follow_suit:
+                        # Agent could have played lower and let partner win
+                        logger.debug(f"Player {player_idx} penalty: unnecessarily took trick from winning partner ({winning_card}) [{PARTNER_OVERPLAY_PENALTY} partner overplay]")
+                        return PARTNER_OVERPLAY_PENALTY
+        
         # Penalty 1: Not using trump when should
         # Conditions: 
         # - Opponent is winning (not partner)
@@ -246,16 +297,23 @@ class Whist(BaseGame):
         # Conditions:
         # - Agent played a trump card
         # - Agent had lower trump cards that could still win
-        if card_played.is_trump() and not partner_winning:
-            # Find what trump cards could win
-            if winning_card.is_trump():
-                # Need to beat existing trump
+        # Note: This applies even when partner is winning with trump (overtrumping partner unnecessarily)
+        if card_played.is_trump():
+            # Determine what the minimum trump needed is
+            if partner_winning and winning_card.is_trump():
+                # Partner is winning with trump - any trump higher than partner's is overtrumping
+                # This is generally bad unless opponents could beat partner's trump
+                # For simplicity, penalize any overtrump of partner that's unnecessarily high
+                min_trump_to_win = winning_card.rank_value
+            elif winning_card.is_trump():
+                # Opponent has trump, need to beat it
                 min_trump_to_win = winning_card.rank_value
             else:
-                # Any trump would win
+                # No trump played yet, any trump would win
                 min_trump_to_win = 0
             
             # Check if agent had lower trumps that could still win
+            # Only consider cards that would beat the current winning card
             lower_winning_trumps = [
                 card for card in trump_cards_in_hand 
                 if card.is_trump() 
@@ -265,8 +323,12 @@ class Whist(BaseGame):
             ]
             
             if lower_winning_trumps:
-                # Agent used unnecessarily high trump
-                logger.debug(f"Player {player_idx} penalty: used unnecessarily high trump ({card_played}) when lower would win [{TRUMP_OVERPLAY_PENALTY} trump overplay]")
+                if partner_winning and winning_card.is_trump():
+                    # Special case: overtrumping partner unnecessarily
+                    logger.debug(f"Player {player_idx} penalty: overtrumped partner ({winning_card}) with unnecessarily high trump ({card_played}) [{TRUMP_OVERPLAY_PENALTY} trump overplay]")
+                else:
+                    # Regular case: used unnecessarily high trump
+                    logger.debug(f"Player {player_idx} penalty: used unnecessarily high trump ({card_played}) when lower would win [{TRUMP_OVERPLAY_PENALTY} trump overplay]")
                 return TRUMP_OVERPLAY_PENALTY
         
         return 0.0

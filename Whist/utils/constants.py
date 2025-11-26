@@ -104,6 +104,7 @@ END_GAME_REWARD_MULTIPLIER = 1.0
 # Trump play penalties (for suboptimal trump usage)
 TRUMP_NOT_USED_PENALTY = -7.0  # Penalty for not using trump when should (opponent winning, agent has trump, partner not winning)
 TRUMP_OVERPLAY_PENALTY = -5.0  # Penalty for using unnecessarily high trump when lower trump would win
+PARTNER_OVERPLAY_PENALTY = -8.0  # Penalty for taking trick from partner who is already winning
 
 
 # =============================================================================
