@@ -147,9 +147,9 @@ class Whist(BaseGame):
             return 0.0
         
         # Convert both to int to ensure comparison works correctly
-        # (action might be numpy.int64, ew_action is regular int)
-        action_int = int(action)
-        ew_action_int = int(ew_action)
+        # Handle numpy types (action might be numpy.int64) and Python ints
+        action_int = int(action) if not isinstance(action, int) else action
+        ew_action_int = int(ew_action) if not isinstance(ew_action, int) else ew_action
         
         # Reward only if agent matches EW strategy (no penalty for mismatch)
         if action_int == ew_action_int:
