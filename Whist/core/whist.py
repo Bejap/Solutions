@@ -185,7 +185,7 @@ class Whist(BaseGame):
         
         # Get trick cards BEFORE the current card was played
         # (round_list now includes the just-played card, so we need to exclude it)
-        trick_cards_before = [t for t in self.round_list if t[0] != player_idx or t[1] != card_played]
+        trick_cards_before = [t for t in self.round_list if not (t[0] == player_idx and t[1] == card_played)]
         
         # Only evaluate when following (not leading)
         if len(trick_cards_before) == 0:  # Leading the trick
@@ -197,7 +197,21 @@ class Whist(BaseGame):
         led_suit = trick_cards_before[0][1].suit
         
         # Find currently winning card and player BEFORE this card was played
-        winning_tuple = max(trick_cards_before, key=lambda t: (t[1].is_trump(), t[1].rank_value))
+        # Must properly consider trump and led suit
+        def card_wins_over_others(card_tuple):
+            """Determine card strength considering trump and led suit."""
+            card = card_tuple[1]
+            if card.is_trump():
+                # Trump cards beat everything, ordered by rank
+                return (2, card.rank_value)
+            elif card.suit == led_suit:
+                # Led suit cards beat off-suit non-trump, ordered by rank
+                return (1, card.rank_value)
+            else:
+                # Off-suit non-trump cards cannot win
+                return (0, card.rank_value)
+        
+        winning_tuple = max(trick_cards_before, key=card_wins_over_others)
         winning_player_idx = winning_tuple[0]
         winning_card = winning_tuple[1]
         
@@ -265,10 +279,21 @@ class Whist(BaseGame):
                         )
                     ]
                     
-                    if cards_that_wouldnt_win and can_follow_suit:
-                        # Agent could have played lower and let partner win
-                        logger.debug(f"Player {player_idx} penalty: unnecessarily took trick from winning partner ({winning_card}) [{PARTNER_OVERPLAY_PENALTY} partner overplay]")
-                        return PARTNER_OVERPLAY_PENALTY
+                    # Need to check if agent could legally play one of those lower cards
+                    # If they can follow suit, check for lower cards in led suit
+                    # If they can't follow suit, any lower card would be valid
+                    if cards_that_wouldnt_win:
+                        if can_follow_suit:
+                            # Check if any of the lower cards are in the led suit
+                            lower_cards_in_led_suit = [c for c in cards_that_wouldnt_win if c.suit == led_suit]
+                            if lower_cards_in_led_suit:
+                                # Agent could have played lower and let partner win
+                                logger.debug(f"Player {player_idx} penalty: unnecessarily took trick from winning partner ({winning_card}) [{PARTNER_OVERPLAY_PENALTY} partner overplay]")
+                                return PARTNER_OVERPLAY_PENALTY
+                        else:
+                            # Can't follow suit, so any card is valid - had lower options available
+                            logger.debug(f"Player {player_idx} penalty: unnecessarily took trick from winning partner ({winning_card}) [{PARTNER_OVERPLAY_PENALTY} partner overplay]")
+                            return PARTNER_OVERPLAY_PENALTY
         
         # Penalty 1: Not using trump when should
         # Conditions: 
