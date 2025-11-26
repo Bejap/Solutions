@@ -240,12 +240,12 @@ class DQNAgent(BaseAgent):
         """
         self.update_replay_memory(transition)
 
-    @staticmethod
-    def save_agent(agent, filename):
-        agent.model.save_weights(filename)
+    def save_agent(self, filename):
+        """Save agent weights."""
+        self.model.save_weights(filename)
         print(f"Agent weights saved to {filename}")
 
-    @staticmethod
-    def save_full_agent(agent, filename):
-        agent.model.save(filename)
+    def save_full_agent(self, filename):
+        """Save full agent model."""
+        self.model.save(filename)
         print(f"Full agent model saved to {filename}")

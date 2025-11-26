@@ -23,7 +23,11 @@ from Whist.utils.constants import (
     NUM_PLAYERS,
     DQN_AGENT_POSITIONS,
     EAST,
-    WEST
+    WEST,
+    MODEL_SAVE_REWARD_THRESHOLD,
+    ENABLE_PER_CARD_REWARD,
+    MODEL_SAVE_CHECK_EVERY,
+    MODEL_SAVE_MIN_GAMES
 )
 
 
@@ -52,7 +56,8 @@ class EmbeddedWhistTrainer:
     
     def __init__(self, embedding_dim=8, num_games=DEFAULT_NUM_GAMES, epsilon=DEFAULT_EPSILON, 
                  epsilon_decay=DEFAULT_EPSILON_DECAY, min_epsilon=DEFAULT_MIN_EPSILON, 
-                 gamma_values=None, save_every=DEFAULT_SAVE_EVERY, log_every=100, log_dir='game_logs_embedded'):
+                 gamma_values=None, save_every=DEFAULT_SAVE_EVERY, log_every=100, log_dir='game_logs_embedded',
+                 enable_per_card_reward=ENABLE_PER_CARD_REWARD, model_save_threshold=MODEL_SAVE_REWARD_THRESHOLD):
         """
         Initialize the Embedded Whist trainer.
         
@@ -66,6 +71,8 @@ class EmbeddedWhistTrainer:
             save_every: Save models every N episodes
             log_every: Log detailed game info every N episodes (default: 100)
             log_dir: Directory for game logs (default: 'game_logs_embedded')
+            enable_per_card_reward: Enable per-card reward based on EW strategy (default: True)
+            model_save_threshold: Only save model if average reward > this value (default: -5.5)
         """
         self.embedding_dim = embedding_dim
         self.NUM_GAMES = num_games
@@ -75,13 +82,16 @@ class EmbeddedWhistTrainer:
         self.GAMMA_VALUES = gamma_values if gamma_values is not None else DEFAULT_GAMMA_VALUES
         self.SAVE_EVERY = save_every
         self.LOG_EVERY = log_every
+        self.enable_per_card_reward = enable_per_card_reward
+        self.model_save_threshold = model_save_threshold
         
         # Initialize game logger
         self.logger = GameLogger(log_dir=log_dir)
         
-        # Initialize embedded game
+        # Initialize embedded game with per-card reward setting
         player_names = [1, 2, 3, 4]
-        self.game = WhistEmbedded(player_names, embedding_dim=embedding_dim)
+        self.game = WhistEmbedded(player_names, embedding_dim=embedding_dim, 
+                                   enable_per_card_reward=enable_per_card_reward)
         
         # Create embedded agents for North (0) and South (2) positions
         self.agents = [
@@ -95,6 +105,9 @@ class EmbeddedWhistTrainer:
             EAST: EWStrategy(2, self.game),  # Player 2 is at position 1 (East)
             WEST: EWStrategy(4, self.game)   # Player 4 is at position 3 (West)
         }
+        
+        # Set EW strategies on game for per-card reward calculation
+        self.game.set_ew_strategies(self.ew_strategies)
         
         self.all_episode_rewards = []
     
@@ -142,12 +155,19 @@ class EmbeddedWhistTrainer:
                         else:
                             decision_type = 'agent'
                             certainty = q_value
+                        
+                        # Calculate per-card reward based on EW strategy matching
+                        per_card_reward = self.game.calculate_per_card_reward(
+                            current_player_index, action, valid_actions
+                        )
+                        episode_rewards[current_player_index] += per_card_reward
                     else:
                         # Use strategic play for East (1) and West (3)
                         ew_strategy = self.ew_strategies[current_player_index]
                         action = ew_strategy.choose_action(current_player, valid_actions)
                         decision_type = 'strategy'
                         certainty = None
+                        per_card_reward = 0
                     
                     # Get the card being played for logging
                     card_played = current_player.hand[action] if action < len(current_player.hand) else None
@@ -161,9 +181,9 @@ class EmbeddedWhistTrainer:
                     if rewards != 0:
                         episode_rewards[current_player_index] += rewards[current_player_index]
 
-                    # Only store transitions for agents
+                    # Only store transitions for agents - include per-card reward
                     if agent is not None and len(valid_actions) >= 1:
-                        pending_transitions.append((current_state, action, None, new_state, False, current_player_index))
+                        pending_transitions.append((current_state, action, per_card_reward, new_state, False, current_player_index))
 
                     if new_state is not None:
                         current_state = new_state
@@ -177,11 +197,12 @@ class EmbeddedWhistTrainer:
                             winner_idx = self._get_last_trick_winner()
                             self.logger.complete_trick(winner_idx)
                         
-                        for s, a, _, ns, _, player_idx in pending_transitions:
+                        for s, a, per_card_r, ns, _, player_idx in pending_transitions:
                             if rewards != 0:
-                                reward_value = rewards[player_idx]
+                                # Combine trick reward with per-card reward
+                                reward_value = rewards[player_idx] + per_card_r
                             else:
-                                reward_value = 0
+                                reward_value = per_card_r
 
                             if sum(self.game.score_array) >= CARDS_PER_PLAYER:  # All tricks completed
                                 done = True
@@ -209,12 +230,21 @@ class EmbeddedWhistTrainer:
                 if agent_obj is not None:
                     agent_obj.train(True, trick_count)
 
-            if episode % self.SAVE_EVERY == 0:
-                for i, agent_obj in enumerate(self.agents):
-                    if agent_obj is not None:
-                        agent_obj.save_agent(f"Weights/embedded_agent_player_{i}_ep{episode}.weights.h5")
-                        agent_obj.save_full_agent(f"Models/embedded_agent_player_{i}_ep{episode}.keras")
-                print(f"\nEpisode {episode}: Saved embedded agent models")
+            # Only save model if average reward is above threshold
+            # Check every MODEL_SAVE_CHECK_EVERY games after MODEL_SAVE_MIN_GAMES
+            if episode >= MODEL_SAVE_MIN_GAMES and episode % MODEL_SAVE_CHECK_EVERY == 0:
+                # Calculate average reward over recent episodes
+                recent_window = min(100, len(self.all_episode_rewards))
+                avg_reward = np.mean(self.all_episode_rewards[-recent_window:])
+                
+                if avg_reward > self.model_save_threshold:
+                    for i, agent_obj in enumerate(self.agents):
+                        if agent_obj is not None:
+                            agent_obj.save_agent(f"Weights/embedded_agent_player_{i}_ep{episode}.weights.h5")
+                            agent_obj.save_full_agent(f"Models/embedded_agent_player_{i}_ep{episode}.keras")
+                    print(f"\nEpisode {episode}: Saved models (avg reward: {avg_reward:.2f} > {self.model_save_threshold})")
+                else:
+                    print(f"\nEpisode {episode}: Skipped saving (avg reward: {avg_reward:.2f} <= {self.model_save_threshold})")
     
     def _get_last_trick_winner(self):
         """Determine who won the last trick based on score changes."""

@@ -9,7 +9,10 @@ from Whist.utils.constants import (
     DEFAULT_MIN_EPSILON, 
     ARRAY_LENGTH, 
     NUM_PLAYERS,
-    CARDS_PER_PLAYER
+    CARDS_PER_PLAYER,
+    ENABLE_PER_CARD_REWARD,
+    PER_CARD_EW_STRATEGY_REWARD,
+    END_GAME_REWARD_MULTIPLIER
 )
 
 # Configure logger for reward monitoring
@@ -24,7 +27,7 @@ MIN_EPSILON = DEFAULT_MIN_EPSILON
 
 
 class Whist(BaseGame):
-    def __init__(self, player_names: list):
+    def __init__(self, player_names: list, enable_per_card_reward: bool = ENABLE_PER_CARD_REWARD):
         super().__init__(NUM_PLAYERS)
         self.deck = wg.Deck()
         self.players = [wg.Player(name) for name in player_names]
@@ -49,13 +52,22 @@ class Whist(BaseGame):
         self.turn_counter = 0
         self.next_player_is_winner = None  # Track if next player should be trick winner
         
+        # Per-card reward configuration
+        self.enable_per_card_reward = enable_per_card_reward
+        self.per_card_reward = PER_CARD_EW_STRATEGY_REWARD
+        # No penalty for not matching EW strategy
+        
+        # Store EW strategy reference for per-card rewards (set externally)
+        self.ew_strategies = None
+        
         # Monitoring: Track reward statistics per episode
         self.reward_stats = {
             'agent_0_total': 0,
             'agent_2_total': 0,
             'agent_0_wins': 0,
             'agent_2_wins': 0,
-            'tricks_completed': 0
+            'tricks_completed': 0,
+            'per_card_rewards': 0  # Track per-card rewards given
         }
     
     def set_monitoring_level(self, level='INFO'):
@@ -78,8 +90,65 @@ class Whist(BaseGame):
             'agent_2_total': 0,
             'agent_0_wins': 0,
             'agent_2_wins': 0,
-            'tricks_completed': 0
+            'tricks_completed': 0,
+            'per_card_rewards': 0
         }
+    
+    def set_ew_strategies(self, ew_strategies: dict):
+        """Set EW strategy references for per-card reward calculation.
+        
+        Args:
+            ew_strategies: Dictionary mapping player index to EWStrategy object
+        """
+        self.ew_strategies = ew_strategies
+    
+    def calculate_per_card_reward(self, player_idx: int, action: int, valid_actions: list) -> float:
+        """Calculate per-card reward based on EW strategy matching.
+        
+        This rewards agents for playing cards that match what EW strategy would play.
+        This feature can be disabled by setting enable_per_card_reward=False.
+        
+        Args:
+            player_idx: Index of the current player (0-3)
+            action: The action (card index) the agent chose
+            valid_actions: List of valid action indices
+            
+        Returns:
+            Reward value (positive if matching EW strategy, negative otherwise)
+        """
+        if not self.enable_per_card_reward or self.ew_strategies is None:
+            return 0.0
+        
+        # Only apply per-card rewards to agent positions (0 and 2)
+        if player_idx not in [0, 2]:
+            return 0.0
+        
+        # Get what EW strategy would choose
+        # We need to use the strategy for position 1 or 3 as reference
+        # Use position 1 (East) as the reference strategy
+        reference_strategy = self.ew_strategies.get(1)
+        if reference_strategy is None:
+            return 0.0
+        
+        current_player = self.players[player_idx]
+        
+        # Get EW strategy's preferred action
+        try:
+            ew_action = reference_strategy._strategic_action(current_player, valid_actions)
+        except (IndexError, AttributeError) as e:
+            # Log the error for debugging but don't crash - just return no reward
+            logger.debug(f"Per-card reward calculation failed: {e}")
+            return 0.0
+        
+        # Reward only if agent matches EW strategy (no penalty for mismatch)
+        if action == ew_action:
+            self.reward_stats['per_card_rewards'] += self.per_card_reward
+            logger.debug(f"Player {player_idx} matched EW strategy [+{self.per_card_reward} EW match bonus]")
+            return self.per_card_reward
+        else:
+            # No penalty for not matching - just return 0
+            logger.debug(f"Player {player_idx} did not match EW strategy [no penalty]")
+            return 0.0
     
     @staticmethod
     def _get_card_position(card: wg.Card):
@@ -245,30 +314,41 @@ class Whist(BaseGame):
         game_state, reward = self._get_game_state(card)
         if all(len(player.hand) == 0 for player in self.players):
             done = True
-            # Add game-ending rewards for agents (positions 0 and 2)
-            team_1_score = self.score_array[0] + self.score_array[2]  # Agents' team
+            # New reward system: based on (tricks_won - max_tricks)
+            # max_tricks for each player is CARDS_PER_PLAYER
+            max_tricks = CARDS_PER_PLAYER
+            
+            # Calculate end-game reward for each agent based on their individual tricks won
+            agent_0_tricks = self.score_array[0]
+            agent_2_tricks = self.score_array[2]
+            team_1_score = agent_0_tricks + agent_2_tricks  # Agents' team total
             team_2_score = self.score_array[1] + self.score_array[3]  # Opponents' team
             
-            if team_1_score > team_2_score:
-                # Team 1 (agents) wins: +10 for each agent
-                reward[0] += 10
-                reward[2] += 10
-                self.reward_stats['agent_0_total'] += 10
-                self.reward_stats['agent_2_total'] += 10
-                logger.info(f"Game ended. Team 1 (Agents) WINS! Score: {team_1_score}-{team_2_score}. "
-                           f"Agents receive +10 bonus each.")
-            elif team_1_score < team_2_score:
-                # Team 1 (agents) loses: -20 for each agent
-                reward[0] -= 20
-                reward[2] -= 20
-                self.reward_stats['agent_0_total'] -= 20
-                self.reward_stats['agent_2_total'] -= 20
-                logger.info(f"Game ended. Team 1 (Agents) LOSES. Score: {team_1_score}-{team_2_score}. "
-                           f"Agents receive -20 penalty each.")
-            else:
-                # Tie - no game-ending bonus/penalty
-                logger.info(f"Game ended in a TIE. Score: {team_1_score}-{team_2_score}. "
-                           f"No game-ending bonus/penalty.")
+            # Base reward is (tricks_won - max_tricks) * multiplier
+            agent_0_end_reward = (agent_0_tricks - max_tricks) * END_GAME_REWARD_MULTIPLIER
+            agent_2_end_reward = (agent_2_tricks - max_tricks) * END_GAME_REWARD_MULTIPLIER
+            
+            # Apply score multiplier: (1 - amount_of_tricks / 13)
+            # This reduces reward as more tricks are won (encouraging efficiency)
+            agent_0_multiplier = 1 - (agent_0_tricks / max_tricks)
+            agent_2_multiplier = 1 - (agent_2_tricks / max_tricks)
+            agent_0_end_reward *= agent_0_multiplier
+            agent_2_end_reward *= agent_2_multiplier
+            
+            # Team bonus: +2 if team wins 7 or more tricks (wins the game)
+            if team_1_score >= 7:
+                agent_0_end_reward += 2
+                agent_2_end_reward += 2
+            
+            reward[0] += agent_0_end_reward
+            reward[2] += agent_2_end_reward
+            self.reward_stats['agent_0_total'] += agent_0_end_reward
+            self.reward_stats['agent_2_total'] += agent_2_end_reward
+            
+            logger.info(f"Game ended. Team 1 Score: {team_1_score}, Team 2 Score: {team_2_score}. "
+                       f"Agent 0 end reward: {agent_0_end_reward:.1f} (tricks: {agent_0_tricks}/{max_tricks}), "
+                       f"Agent 2 end reward: {agent_2_end_reward:.1f} (tricks: {agent_2_tricks}/{max_tricks})"
+                       f"{' [+2 team bonus]' if team_1_score >= 7 else ''}")
 
         # Update current_player_idx
         # If a trick was just completed, the winner should lead the next trick

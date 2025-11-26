@@ -130,11 +130,27 @@ North and South agents learn to cooperate as partners on the same team. East and
 
 The game uses a sophisticated reward structure to train the agents:
 
+### Trick-Level Rewards
 - **+1** for winning a trick
 - **+0.8** for partner winning a trick  
 - **-1** for losing a trick
-- **+10** for winning the game
-- **-20** for losing the game
+
+### End-Game Rewards (New)
+The end-game reward uses the formula: `(tricks_won - max_tricks) × (1 - tricks_won / 13) + team_bonus`
+
+- **Score multiplier**: Each agent's reward is multiplied by `(1 - tricks_won / 13)`
+- **Team bonus**: +2 if the team (agents combined) wins 7 or more tricks (wins the game)
+- Example: Agent wins 5 tricks, team total 9: `(5-13) × (1-5/13) + 2 = -8 × 0.615 + 2 ≈ -2.9`
+
+### Per-Card Rewards (New, Configurable)
+Agents receive a reward when their card choice matches what the EW strategy would play:
+- **+0.2** if agent plays the same card EW strategy would choose [+0.2 EW match bonus]
+- **No penalty** for playing a different card
+
+This feature can be disabled by setting `enable_per_card_reward=False` in the trainer or `ENABLE_PER_CARD_REWARD=False` in constants.
+
+### Model Save Threshold
+Models are only saved if the average reward over the last 100 episodes is above **-5.5**. The check is performed every 25 games, but only after 200 games have been played. This prevents saving poorly performing models.
 
 Only the two DQN agents (positions 0 and 2) receive rewards. The system includes comprehensive monitoring and statistics tracking. See `docs/reward_system.md` for complete details.
 
