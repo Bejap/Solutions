@@ -123,10 +123,16 @@ class Whist(BaseGame):
         if player_idx not in [0, 2]:
             return 0.0
         
-        # Get what EW strategy would choose
-        # We need to use the strategy for position 1 or 3 as reference
-        # Use position 1 (East) as the reference strategy
-        reference_strategy = self.ew_strategies.get(1)
+        # Determine which EW strategy to use as reference based on player position
+        # For North (0), use South (2) as partner, reference East (1) or West (3)
+        # For South (2), use North (0) as partner, reference East (1) or West (3)
+        # Use the strategy of the player's right opponent as reference
+        if player_idx == 0:  # North
+            reference_player_idx = 1  # East (right opponent)
+        else:  # player_idx == 2 (South)
+            reference_player_idx = 3  # West (right opponent)
+        
+        reference_strategy = self.ew_strategies.get(reference_player_idx)
         if reference_strategy is None:
             return 0.0
         
@@ -140,14 +146,19 @@ class Whist(BaseGame):
             logger.debug(f"Per-card reward calculation failed: {e}")
             return 0.0
         
+        # Convert both to int to ensure comparison works correctly
+        # (action might be numpy.int64, ew_action is regular int)
+        action_int = int(action)
+        ew_action_int = int(ew_action)
+        
         # Reward only if agent matches EW strategy (no penalty for mismatch)
-        if action == ew_action:
+        if action_int == ew_action_int:
             self.reward_stats['per_card_rewards'] += self.per_card_reward
             logger.debug(f"Player {player_idx} matched EW strategy [+{self.per_card_reward} EW match bonus]")
             return self.per_card_reward
         else:
             # No penalty for not matching - just return 0
-            logger.debug(f"Player {player_idx} did not match EW strategy [no penalty]")
+            logger.debug(f"Player {player_idx} did not match EW strategy (action={action_int}, ew={ew_action_int}) [no penalty]")
             return 0.0
     
     @staticmethod

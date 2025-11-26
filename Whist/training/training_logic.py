@@ -229,11 +229,14 @@ class WhistTrainer:
                             decision_type = 'agent'
                             certainty = q_value
                         
-                        # Calculate per-card reward based on EW strategy matching
-                        per_card_reward = self.game.calculate_per_card_reward(
-                            current_player_index, action, valid_actions
-                        )
-                        episode_rewards[current_player_index] += per_card_reward
+                        # Only calculate per-card reward during training phase (not during exploration)
+                        if not in_exploration:
+                            per_card_reward = self.game.calculate_per_card_reward(
+                                current_player_index, action, valid_actions
+                            )
+                            episode_rewards[current_player_index] += per_card_reward
+                        else:
+                            per_card_reward = 0
                     else:
                         # Use strategic play for East (1) and West (3)
                         ew_strategy = self.ew_strategies[current_player_index]
@@ -282,9 +285,11 @@ class WhistTrainer:
                             if self.agents[player_idx] is not None:
                                 self.agents[player_idx].update_replay_memory((s, a, reward_value, ns, done))
 
-                        for agent_idx, agent_obj in enumerate(self.agents):
-                            if agent_obj is not None:
-                                agent_obj.train(done, trick_count)
+                        # Only train agents during training phase (not during exploration)
+                        if not in_exploration:
+                            for agent_idx, agent_obj in enumerate(self.agents):
+                                if agent_obj is not None:
+                                    agent_obj.train(done, trick_count)
 
                         pending_transitions = []
 
@@ -301,9 +306,11 @@ class WhistTrainer:
             if not in_exploration:
                 self.epsilon = max(self.MIN_EPSILON, self.epsilon * self.EPSILON_DECAY)
 
-            for agent_idx, agent_obj in enumerate(self.agents):
-                if agent_obj is not None:
-                    agent_obj.train(True, trick_count)
+            # Only train agents at episode end during training phase (not during exploration)
+            if not in_exploration:
+                for agent_idx, agent_obj in enumerate(self.agents):
+                    if agent_obj is not None:
+                        agent_obj.train(True, trick_count)
 
             # Only save model if average reward is above threshold
             # Check every MODEL_SAVE_CHECK_EVERY games after MODEL_SAVE_MIN_GAMES
