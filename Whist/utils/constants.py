@@ -96,10 +96,10 @@ MEMORY_FRACTION = 0.35  # GPU memory fraction to use
 DEFAULT_GAMMA = 0.99
 
 # Model save threshold: only save model if average reward is above this value
-MODEL_SAVE_REWARD_THRESHOLD = -3.0
+MODEL_SAVE_REWARD_THRESHOLD = -2.25
 
 # Model save check frequency: check every N games after minimum games played
-MODEL_SAVE_CHECK_EVERY = 25  # Check every 25 games
+MODEL_SAVE_CHECK_EVERY = 75  # Check every x games
 MODEL_SAVE_MIN_GAMES = 400  # Only start checking after 400 games (200 exploration + 200 training)
 
 
