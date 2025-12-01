@@ -365,11 +365,13 @@ class WhistTrainer:
                     avg_reward_str = f"avgR{avg_reward:.2f}"
                     # Generate timestamp for unique filenames
                     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                    # Determine subfolder based on agent type
+                    subfolder = "dueling" if self.use_dueling_dqn else "classic"
                     for i, agent_obj in enumerate(self.agents):
                         if agent_obj is not None:
-                            agent_obj.save_agent(f"Weights/agent_player_{i}_ep{episode}_{avg_reward_str}_{timestamp}.weights.h5")
-                            agent_obj.save_full_agent(f"Models/full_agent_player_{i}_ep{episode}_{avg_reward_str}_{timestamp}.keras")
-                    print(f"\nEpisode {episode}: Saved models (avg reward: {avg_reward:.2f} > {self.model_save_threshold})")
+                            agent_obj.save_agent(f"Weights/{subfolder}/agent_player_{i}_ep{episode}_{avg_reward_str}_{timestamp}.weights.h5")
+                            agent_obj.save_full_agent(f"Models/{subfolder}/full_agent_player_{i}_ep{episode}_{avg_reward_str}_{timestamp}.keras")
+                    print(f"\nEpisode {episode}: Saved models to {subfolder}/ (avg reward: {avg_reward:.2f} > {self.model_save_threshold})")
                 else:
                     print(f"\nEpisode {episode}: Skipped saving (avg reward: {avg_reward:.2f} <= {self.model_save_threshold})")
                 

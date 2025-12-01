@@ -271,9 +271,9 @@ class EmbeddedWhistTrainer:
                     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                     for i, agent_obj in enumerate(self.agents):
                         if agent_obj is not None:
-                            agent_obj.save_agent(f"Weights/embedded_agent_player_{i}_ep{episode}_{avg_reward_str}_{timestamp}.weights.h5")
-                            agent_obj.save_full_agent(f"Models/embedded_agent_player_{i}_ep{episode}_{avg_reward_str}_{timestamp}.keras")
-                    print(f"\nEpisode {episode}: Saved models (avg reward: {avg_reward:.2f} > {self.model_save_threshold})")
+                            agent_obj.save_agent(f"Weights/embedded/agent_player_{i}_ep{episode}_{avg_reward_str}_{timestamp}.weights.h5")
+                            agent_obj.save_full_agent(f"Models/embedded/full_agent_player_{i}_ep{episode}_{avg_reward_str}_{timestamp}.keras")
+                    print(f"\nEpisode {episode}: Saved models to embedded/ (avg reward: {avg_reward:.2f} > {self.model_save_threshold})")
                 else:
                     print(f"\nEpisode {episode}: Skipped saving (avg reward: {avg_reward:.2f} <= {self.model_save_threshold})")
     
