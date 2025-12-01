@@ -14,16 +14,21 @@ This document provides light and simple optimization suggestions for the Deep Si
 - **Trade-off**: Balance between training stability and computational efficiency
 
 ### 2. Replay Memory Size
-- **Constant**: `REPLAY_MEMORY_SIZE`
+- **Status**: ✅ Implemented
+- **Constant**: `REPLAY_MEMORY_SIZE`, `MIN_REPLAY_MEMORY_SIZE`
 - **Effect of increasing**: More diverse training experiences, better exploration of past states, but more memory usage
 - **Effect of decreasing**: Less memory usage, faster sampling, but less experience diversity
 - **Trade-off**: Balance between experience diversity and memory constraints
+- **Notes**: Increased from 100 to 50,000 for significantly improved experience diversity
 
 ### 3. Learning Rate
-- **Configuration**: Adam optimizer learning rate
-- **Effect of increasing**: Faster initial learning but risk of instability and overshooting optima
-- **Effect of decreasing**: More stable training, better final performance, but slower convergence
-- **Suggestion**: Consider exponential decay or step-based scheduling for best results
+- **Status**: ✅ Implemented
+- **Configuration**: Adam optimizer with exponential decay scheduling
+- **Constants**: `INITIAL_LEARNING_RATE`, `LR_DECAY_STEPS`, `LR_DECAY_RATE`, `MIN_LEARNING_RATE`
+- **Effect of increasing initial rate**: Faster initial learning but risk of instability and overshooting optima
+- **Effect of decreasing initial rate**: More stable training, better final performance, but slower convergence
+- **Implementation**: Exponential decay scheduler that reduces LR over training
+- **Notes**: Automatically enabled in DuelingDQNAgent, configurable via `use_lr_scheduling`
 
 ## Model Architecture Optimizations
 
@@ -68,11 +73,17 @@ This document provides light and simple optimization suggestions for the Deep Si
 ## Training Loop Optimizations
 
 ### 9. Epsilon Decay
-- **Constant**: `EPSILON_DECAY`
+- **Status**: ✅ Implemented with multiple strategies
+- **Constants**: `EPSILON_DECAY_TYPE`, `EPSILON_STEP_DECAY_EPISODES`, `EPSILON_STEP_DECAY_VALUES`
+- **Decay types available**:
+  - `exponential`: Standard exponential decay (default)
+  - `linear`: Linear decay to minimum
+  - `step`: Discrete steps at specified episodes
+  - `cosine`: Cosine annealing with warm restarts
 - **Effect of faster decay**: Quicker transition to exploitation, faster convergence, but may miss important explorations
 - **Effect of slower decay**: More thorough exploration, better final policy, but slower convergence
 - **Trade-off**: Balance between exploration and exploitation
-- **Suggestion**: Consider stepped decay or scheduled reduction
+- **Usage**: Configure via `epsilon_decay_type` parameter in WhistTrainer
 
 ### 10. Target Network Updates
 - **Constant**: `UPDATE_TARGET_EVERY`
@@ -147,18 +158,22 @@ This document provides light and simple optimization suggestions for the Deep Si
 - **Notes**: Enabled by default in both DQNAgent and EmbeddedDQNAgent
 
 ### 19. Dueling DQN
-- **Status**: ❌ Not Implemented
-- **Suggestion**: Separate state value and action advantage streams
-- **Impact**: Better learning in states where action choice matters less
-- **Implementation**: Split final layers into V(s) and A(s,a) streams
-- **Notes**: Particularly useful for card games with variable action spaces
+- **Status**: ✅ Implemented
+- **Class**: `DuelingDQNAgent` in `advanced_dqn.py`
+- **Architecture**: Separate value (V) and advantage (A) streams
+- **Formula**: Q(s, a) = V(s) + (A(s, a) - mean(A(s, :)))
+- **Effect**: Better learning in states where action choice matters less
+- **Usage**: Set `use_dueling_dqn=True` in WhistTrainer
+- **Notes**: Includes learning rate scheduling and n-step returns by default
 
 ### 20. Multi-Step Returns
-- **Status**: ❌ Not Implemented
-- **Suggestion**: Use n-step returns instead of 1-step TD targets
-- **Impact**: Faster credit assignment, better bootstrapping
-- **Implementation**: Accumulate rewards over n steps before update
-- **Notes**: Requires storing longer trajectories
+- **Status**: ✅ Implemented
+- **Class**: `NStepReplayBuffer` in `advanced_dqn.py`
+- **Constant**: `N_STEP_RETURNS` (default: 3)
+- **Effect**: Faster credit assignment, better bootstrapping
+- **Implementation**: Accumulates rewards over N steps before computing TD target
+- **Trade-off**: Higher N = faster propagation but higher variance
+- **Notes**: Automatically used with DuelingDQNAgent, stores longer trajectories
 
 ### 21. Curriculum Learning
 - **Status**: ❌ Not Implemented
@@ -202,11 +217,11 @@ This document provides light and simple optimization suggestions for the Deep Si
 - ✅ Try Double DQN (done)
 
 **Medium Priority** (Moderate effort, good impact):
-- Increase replay memory size
-- Implement Dueling DQN
-- Add learning rate scheduling
-- Tune epsilon decay schedule
-- Implement multi-step returns
+- ✅ Increase replay memory size (done - increased from 100 to 50,000)
+- ✅ Implement Dueling DQN (done - separate value and advantage streams)
+- ✅ Add learning rate scheduling (done - exponential decay with configurable parameters)
+- ✅ Tune epsilon decay schedule (done - multiple strategies: exponential, linear, step, cosine)
+- ✅ Implement multi-step returns (done - N-step TD with configurable N)
 
 **Low Priority** (High effort or experimental):
 - Prioritized Experience Replay
