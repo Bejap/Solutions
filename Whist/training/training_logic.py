@@ -22,8 +22,12 @@ from Whist.utils.constants import (
     ENABLE_PER_CARD_REWARD,
     MODEL_SAVE_CHECK_EVERY,
     MODEL_SAVE_MIN_GAMES,
-    EXPLORATION_GAMES
+    EXPLORATION_GAMES,
+    EPSILON_DECAY_TYPE,
+    EPSILON_STEP_DECAY_EPISODES,
+    EPSILON_STEP_DECAY_VALUES
 )
+from Whist.agents.advanced_dqn import EpsilonScheduler
 
 
 def _as_list(actions):
@@ -118,7 +122,9 @@ class WhistTrainer:
                  epsilon_decay=DEFAULT_EPSILON_DECAY, min_epsilon=DEFAULT_MIN_EPSILON, 
                  array_length=ARRAY_LENGTH, gamma_values=None, save_every=DEFAULT_SAVE_EVERY,
                  log_every=100, log_dir='game_logs', enable_per_card_reward=ENABLE_PER_CARD_REWARD,
-                 model_save_threshold=MODEL_SAVE_REWARD_THRESHOLD, exploration_games=EXPLORATION_GAMES):
+                 model_save_threshold=MODEL_SAVE_REWARD_THRESHOLD, exploration_games=EXPLORATION_GAMES,
+                 early_stopping_patience=100, early_stopping_min_delta=0.01,
+                 epsilon_decay_type='exponential', use_dueling_dqn=False):
         """
         Initialize the Whist trainer.
         
@@ -133,8 +139,12 @@ class WhistTrainer:
             log_every: Log detailed game info every N episodes (default: 100)
             log_dir: Directory for game logs (default: 'game_logs')
             enable_per_card_reward: Enable per-card reward based on EW strategy (default: True)
-            model_save_threshold: Only save model if average reward > this value (default: -5.5)
+            model_save_threshold: Only save model if average reward > this value
             exploration_games: Number of games with pure random exploration (default: 200)
+            early_stopping_patience: Stop if no improvement for N episodes (0 = disabled)
+            early_stopping_min_delta: Minimum change to qualify as improvement
+            epsilon_decay_type: Type of epsilon decay ('exponential', 'linear', 'step', 'cosine')
+            use_dueling_dqn: Use Dueling DQN architecture (default: False)
         """
         self.NUM_GAMES = num_games
         self.epsilon = epsilon
@@ -147,6 +157,25 @@ class WhistTrainer:
         self.enable_per_card_reward = enable_per_card_reward
         self.model_save_threshold = model_save_threshold
         self.exploration_games = exploration_games
+        self.early_stopping_patience = early_stopping_patience
+        self.early_stopping_min_delta = early_stopping_min_delta
+        self.epsilon_decay_type = epsilon_decay_type
+        self.use_dueling_dqn = use_dueling_dqn
+        
+        # Early stopping tracking
+        self.best_avg_reward = float('-inf')
+        self.episodes_without_improvement = 0
+        
+        # Initialize epsilon scheduler for advanced decay strategies
+        self.epsilon_scheduler = EpsilonScheduler(
+            initial_epsilon=epsilon,
+            min_epsilon=min_epsilon,
+            decay_type=epsilon_decay_type,
+            decay_rate=epsilon_decay,
+            total_episodes=num_games - exploration_games,
+            step_episodes=EPSILON_STEP_DECAY_EPISODES,
+            step_values=EPSILON_STEP_DECAY_VALUES
+        )
         
         # Initialize game logger
         self.logger = GameLogger(log_dir=log_dir)
@@ -155,11 +184,20 @@ class WhistTrainer:
         player_names = [1, 2, 3, 4]
         self.game = Whist(player_names, enable_per_card_reward=enable_per_card_reward)
         
-        # Only train agents for North (0) and South (2) positions, which are on the same team
-        self.agents = [
-            DQNAgent((self.ARRAY_LENGTH * 7) + 4 + 4, gamma=self.GAMMA_VALUES[i], agent_id=i) if i in DQN_AGENT_POSITIONS else None 
-            for i in range(NUM_PLAYERS)
-        ]
+        # Select agent type based on configuration
+        if use_dueling_dqn:
+            from Whist.agents.advanced_dqn import DuelingDQNAgent
+            self.agents = [
+                DuelingDQNAgent((self.ARRAY_LENGTH * 7) + 4 + 4, gamma=self.GAMMA_VALUES[i], agent_id=i) if i in DQN_AGENT_POSITIONS else None 
+                for i in range(NUM_PLAYERS)
+            ]
+            print("Using Dueling DQN architecture with n-step returns and LR scheduling")
+        else:
+            # Only train agents for North (0) and South (2) positions, which are on the same team
+            self.agents = [
+                DQNAgent((self.ARRAY_LENGTH * 7) + 4 + 4, gamma=self.GAMMA_VALUES[i], agent_id=i) if i in DQN_AGENT_POSITIONS else None 
+                for i in range(NUM_PLAYERS)
+            ]
         
         # Create EW strategy players for positions 1 (East) and 3 (West)
         self.ew_strategies = {
@@ -304,7 +342,9 @@ class WhistTrainer:
             
             # Only decay epsilon after exploration phase
             if not in_exploration:
-                self.epsilon = max(self.MIN_EPSILON, self.epsilon * self.EPSILON_DECAY)
+                # Use epsilon scheduler for advanced decay strategies
+                training_episode = episode - self.exploration_games
+                self.epsilon = self.epsilon_scheduler.get_epsilon(training_episode)
 
             # Only train agents at episode end during training phase (not during exploration)
             if not in_exploration:
@@ -329,6 +369,26 @@ class WhistTrainer:
                     print(f"\nEpisode {episode}: Saved models (avg reward: {avg_reward:.2f} > {self.model_save_threshold})")
                 else:
                     print(f"\nEpisode {episode}: Skipped saving (avg reward: {avg_reward:.2f} <= {self.model_save_threshold})")
+                
+                # Early stopping check (only if enabled and after exploration phase)
+                if self.early_stopping_patience > 0 and not in_exploration:
+                    if avg_reward > self.best_avg_reward + self.early_stopping_min_delta:
+                        # Improvement detected
+                        self.best_avg_reward = avg_reward
+                        self.episodes_without_improvement = 0
+                        print(f"Episode {episode}: New best avg reward: {avg_reward:.2f}")
+                    else:
+                        # No improvement
+                        self.episodes_without_improvement += MODEL_SAVE_CHECK_EVERY
+                        print(f"Episode {episode}: No improvement ({self.episodes_without_improvement}/{self.early_stopping_patience} episodes)")
+                        
+                        if self.episodes_without_improvement >= self.early_stopping_patience:
+                            print(f"\n{'='*60}")
+                            print(f"Early stopping triggered after {episode} episodes")
+                            print(f"Best average reward: {self.best_avg_reward:.2f}")
+                            print(f"No improvement for {self.episodes_without_improvement} episodes")
+                            print(f"{'='*60}\n")
+                            break  # Exit training loop
     
     def _get_last_trick_winner(self):
         """Determine who won the last trick."""

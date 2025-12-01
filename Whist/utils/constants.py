@@ -66,12 +66,26 @@ LEGACY_EPSILON_DECAY = 0.99
 # =============================================================================
 
 # Replay memory configuration
-REPLAY_MEMORY_SIZE = 100  # How many last steps to keep for model training
-MIN_REPLAY_MEMORY_SIZE = 100  # Minimum replay memory size before training starts
-MINIBATCH_SIZE = 32  # Batch size for training (increased from 8 for stability)
+REPLAY_MEMORY_SIZE = 50000  # How many last steps to keep for model training (increased from 100)
+MIN_REPLAY_MEMORY_SIZE = 1000  # Minimum replay memory size before training starts (increased from 100)
+MINIBATCH_SIZE = 64  # Batch size for training (increased from 32 for stability)
 
 # Target network update frequency
 UPDATE_TARGET_EVERY = 5  # Update target network every N terminal states
+
+# Multi-step returns configuration
+N_STEP_RETURNS = 3  # Number of steps for n-step TD learning (1 = standard TD)
+
+# Learning rate scheduling configuration
+INITIAL_LEARNING_RATE = 0.001  # Initial learning rate for Adam optimizer
+LR_DECAY_STEPS = 1000  # Decay learning rate every N steps
+LR_DECAY_RATE = 0.96  # Multiply learning rate by this factor each decay period
+MIN_LEARNING_RATE = 0.0001  # Minimum learning rate floor
+
+# Epsilon decay scheduling configuration
+EPSILON_DECAY_TYPE = 'exponential'  # Options: 'exponential', 'linear', 'step'
+EPSILON_STEP_DECAY_EPISODES = [300, 600, 900]  # Episodes to decay epsilon (for step decay)
+EPSILON_STEP_DECAY_VALUES = [0.5, 0.2, 0.05]  # Values at each step (for step decay)
 
 # Model configuration
 MODEL_NAME = 'smalle'
@@ -82,10 +96,10 @@ MEMORY_FRACTION = 0.35  # GPU memory fraction to use
 DEFAULT_GAMMA = 0.99
 
 # Model save threshold: only save model if average reward is above this value
-MODEL_SAVE_REWARD_THRESHOLD = -0.5
+MODEL_SAVE_REWARD_THRESHOLD = -2.25
 
 # Model save check frequency: check every N games after minimum games played
-MODEL_SAVE_CHECK_EVERY = 25  # Check every 25 games
+MODEL_SAVE_CHECK_EVERY = 75  # Check every x games
 MODEL_SAVE_MIN_GAMES = 400  # Only start checking after 400 games (200 exploration + 200 training)
 
 
@@ -100,6 +114,11 @@ PER_CARD_EW_STRATEGY_REWARD = 0.2  # Reward for matching EW strategy decision
 
 # End-game reward multiplier (applied to tricks_won - max_tricks)
 END_GAME_REWARD_MULTIPLIER = 1.0
+
+# Trump play penalties (for suboptimal trump usage)
+TRUMP_NOT_USED_PENALTY = -7.0  # Penalty for not using trump when should (opponent winning, agent has trump, partner not winning)
+TRUMP_OVERPLAY_PENALTY = -5.0  # Penalty for using unnecessarily high trump when lower trump would win
+PARTNER_OVERPLAY_PENALTY = -8.0  # Penalty for taking trick from partner who is already winning
 
 
 # =============================================================================

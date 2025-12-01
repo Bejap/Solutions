@@ -12,7 +12,10 @@ from Whist.utils.constants import (
     CARDS_PER_PLAYER,
     ENABLE_PER_CARD_REWARD,
     PER_CARD_EW_STRATEGY_REWARD,
-    END_GAME_REWARD_MULTIPLIER
+    END_GAME_REWARD_MULTIPLIER,
+    TRUMP_NOT_USED_PENALTY,
+    TRUMP_OVERPLAY_PENALTY,
+    PARTNER_OVERPLAY_PENALTY
 )
 
 # Configure logger for reward monitoring
@@ -161,6 +164,200 @@ class Whist(BaseGame):
             logger.debug(f"Player {player_idx} did not match EW strategy (action={action_int}, ew={ew_action_int}) [no penalty]")
             return 0.0
     
+    def calculate_trump_penalty(self, player_idx: int, card_played: wg.Card, valid_actions: list) -> float:
+        """Calculate penalty for suboptimal trump usage.
+        
+        Penalties:
+        1. Not using trump when opponent is winning and agent has trump (partner not winning): TRUMP_NOT_USED_PENALTY
+        2. Using unnecessarily high trump when lower trump would win: TRUMP_OVERPLAY_PENALTY
+        
+        Args:
+            player_idx: Index of the current player (0-3)
+            card_played: The card that was played
+            valid_actions: List of valid action indices
+            
+        Returns:
+            Penalty value (negative if penalty applies, 0 otherwise)
+        """
+        # Only apply penalties to agent positions (0 and 2)
+        if player_idx not in [0, 2]:
+            return 0.0
+        
+        # Get trick cards BEFORE the current card was played
+        # (round_list now includes the just-played card, so we need to exclude it)
+        trick_cards_before = [t for t in self.round_list if not (t[0] == player_idx and t[1] == card_played)]
+        
+        # Only evaluate when following (not leading)
+        if len(trick_cards_before) == 0:  # Leading the trick
+            return 0.0
+        
+        current_player = self.players[player_idx]
+        
+        # Get the led suit
+        led_suit = trick_cards_before[0][1].suit
+        
+        # Find currently winning card and player BEFORE this card was played
+        # Must properly consider trump and led suit
+        def card_wins_over_others(card_tuple):
+            """Determine card strength considering trump and led suit."""
+            card = card_tuple[1]
+            if card.is_trump():
+                # Trump cards beat everything, ordered by rank
+                return (2, card.rank_value)
+            elif card.suit == led_suit:
+                # Led suit cards beat off-suit non-trump, ordered by rank
+                return (1, card.rank_value)
+            else:
+                # Off-suit non-trump cards cannot win
+                return (0, card.rank_value)
+        
+        winning_tuple = max(trick_cards_before, key=card_wins_over_others)
+        winning_player_idx = winning_tuple[0]
+        winning_card = winning_tuple[1]
+        
+        # Check if partner is currently winning
+        partner_idx = (player_idx + 2) % 4
+        partner_winning = (winning_player_idx == partner_idx)
+        
+        # Get player's hand (need to add back the played card for analysis)
+        player_hand = current_player.hand.copy()
+        player_hand.append(card_played)
+        
+        # Get trump cards in hand
+        trump_cards_in_hand = [card for card in player_hand if card.is_trump()]
+        
+        # Check if player can follow led suit
+        can_follow_suit = any(card.suit == led_suit for card in player_hand)
+        
+        logger.debug(f"Trump penalty check for Player {player_idx}: "
+                    f"played={card_played}, trumps_in_hand={len(trump_cards_in_hand)}, "
+                    f"can_follow={can_follow_suit}, partner_winning={partner_winning}, "
+                    f"winning_card={winning_card}")
+        
+        # Check if agent's card will beat partner's winning card
+        # This happens when:
+        # 1. Partner is currently winning
+        # 2. Agent plays a card that beats partner's card
+        if partner_winning:
+            agent_card_beats_partner = False
+            
+            # Compare cards considering trump and led suit
+            if card_played.is_trump() and not winning_card.is_trump():
+                # Agent trumps when partner winning with non-trump
+                agent_card_beats_partner = True
+            elif card_played.is_trump() and winning_card.is_trump():
+                # Both trump - compare ranks
+                if card_played.rank_value > winning_card.rank_value:
+                    agent_card_beats_partner = True
+            elif not card_played.is_trump() and not winning_card.is_trump():
+                # Both non-trump - check if same suit and agent's is higher
+                if card_played.suit == winning_card.suit and card_played.rank_value > winning_card.rank_value:
+                    agent_card_beats_partner = True
+            
+            # If agent takes trick from partner, apply penalty
+            if agent_card_beats_partner:
+                # Check if there are remaining players who could beat partner's card
+                # If this is the last card (4th player), definitely wasteful
+                num_players_after = 4 - len(trick_cards_before) - 1  # -1 for current player
+                
+                if num_players_after == 0:
+                    # Last player - definitely wasteful to take from partner
+                    logger.debug(f"Player {player_idx} penalty: took trick from winning partner ({winning_card}) as last player [{PARTNER_OVERPLAY_PENALTY} partner overplay]")
+                    return PARTNER_OVERPLAY_PENALTY
+                else:
+                    # Not last player, but still generally wasteful unless there's a good reason
+                    # Apply penalty if agent had lower cards that wouldn't win
+                    cards_that_wouldnt_win = [
+                        card for card in player_hand 
+                        if card != card_played
+                        and (
+                            # Non-trump that wouldn't beat partner
+                            (not card.is_trump() and (card.suit != winning_card.suit or card.rank_value < winning_card.rank_value))
+                            or
+                            # Trump lower than partner's trump
+                            (card.is_trump() and winning_card.is_trump() and card.rank_value < winning_card.rank_value)
+                        )
+                    ]
+                    
+                    # Need to check if agent could legally play one of those lower cards
+                    # If they can follow suit, check for lower cards in led suit
+                    # If they can't follow suit, any lower card would be valid
+                    if cards_that_wouldnt_win:
+                        if can_follow_suit:
+                            # Check if any of the lower cards are in the led suit
+                            lower_cards_in_led_suit = [c for c in cards_that_wouldnt_win if c.suit == led_suit]
+                            if lower_cards_in_led_suit:
+                                # Agent could have played lower and let partner win
+                                logger.debug(f"Player {player_idx} penalty: unnecessarily took trick from winning partner ({winning_card}) [{PARTNER_OVERPLAY_PENALTY} partner overplay]")
+                                return PARTNER_OVERPLAY_PENALTY
+                        else:
+                            # Can't follow suit, so any card is valid - had lower options available
+                            logger.debug(f"Player {player_idx} penalty: unnecessarily took trick from winning partner ({winning_card}) [{PARTNER_OVERPLAY_PENALTY} partner overplay]")
+                            return PARTNER_OVERPLAY_PENALTY
+        
+        # Penalty 1: Not using trump when should
+        # Conditions: 
+        # - Opponent is winning (not partner)
+        # - Agent has trump cards
+        # - Agent cannot follow led suit (or led suit is not trump and losing)
+        # - Agent didn't play trump
+        if not partner_winning and trump_cards_in_hand and not card_played.is_trump():
+            # Check if agent could have used trump (couldn't follow suit or chose not to trump)
+            if not can_follow_suit:
+                # Agent had to play off-suit and chose not to trump
+                logger.debug(f"Player {player_idx} penalty: didn't use trump when opponent winning [{TRUMP_NOT_USED_PENALTY} trump not used]")
+                return TRUMP_NOT_USED_PENALTY
+            elif led_suit != wg.Card.TRUMP_SUIT and winning_card.is_trump():
+                # Opponent is winning with trump, but agent didn't trump
+                # Only penalize if agent can't follow suit or is discarding
+                cards_in_led_suit = [card for card in player_hand if card.suit == led_suit]
+                if cards_in_led_suit:
+                    # Check if all cards in led suit would lose to current winning card
+                    all_would_lose = all(card.rank_value < winning_card.rank_value for card in cards_in_led_suit)
+                    if all_would_lose and not card_played.is_trump():
+                        logger.debug(f"Player {player_idx} penalty: could have trumped opponent's trump [{TRUMP_NOT_USED_PENALTY} trump not used]")
+                        return TRUMP_NOT_USED_PENALTY
+        
+        # Penalty 2: Using unnecessarily high trump when lower trump would win
+        # Conditions:
+        # - Agent played a trump card
+        # - Agent had lower trump cards that could still win
+        # Note: This applies even when partner is winning with trump (overtrumping partner unnecessarily)
+        if card_played.is_trump():
+            # Determine what the minimum trump needed is
+            if partner_winning and winning_card.is_trump():
+                # Partner is winning with trump - any trump higher than partner's is overtrumping
+                # This is generally bad unless opponents could beat partner's trump
+                # For simplicity, penalize any overtrump of partner that's unnecessarily high
+                min_trump_to_win = winning_card.rank_value
+            elif winning_card.is_trump():
+                # Opponent has trump, need to beat it
+                min_trump_to_win = winning_card.rank_value
+            else:
+                # No trump played yet, any trump would win
+                min_trump_to_win = 0
+            
+            # Check if agent had lower trumps that could still win
+            # Only consider cards that would beat the current winning card
+            lower_winning_trumps = [
+                card for card in trump_cards_in_hand 
+                if card.is_trump() 
+                and card.rank_value > min_trump_to_win 
+                and card.rank_value < card_played.rank_value
+                and card != card_played
+            ]
+            
+            if lower_winning_trumps:
+                if partner_winning and winning_card.is_trump():
+                    # Special case: overtrumping partner unnecessarily
+                    logger.debug(f"Player {player_idx} penalty: overtrumped partner ({winning_card}) with unnecessarily high trump ({card_played}) [{TRUMP_OVERPLAY_PENALTY} trump overplay]")
+                else:
+                    # Regular case: used unnecessarily high trump
+                    logger.debug(f"Player {player_idx} penalty: used unnecessarily high trump ({card_played}) when lower would win [{TRUMP_OVERPLAY_PENALTY} trump overplay]")
+                return TRUMP_OVERPLAY_PENALTY
+        
+        return 0.0
+    
     @staticmethod
     def _get_card_position(card: wg.Card):
         """Calculate the position of a card in the state array.
@@ -306,13 +503,17 @@ class Whist(BaseGame):
     
     def step(self, action):
         done = False
-        current_player = self.players[self.current_player_idx]
+        current_player_idx = self.current_player_idx
+        current_player = self.players[current_player_idx]
 
         if not current_player.hand:
             return None, 0, True
 
+        # Get valid actions before playing the card (for penalty calculation)
+        valid_actions = self.get_valid_actions(current_player)
+        
         card = current_player.action(action)
-        self.round_list.append((self.current_player_idx, card))
+        self.round_list.append((current_player_idx, card))
         self._count_cards_in_round()
         current_player.hand.remove(card)
         # print(f"Player {current_player.name} played {card}. Count: {self.count}")
@@ -323,6 +524,18 @@ class Whist(BaseGame):
             player.observe(current_player.id, card.rank_value)
 
         game_state, reward = self._get_game_state(card)
+        
+        # Apply trump penalty for agents (positions 0 and 2)
+        if current_player_idx in [0, 2]:
+            trump_penalty = self.calculate_trump_penalty(current_player_idx, card, valid_actions)
+            if trump_penalty < 0:
+                reward[current_player_idx] += trump_penalty
+                # Update monitoring stats
+                if current_player_idx == 0:
+                    self.reward_stats['agent_0_total'] += trump_penalty
+                else:  # current_player_idx == 2
+                    self.reward_stats['agent_2_total'] += trump_penalty
+        
         if all(len(player.hand) == 0 for player in self.players):
             done = True
             # New reward system: based on (tricks_won - max_tricks)

@@ -31,9 +31,10 @@ from Whist.utils.constants import (
 from Whist.utils.device_config import configure_device, enable_mixed_precision
 
 class DQNAgent(BaseAgent):
-    def __init__(self, input_size: int, gamma, agent_id: int = 0):
+    def __init__(self, input_size: int, gamma, agent_id: int = 0, use_double_dqn: bool = True):
         super().__init__(agent_id)
         self.input_shape = input_size
+        self.use_double_dqn = use_double_dqn
         
         # Configure GPU/NPU if requested (only once per process)
         if USE_GPU and not hasattr(DQNAgent, '_device_configured'):
@@ -143,11 +144,27 @@ class DQNAgent(BaseAgent):
         )
 
         # Get future Q values
-        future_qs_list = self.target_model(
-            [new_game_data, new_player_data, new_tracking_data, new_score_data],
-            verbose=0,
-            batch_size=MINIBATCH_SIZE
-        )
+        # Double DQN: use online network to select actions, target network to evaluate
+        if self.use_double_dqn:
+            # Use online network to select best actions
+            future_qs_online = self.model(
+                [new_game_data, new_player_data, new_tracking_data, new_score_data],
+                verbose=0,
+                batch_size=MINIBATCH_SIZE
+            )
+            # Use target network to evaluate those actions
+            future_qs_target = self.target_model(
+                [new_game_data, new_player_data, new_tracking_data, new_score_data],
+                verbose=0,
+                batch_size=MINIBATCH_SIZE
+            )
+        else:
+            # Standard DQN
+            future_qs_list = self.target_model(
+                [new_game_data, new_player_data, new_tracking_data, new_score_data],
+                verbose=0,
+                batch_size=MINIBATCH_SIZE
+            )
 
         X_game = []
         X_player = []
@@ -157,7 +174,13 @@ class DQNAgent(BaseAgent):
 
         for index, (state, action, reward, next_state, done) in enumerate(minibatch):
             if not done:
-                max_future_q = np.max(future_qs_list[index])
+                if self.use_double_dqn:
+                    # Double DQN: select action with online, evaluate with target
+                    best_action = np.argmax(future_qs_online[index])
+                    max_future_q = future_qs_target[index][best_action]
+                else:
+                    # Standard DQN
+                    max_future_q = np.max(future_qs_list[index])
                 new_q = reward + self.gamma * max_future_q
             else:
                 new_q = reward
