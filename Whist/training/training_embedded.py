@@ -258,7 +258,7 @@ class EmbeddedWhistTrainer:
 
             # Only save model if average reward is above threshold
             # Check every MODEL_SAVE_CHECK_EVERY games after MODEL_SAVE_MIN_GAMES
-            if episode >= MODEL_SAVE_MIN_GAMES and episode % MODEL_SAVE_CHECK_EVERY == 0:
+            if episode >= MODEL_SAVE_MIN_GAMES and episode % MODEL_SAVE_CHECK_EVERY == 0 or episode % self.SAVE_EVERY == 0:
                 # Calculate average reward over recent episodes
                 recent_window = min(100, len(self.all_episode_rewards))
                 avg_reward = np.mean(self.all_episode_rewards[-recent_window:])

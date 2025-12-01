@@ -54,7 +54,7 @@ EXPLORATION_GAMES = 200  # Number of games with pure random exploration
 DEFAULT_GAMMA_VALUES = [0.99, 0.95, 0.90, 0.85]
 
 # How often to save models during training
-DEFAULT_SAVE_EVERY = 500
+DEFAULT_SAVE_EVERY = DEFAULT_NUM_GAMES / 4  # Save model every N games
 
 # Legacy training parameters (from whist.py)
 LEGACY_EPISODES = 250
@@ -96,11 +96,12 @@ MEMORY_FRACTION = 0.35  # GPU memory fraction to use
 DEFAULT_GAMMA = 0.99
 
 # Model save threshold: only save model if average reward is above this value
-MODEL_SAVE_REWARD_THRESHOLD = -2.25
+MODEL_SAVE_REWARD_THRESHOLD = -3
 
 # Model save check frequency: check every N games after minimum games played
 MODEL_SAVE_CHECK_EVERY = 75  # Check every x games
 MODEL_SAVE_MIN_GAMES = 400  # Only start checking after 400 games (200 exploration + 200 training)
+
 
 
 # =============================================================================
