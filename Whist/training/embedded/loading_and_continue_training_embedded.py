@@ -10,7 +10,7 @@ import numpy as np
 from Whist.core.whist_embedded import WhistEmbedded
 from Whist.agents.embedded_dqn_agent import EmbeddedDQNAgent
 from Whist.agents.ew_strategy import EWStrategy
-from Whist.training.training_embedded import EmbeddedWhistTrainer
+from Whist.training.embedded.training_embedded import EmbeddedWhistTrainer
 from Whist.utils.constants import (
     DEFAULT_NUM_GAMES,
     DEFAULT_EPSILON,
