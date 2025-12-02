@@ -67,7 +67,7 @@ def choose_agent_action(
     
     if np.random.random() > epsilon:
         # Exploit
-        qs = agent.get_qs(current_state)
+        qs = agent.get_qs(current_state)[0]  # Get first element since get_qs returns shape [1, num_actions]
         best = _best_valid_action_from_qs(qs, valid_actions)
         if best is not None:
             if return_info:
