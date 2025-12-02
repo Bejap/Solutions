@@ -6,6 +6,7 @@ from typing import List, Optional, Any, Tuple
 from Whist.utils.base_classes import BaseAgent
 from Whist.utils.constants import (
     DEFAULT_GAMMA,
+    INITIAL_LEARNING_RATE,
     REPLAY_MEMORY_SIZE,
     MIN_REPLAY_MEMORY_SIZE,
     MINIBATCH_SIZE,
@@ -47,11 +48,14 @@ class DQNAgent(BaseAgent):
                 enable_mixed_precision()
             DQNAgent._device_configured = True
         
-        self.model = self.create_model()
+        self.models = self.create_model()
+        self.model, self.critic = self.models
         self.gamma = gamma
 
-        self.target_model = self.create_model()
+        self.target_models = self.create_model()
+        self.target_model, self.target_critic = self.target_models
         self.target_model.set_weights(self.model.get_weights())
+        self.target_critic.set_weights(self.critic.get_weights())
 
         self.replay_memory = deque(maxlen=100000)
 
@@ -79,6 +83,7 @@ class DQNAgent(BaseAgent):
 
         # Output layer for Q-values
         output = tf.keras.layers.Dense(ACTION_SIZE, activation='linear')(dropout3)  # ACTION_SIZE card actions
+        value = tf.keras.layers.Dense(1, activation='linear')(dropout3)  # State value
 
         # Create model with multiple inputs
         model = tf.keras.Model(
@@ -87,7 +92,14 @@ class DQNAgent(BaseAgent):
         )
 
         model.compile(optimizer='adam', loss='mse', jit_compile=False)
-        return model
+
+        critic = tf.keras.Model(
+            inputs=[game_input, player_input, tracking_input, score_input],
+            outputs=value
+        )
+        critic.compile(optimizer=tf.keras.optimizers.RMSprop(learning_rate=INITIAL_LEARNING_RATE), loss='categorical_crossentropy', jit_compile=False)
+
+        return model, critic
 
     def update_replay_memory(self, transition):
         state, action, reward, next_state, done = transition
