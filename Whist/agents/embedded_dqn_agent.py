@@ -89,7 +89,7 @@ class EmbeddedDQNAgent(BaseAgent):
                 epsilon=PER_EPSILON
             )
         else:
-            self.replay_memory = deque(maxlen=100000)
+            self.replay_memory = deque(maxlen=REPLAY_MEMORY_SIZE)
         
         self.target_update_counter = 0
     
