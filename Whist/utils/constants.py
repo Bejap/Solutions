@@ -18,12 +18,12 @@ NUM_PLAYERS = 4
 # Cards dealt to each player (adjust this for smaller games)
 # For full whist game: 13 cards per player (52 total)
 # For smaller games: 9 or 11 cards per player
-CARDS_PER_PLAYER = 13
+CARDS_PER_PLAYER = 9
 
 # Total number of cards in the game (calculated from cards per player)
 # This represents the state array size for tracking all possible cards
 # Note: Set CARDS_PER_PLAYER to adjust game size, not ARRAY_LENGTH directly
-ARRAY_LENGTH = CARDS_PER_PLAYER * NUM_PLAYERS  # e.g., 13 * 4 = 52
+ARRAY_LENGTH = 13 * NUM_PLAYERS  # e.g., 13 * 4 = 52
 
 # Player positions (teams: 0-2 and 1-3 are partners)
 NORTH = 0
