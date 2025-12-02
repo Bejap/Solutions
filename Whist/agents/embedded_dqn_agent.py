@@ -24,9 +24,15 @@ from Whist.utils.constants import (
     USE_GPU,
     GPU_MEMORY_GROWTH,
     GPU_MEMORY_LIMIT_MB,
-    USE_MIXED_PRECISION
+    USE_MIXED_PRECISION,
+    USE_PRIORITIZED_REPLAY,
+    PER_ALPHA,
+    PER_BETA_START,
+    PER_BETA_FRAMES,
+    PER_EPSILON
 )
 from Whist.utils.device_config import configure_device, enable_mixed_precision
+from Whist.utils.prioritized_replay import PrioritizedReplayMemory, convert_to_standard_format
 
 
 class EmbeddedDQNAgent(BaseAgent):
@@ -37,7 +43,7 @@ class EmbeddedDQNAgent(BaseAgent):
     embeddings to represent cards, hands, and game state.
     """
     
-    def __init__(self, embedding_dim: int = 8, gamma: float = 0.99, agent_id: int = 0, use_double_dqn: bool = True):
+    def __init__(self, embedding_dim: int = 8, gamma: float = 0.99, agent_id: int = 0, use_double_dqn: bool = True, use_prioritized_replay: bool = USE_PRIORITIZED_REPLAY):
         """
         Initialize the Embedded DQN Agent.
         
@@ -46,11 +52,13 @@ class EmbeddedDQNAgent(BaseAgent):
             gamma: Discount factor for future rewards
             agent_id: Unique identifier for this agent
             use_double_dqn: Use Double DQN algorithm (default: True)
+            use_prioritized_replay: Use prioritized experience replay (default: from constants)
         """
         super().__init__(agent_id)
         self.embedding_dim = embedding_dim
         self.gamma = gamma
         self.use_double_dqn = use_double_dqn
+        self.use_prioritized_replay = use_prioritized_replay
         
         # Configure GPU/NPU if requested (only once per process)
         if USE_GPU and not hasattr(EmbeddedDQNAgent, '_device_configured'):
@@ -71,7 +79,18 @@ class EmbeddedDQNAgent(BaseAgent):
         self.target_model = self.create_model()
         self.target_model.set_weights(self.model.get_weights())
         
-        self.replay_memory = deque(maxlen=100000)
+        # Use prioritized or standard replay memory
+        if use_prioritized_replay:
+            self.replay_memory = PrioritizedReplayMemory(
+                capacity=REPLAY_MEMORY_SIZE,
+                alpha=PER_ALPHA,
+                beta_start=PER_BETA_START,
+                beta_frames=PER_BETA_FRAMES,
+                epsilon=PER_EPSILON
+            )
+        else:
+            self.replay_memory = deque(maxlen=100000)
+        
         self.target_update_counter = 0
     
     def create_model(self):
@@ -143,10 +162,17 @@ class EmbeddedDQNAgent(BaseAgent):
             terminal_state: Whether this is a terminal state
             step: Current step count
         """
-        if len(self.replay_memory) < MIN_REPLAY_MEMORY_SIZE:
-            return
-        
-        minibatch = random.sample(self.replay_memory, MINIBATCH_SIZE)
+        if self.use_prioritized_replay:
+            if not self.replay_memory.is_ready(MIN_REPLAY_MEMORY_SIZE):
+                return
+            # Sample from prioritized replay
+            experiences, indices, importance_weights = self.replay_memory.sample(MINIBATCH_SIZE)
+            minibatch = convert_to_standard_format(experiences)
+        else:
+            if len(self.replay_memory) < MIN_REPLAY_MEMORY_SIZE:
+                return
+            minibatch = random.sample(self.replay_memory, MINIBATCH_SIZE)
+            importance_weights = np.ones(MINIBATCH_SIZE)  # Uniform weights for standard replay
         
         # Prepare batch data
         current_states = {
@@ -204,6 +230,7 @@ class EmbeddedDQNAgent(BaseAgent):
         
         X = {key: [] for key in current_states.keys()}
         y = []
+        td_errors = []  # Track TD errors for priority updates
         
         for index, (state, action, reward, next_state, done) in enumerate(minibatch):
             if not done:
@@ -219,7 +246,12 @@ class EmbeddedDQNAgent(BaseAgent):
                 new_q = reward
             
             current_qs = np.array(current_qs_list[index])
+            old_q = current_qs[action]
             current_qs[action] = new_q
+            
+            # Compute TD error for prioritized replay
+            td_error = new_q - old_q
+            td_errors.append(td_error)
             
             # Add to training data
             for i, key in enumerate(['hand', 'round', 'played', 'player_id', 'tracking', 'scores']):
@@ -231,14 +263,22 @@ class EmbeddedDQNAgent(BaseAgent):
             X[key] = np.array(X[key])
         y = np.array(y)
         
+        # Apply importance sampling weights to loss
+        sample_weights = importance_weights if self.use_prioritized_replay else None
+        
         # Fit model
         self.model.fit(
             [X['hand'], X['round'], X['played'], X['player_id'], X['tracking'], X['scores']],
             y,
+            sample_weight=sample_weights,
             batch_size=MINIBATCH_SIZE,
             verbose=0,
             shuffle=False
         )
+        
+        # Update priorities in prioritized replay
+        if self.use_prioritized_replay:
+            self.replay_memory.update_priorities(indices, np.array(td_errors))
         
         # Update target network
         if terminal_state:
