@@ -7,15 +7,15 @@ Usage:
     python model_training.py
     
     OR from project root:
-    python -m Whist.training.model_training
+    python -m Whist.training.classic.model_training
 """
 
 # Add project root to path for direct script execution
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
-from Whist.training.training_logic import WhistTrainer
+from Whist.training.classic.training_logic import WhistTrainer
 from Whist.utils.constants import (
     DEFAULT_NUM_GAMES,
     DEFAULT_EPSILON,
