@@ -85,8 +85,20 @@ def load_embedded_agent_from_keras(model_path: str, gamma: float,
     """
     print(f"Loading full embedded agent model: {model_path}")
     
-    # Load the Keras model
-    loaded_model = tf.keras.models.load_model(model_path)
+    # Load the Keras model without compiling (avoids custom object issues)
+    # compile=False skips loading optimizer state which often causes problems
+    try:
+        loaded_model = tf.keras.models.load_model(model_path, compile=False)
+        print("  Model loaded successfully (without compilation)")
+    except Exception as e:
+        print(f"  Error loading model: {e}")
+        print("  Trying with custom objects...")
+        # If that fails, try with custom_objects parameter
+        loaded_model = tf.keras.models.load_model(
+            model_path, 
+            compile=False,
+            custom_objects={'mse': tf.keras.losses.MeanSquaredError()}
+        )
     
     # Create agent and assign loaded model
     agent = EmbeddedDQNAgent(
@@ -96,8 +108,12 @@ def load_embedded_agent_from_keras(model_path: str, gamma: float,
         use_double_dqn=use_double_dqn
     )
     
-    # Replace model with loaded one
+    # Replace model with loaded one and recompile it
     agent.model = loaded_model
+    agent.model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+        loss=tf.keras.losses.MeanSquaredError()
+    )
     agent.target_model.set_weights(agent.model.get_weights())
     
     print(f"Embedded agent {agent_id} loaded successfully from Keras model")
