@@ -1,3 +1,19 @@
+"""
+Model Loading Utilities for DQN Agent
+
+This module provides functions to load trained DQN agents.
+"""
+
+# Add project root to Python path to allow running script directly
+import sys
+import os
+from pathlib import Path
+
+# Get the project root (3 levels up from this file)
+script_dir = Path(__file__).resolve().parent
+project_root = script_dir.parent.parent.parent
+sys.path.insert(0, str(project_root))
+
 import tensorflow as tf
 import numpy as np
 from Whist.core import whist as whist
