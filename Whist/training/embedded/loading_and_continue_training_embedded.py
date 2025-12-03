@@ -222,9 +222,31 @@ class ContinueEmbeddedTraining:
         self.path_type = path_type
         self.embedding_dim = embedding_dim
         
+        # Convert paths to absolute paths if they're relative
+        if not os.path.isabs(agent_0_path):
+            agent_0_path = os.path.join(PROJECT_ROOT, agent_0_path)
+        if not os.path.isabs(agent_2_path):
+            agent_2_path = os.path.join(PROJECT_ROOT, agent_2_path)
+        
+        # Verify files exist before trying to load
+        if path_type == 'weights':
+            if not os.path.exists(agent_0_path):
+                raise FileNotFoundError(f"Agent 0 weights file not found: {agent_0_path}")
+            if not os.path.exists(agent_2_path):
+                raise FileNotFoundError(f"Agent 2 weights file not found: {agent_2_path}")
+        elif path_type == 'keras':
+            if not os.path.exists(agent_0_path):
+                raise FileNotFoundError(f"Agent 0 keras file not found: {agent_0_path}")
+            if not os.path.exists(agent_2_path):
+                raise FileNotFoundError(f"Agent 2 keras file not found: {agent_2_path}")
+        
         # Load agents
         print("="*60)
         print("LOADING PRE-TRAINED EMBEDDED AGENTS")
+        print("="*60)
+        print(f"Agent 0 path: {agent_0_path}")
+        print(f"Agent 2 path: {agent_2_path}")
+        print(f"Files exist: Agent 0={os.path.exists(agent_0_path)}, Agent 2={os.path.exists(agent_2_path)}")
         print("="*60)
         
         gamma_values = gamma_values if gamma_values is not None else DEFAULT_GAMMA_VALUES
@@ -290,8 +312,24 @@ class ContinueEmbeddedTraining:
 
 def main():
     """Example usage of continue embedded training."""
-    # IMPORTANT: Make sure your saved models are compatible with the current architecture
-    # The current EmbeddedDQNAgent uses card embeddings and prioritized replay
+    # IMPORTANT: Backward Compatibility for Old Models
+    # ================================================
+    # If you're loading models trained BEFORE prioritized replay was added,
+    # set use_prioritized_replay=False to match the old architecture.
+    # 
+    # For NEW models (trained with prioritized replay), you can:
+    # - Set use_prioritized_replay=True (or None to use global setting)
+    # - Or omit it to use the global USE_PRIORITIZED_REPLAY setting
+    
+    # IMPORTANT: File Paths
+    # ====================
+    # Paths can be:
+    # 1. Relative to project root (recommended): "Weights/embedded/model.h5"
+    #    - Will be automatically converted to absolute path
+    # 2. Absolute path: "C:/full/path/to/Weights/embedded/model.h5"
+    #    - Works directly as-is
+    # 
+    # The script will verify files exist before attempting to load them
     
     # Example: Load from weights and continue training
     # Update these paths to your actual model files
@@ -303,6 +341,8 @@ def main():
     # agent_2_model = "Models/embedded/embedded_full_agent_player_2_ep1000_avgR-3.25_20251201_120000.keras"
     
     # Continue training
+    # For OLD models (trained before PER was added): set use_prioritized_replay=False
+    # For NEW models (trained with PER): set use_prioritized_replay=True or omit
     continue_trainer = ContinueEmbeddedTraining(
         agent_0_path=agent_0_weights,
         agent_2_path=agent_2_weights,
@@ -311,7 +351,8 @@ def main():
         starting_episode=1000,
         num_additional_games=2000,
         epsilon=0.3,  # Lower epsilon since agents are already trained
-        use_double_dqn=True
+        use_double_dqn=True,
+        use_prioritized_replay=False  # Set to False for old models, True/None for new models
     )
     
     # Run training
