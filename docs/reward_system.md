@@ -4,6 +4,15 @@
 
 The reward system is designed to train only the DQN agents at positions 0 (North) and 2 (South), which form Team 1. Positions 1 (East) and 3 (West) use strategic rule-based play and do not receive rewards.
 
+## 📊 Visual Guides
+
+For a visual understanding of how rewards work in different scenarios, see:
+- **[Reward Visualizations](reward_visualizations/)** - Comprehensive graphs showing:
+  - Reward breakdowns for winning vs losing scenarios
+  - Heatmaps of all agent/partner contribution combinations
+  - Per-trick reward timelines
+  - Impact of team bonus on different game outcomes
+
 ## Reward Structure
 
 ### Trick-Level Rewards
