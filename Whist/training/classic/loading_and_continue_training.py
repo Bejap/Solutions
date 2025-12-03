@@ -44,7 +44,8 @@ from Whist.utils.prioritized_replay import PrioritizedReplayMemory
 
 
 def load_agent_from_weights(weights_path: str, input_size: int, gamma: float, 
-                            agent_id: int = 0, use_double_dqn: bool = True) -> DQNAgent:
+                            agent_id: int = 0, use_double_dqn: bool = True,
+                            use_prioritized_replay: bool = None) -> DQNAgent:
     """
     Load a DQN agent from saved weights.
     
@@ -54,25 +55,33 @@ def load_agent_from_weights(weights_path: str, input_size: int, gamma: float,
         gamma: Discount factor
         agent_id: ID for the agent
         use_double_dqn: Whether to use Double DQN
+        use_prioritized_replay: Whether to use prioritized replay (None = use global setting)
         
     Returns:
         Loaded DQNAgent instance
     """
     print(f"Loading agent from weights: {weights_path}")
     
+    # Use global setting if not specified
+    if use_prioritized_replay is None:
+        use_prioritized_replay = USE_PRIORITIZED_REPLAY
+    
     # Create new agent with same architecture
-    agent = DQNAgent(input_size, gamma, agent_id=agent_id, use_double_dqn=use_double_dqn)
+    agent = DQNAgent(input_size, gamma, agent_id=agent_id, 
+                    use_double_dqn=use_double_dqn,
+                    use_prioritized_replay=use_prioritized_replay)
     
     # Load weights
     agent.model.load_weights(weights_path)
     agent.target_model.set_weights(agent.model.get_weights())
     
-    print(f"Agent {agent_id} loaded successfully with Double DQN={use_double_dqn}")
+    print(f"Agent {agent_id} loaded successfully with Double DQN={use_double_dqn}, PER={use_prioritized_replay}")
     return agent
 
 
 def load_agent_from_keras(model_path: str, gamma: float, agent_id: int = 0, 
-                          use_double_dqn: bool = True) -> DQNAgent:
+                          use_double_dqn: bool = True,
+                          use_prioritized_replay: bool = None) -> DQNAgent:
     """
     Load a DQN agent from a saved Keras model.
     
@@ -84,11 +93,16 @@ def load_agent_from_keras(model_path: str, gamma: float, agent_id: int = 0,
         gamma: Discount factor
         agent_id: ID for the agent
         use_double_dqn: Whether to use Double DQN
+        use_prioritized_replay: Whether to use prioritized replay (None = use global setting)
         
     Returns:
         Loaded DQNAgent instance with the model
     """
     print(f"Loading full agent model: {model_path}")
+    
+    # Use global setting if not specified
+    if use_prioritized_replay is None:
+        use_prioritized_replay = USE_PRIORITIZED_REPLAY
     
     # Load the Keras model without compiling (avoids custom object issues)
     # compile=False skips loading optimizer state which often causes problems
@@ -99,11 +113,21 @@ def load_agent_from_keras(model_path: str, gamma: float, agent_id: int = 0,
         print(f"  Error loading model: {e}")
         print("  Trying with custom objects...")
         # If that fails, try with custom_objects parameter
-        loaded_model = tf.keras.models.load_model(
-            model_path, 
-            compile=False,
-            custom_objects={'mse': tf.keras.losses.MeanSquaredError()}
-        )
+        try:
+            loaded_model = tf.keras.models.load_model(
+                model_path, 
+                compile=False,
+                custom_objects={'mse': tf.keras.losses.MeanSquaredError()}
+            )
+        except Exception as e2:
+            print(f"  Error with custom objects: {e2}")
+            print("  Trying with safe_mode...")
+            # Last resort: use safe mode
+            loaded_model = tf.keras.models.load_model(
+                model_path,
+                compile=False,
+                safe_mode=False
+            )
     
     # Extract input size from the loaded model
     # For multi-input models, sum all input dimensions
@@ -122,7 +146,7 @@ def load_agent_from_keras(model_path: str, gamma: float, agent_id: int = 0,
     agent.agent_id = agent_id
     agent.input_shape = input_size
     agent.use_double_dqn = use_double_dqn
-    agent.use_prioritized_replay = USE_PRIORITIZED_REPLAY
+    agent.use_prioritized_replay = use_prioritized_replay
     agent.gamma = gamma
     
     # Set the loaded model
@@ -144,8 +168,8 @@ def load_agent_from_keras(model_path: str, gamma: float, agent_id: int = 0,
     )
     agent.target_critic = None  # Not used when loading from Keras
     
-    # Initialize replay memory
-    if USE_PRIORITIZED_REPLAY:
+    # Initialize replay memory based on setting
+    if use_prioritized_replay:
         agent.replay_memory = PrioritizedReplayMemory(
             capacity=REPLAY_MEMORY_SIZE,
             alpha=PER_ALPHA,
@@ -153,8 +177,10 @@ def load_agent_from_keras(model_path: str, gamma: float, agent_id: int = 0,
             beta_frames=PER_BETA_FRAMES,
             epsilon=PER_EPSILON
         )
+        print(f"  Using prioritized experience replay")
     else:
         agent.replay_memory = deque(maxlen=REPLAY_MEMORY_SIZE)
+        print(f"  Using standard replay memory")
     
     agent.target_update_counter = 0
     
@@ -177,6 +203,7 @@ class ContinueTraining:
                  min_epsilon: float = DEFAULT_MIN_EPSILON,
                  gamma_values: list = None,
                  use_double_dqn: bool = True,
+                 use_prioritized_replay: bool = None,
                  enable_per_card_reward: bool = True,
                  early_stopping_patience: int = 100):
         """
@@ -193,6 +220,8 @@ class ContinueTraining:
             min_epsilon: Minimum epsilon
             gamma_values: Discount factors for agents
             use_double_dqn: Whether to use Double DQN
+            use_prioritized_replay: Whether to use prioritized replay (None = use global setting)
+                                   Set to False to load old models without prioritized replay
             enable_per_card_reward: Enable per-card rewards
             early_stopping_patience: Patience for early stopping
         """
@@ -211,20 +240,24 @@ class ContinueTraining:
         if path_type == 'weights':
             self.agent_0 = load_agent_from_weights(
                 agent_0_path, input_size, gamma_values[0], agent_id=0, 
-                use_double_dqn=use_double_dqn
+                use_double_dqn=use_double_dqn,
+                use_prioritized_replay=use_prioritized_replay
             )
             self.agent_2 = load_agent_from_weights(
                 agent_2_path, input_size, gamma_values[2], agent_id=2,
-                use_double_dqn=use_double_dqn
+                use_double_dqn=use_double_dqn,
+                use_prioritized_replay=use_prioritized_replay
             )
         elif path_type == 'keras':
             self.agent_0 = load_agent_from_keras(
                 agent_0_path, gamma_values[0], agent_id=0,
-                use_double_dqn=use_double_dqn
+                use_double_dqn=use_double_dqn,
+                use_prioritized_replay=use_prioritized_replay
             )
             self.agent_2 = load_agent_from_keras(
                 agent_2_path, gamma_values[2], agent_id=2,
-                use_double_dqn=use_double_dqn
+                use_double_dqn=use_double_dqn,
+                use_prioritized_replay=use_prioritized_replay
             )
         else:
             raise ValueError(f"Unknown path_type: {path_type}. Use 'weights' or 'keras'")
@@ -264,27 +297,36 @@ class ContinueTraining:
 
 def main():
     """Example usage of continue training."""
-    # IMPORTANT: Make sure your saved models are compatible with the current architecture
-    # The current DQNAgent uses multiple inputs (game, player, tracking, score)
+    # IMPORTANT: Backward Compatibility for Old Models
+    # ================================================
+    # If you're loading models trained BEFORE prioritized replay was added,
+    # set use_prioritized_replay=False to match the old architecture.
+    # 
+    # For NEW models (trained with prioritized replay), you can:
+    # - Set use_prioritized_replay=True (or None to use global setting)
+    # - Or omit it to use the global USE_PRIORITIZED_REPLAY setting
     
     # Example: Load from weights and continue training
     # Update these paths to your actual model files
-    agent_0_weights = "Weights/dueling/agent_player_0_ep600_avgR-2.73_20251203_120008.weights.h5"
-    agent_2_weights = "Weights/dueling/agent_player_2_ep600_avgR-2.73_20251203_120008.weights.h5"
+    agent_0_weights = "Weights/classic/agent_player_0_ep600_avgR-2.73_20251203_120008.weights.h5"
+    agent_2_weights = "Weights/classic/agent_player_2_ep600_avgR-2.73_20251203_120008.weights.h5"
     
     # Or load from Keras models
-    # agent_0_model = "Models/dueling/full_agent_player_0_ep600_avgR-2.73_20251203_120008.keras"
-    # agent_2_model = "Models/dueling/full_agent_player_2_ep600_avgR-2.73_20251203_120008.keras"
+    # agent_0_model = "Models/classic/full_agent_player_0_ep600_avgR-2.73_20251203_120008.keras"
+    # agent_2_model = "Models/classic/full_agent_player_2_ep600_avgR-2.73_20251203_120008.keras"
     
     # Continue training
+    # For OLD models (trained before PER was added): set use_prioritized_replay=False
+    # For NEW models (trained with PER): set use_prioritized_replay=True or omit
     continue_trainer = ContinueTraining(
         agent_0_path=agent_0_weights,
         agent_2_path=agent_2_weights,
         path_type='weights',  # Use 'keras' for full models
-        starting_episode=500,
+        starting_episode=600,
         num_additional_games=2000,
-        epsilon=0.9,
+        epsilon=0.5,
         use_double_dqn=True,
+        use_prioritized_replay=False,  # Set to False for old models, True/None for new models
         early_stopping_patience=150
     )
     
