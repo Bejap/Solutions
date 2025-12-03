@@ -17,6 +17,7 @@ sys.path.insert(0, str(project_root))
 
 import tensorflow as tf
 import numpy as np
+from collections import deque
 from Whist.core.whist_embedded import WhistEmbedded
 from Whist.agents.embedded_dqn_agent import EmbeddedDQNAgent
 from Whist.agents.ew_strategy import EWStrategy
@@ -29,8 +30,15 @@ from Whist.utils.constants import (
     CARDS_PER_PLAYER,
     DEFAULT_GAMMA_VALUES,
     NUM_PLAYERS,
-    DQN_AGENT_POSITIONS
+    DQN_AGENT_POSITIONS,
+    REPLAY_MEMORY_SIZE,
+    USE_PRIORITIZED_REPLAY,
+    PER_ALPHA,
+    PER_BETA_START,
+    PER_BETA_FRAMES,
+    PER_EPSILON
 )
+from Whist.utils.prioritized_replay import PrioritizedReplayMemory
 
 
 def load_embedded_agent_from_weights(weights_path: str, embedding_dim: int, 
@@ -73,10 +81,13 @@ def load_embedded_agent_from_keras(model_path: str, gamma: float,
     """
     Load an Embedded DQN agent from a saved Keras model.
     
+    IMPORTANT: This creates a minimal agent wrapper around the loaded model.
+    The loaded model's architecture is used as-is without modification.
+    
     Args:
         model_path: Path to the saved Keras model (.keras)
         gamma: Discount factor
-        embedding_dim: Dimension of card embeddings
+        embedding_dim: Dimension of card embeddings (not used when loading)
         agent_id: ID for the agent
         use_double_dqn: Whether to use Double DQN
         
@@ -100,23 +111,48 @@ def load_embedded_agent_from_keras(model_path: str, gamma: float,
             custom_objects={'mse': tf.keras.losses.MeanSquaredError()}
         )
     
-    # Create agent and assign loaded model
-    agent = EmbeddedDQNAgent(
-        embedding_dim=embedding_dim,
-        gamma=gamma, 
-        agent_id=agent_id,
-        use_double_dqn=use_double_dqn
-    )
+    # Create a basic agent structure - but we'll use the loaded model directly
+    # We need to bypass the normal __init__ to avoid creating a new model
+    agent = object.__new__(EmbeddedDQNAgent)
+    agent.agent_id = agent_id
+    agent.embedding_dim = embedding_dim
+    agent.use_double_dqn = use_double_dqn
+    agent.use_prioritized_replay = USE_PRIORITIZED_REPLAY
+    agent.gamma = gamma
     
-    # Replace model with loaded one and recompile it
+    # Set the loaded model
     agent.model = loaded_model
+    
+    # Recompile the loaded model with fresh optimizer
     agent.model.compile(
         optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
         loss=tf.keras.losses.MeanSquaredError()
     )
+    
+    # Create target model as a copy of the loaded model
+    agent.target_model = tf.keras.models.clone_model(loaded_model)
     agent.target_model.set_weights(agent.model.get_weights())
+    agent.target_model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+        loss=tf.keras.losses.MeanSquaredError()
+    )
+    
+    # Initialize replay memory
+    if USE_PRIORITIZED_REPLAY:
+        agent.replay_memory = PrioritizedReplayMemory(
+            capacity=REPLAY_MEMORY_SIZE,
+            alpha=PER_ALPHA,
+            beta_start=PER_BETA_START,
+            beta_frames=PER_BETA_FRAMES,
+            epsilon=PER_EPSILON
+        )
+    else:
+        agent.replay_memory = deque(maxlen=REPLAY_MEMORY_SIZE)
+    
+    agent.target_update_counter = 0
     
     print(f"Embedded agent {agent_id} loaded successfully from Keras model")
+    print(f"  Model has {len(loaded_model.inputs) if isinstance(loaded_model.input, list) else 1} inputs")
     return agent
 
 

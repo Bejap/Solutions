@@ -17,6 +17,7 @@ sys.path.insert(0, str(project_root))
 
 import tensorflow as tf
 import numpy as np
+from collections import deque
 from Whist.core.whist import Whist
 from Whist.agents.simple_whist_DQN import DQNAgent
 from Whist.agents.ew_strategy import EWStrategy
@@ -31,8 +32,15 @@ from Whist.utils.constants import (
     NUM_PLAYERS,
     DQN_AGENT_POSITIONS,
     EAST,
-    WEST
+    WEST,
+    REPLAY_MEMORY_SIZE,
+    USE_PRIORITIZED_REPLAY,
+    PER_ALPHA,
+    PER_BETA_START,
+    PER_BETA_FRAMES,
+    PER_EPSILON
 )
+from Whist.utils.prioritized_replay import PrioritizedReplayMemory
 
 
 def load_agent_from_weights(weights_path: str, input_size: int, gamma: float, 
@@ -68,6 +76,9 @@ def load_agent_from_keras(model_path: str, gamma: float, agent_id: int = 0,
     """
     Load a DQN agent from a saved Keras model.
     
+    IMPORTANT: This creates a minimal agent wrapper around the loaded model.
+    The loaded model's architecture is used as-is without modification.
+    
     Args:
         model_path: Path to the saved Keras model (.keras)
         gamma: Discount factor
@@ -94,21 +105,61 @@ def load_agent_from_keras(model_path: str, gamma: float, agent_id: int = 0,
             custom_objects={'mse': tf.keras.losses.MeanSquaredError()}
         )
     
-    # Create agent with proper input size for current architecture
-    # The current architecture uses multiple inputs, so we use the total size
-    input_size = (ARRAY_LENGTH * 7) + 4 + 4
-    agent = DQNAgent(input_size, gamma, agent_id=agent_id, use_double_dqn=use_double_dqn)
+    # Extract input size from the loaded model
+    # For multi-input models, sum all input dimensions
+    if isinstance(loaded_model.input_shape, list):
+        # Multiple inputs
+        input_size = sum(shape[1] if shape[1] is not None else 0 for shape in loaded_model.input_shape)
+    else:
+        # Single input
+        input_size = loaded_model.input_shape[1]
     
-    # Replace model with loaded one and recompile it
+    print(f"  Detected input size from model: {input_size}")
+    
+    # Create a basic agent structure - but we'll use the loaded model directly
+    # We need to bypass the normal __init__ to avoid creating a new model
+    agent = object.__new__(DQNAgent)
+    agent.agent_id = agent_id
+    agent.input_shape = input_size
+    agent.use_double_dqn = use_double_dqn
+    agent.use_prioritized_replay = USE_PRIORITIZED_REPLAY
+    agent.gamma = gamma
+    
+    # Set the loaded model
     agent.model = loaded_model
+    agent.critic = None  # Not used when loading from Keras
+    
+    # Recompile the loaded model with fresh optimizer
     agent.model.compile(
         optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
         loss=tf.keras.losses.MeanSquaredError()
     )
+    
+    # Create target model as a copy of the loaded model
+    agent.target_model = tf.keras.models.clone_model(loaded_model)
     agent.target_model.set_weights(agent.model.get_weights())
+    agent.target_model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+        loss=tf.keras.losses.MeanSquaredError()
+    )
+    agent.target_critic = None  # Not used when loading from Keras
+    
+    # Initialize replay memory
+    if USE_PRIORITIZED_REPLAY:
+        agent.replay_memory = PrioritizedReplayMemory(
+            capacity=REPLAY_MEMORY_SIZE,
+            alpha=PER_ALPHA,
+            beta_start=PER_BETA_START,
+            beta_frames=PER_BETA_FRAMES,
+            epsilon=PER_EPSILON
+        )
+    else:
+        agent.replay_memory = deque(maxlen=REPLAY_MEMORY_SIZE)
+    
+    agent.target_update_counter = 0
     
     print(f"Agent {agent_id} loaded successfully from Keras model")
-    print(f"  Model architecture: {len(loaded_model.inputs)} inputs, {len(loaded_model.outputs)} outputs")
+    print(f"  Model architecture: {len(loaded_model.inputs) if isinstance(loaded_model.input, list) else 1} inputs, {len(loaded_model.outputs)} outputs")
     return agent
 
 
