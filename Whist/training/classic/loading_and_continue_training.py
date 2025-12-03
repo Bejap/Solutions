@@ -202,21 +202,21 @@ def main():
     
     # Example: Load from weights and continue training
     # Update these paths to your actual model files
-    agent_0_weights = "Weights/classic/agent_player_0_ep1000_avgR-3.25_20251201_120000.weights.h5"
-    agent_2_weights = "Weights/classic/agent_player_2_ep1000_avgR-3.25_20251201_120000.weights.h5"
+    agent_0_weights = "Weights/dueling/agent_player_0_ep600_avgR-2.73_20251203_120008.weights.h5"
+    agent_2_weights = "Weights/dueling/agent_player_2_ep600_avgR-2.73_20251203_120008.weights.h5"
     
     # Or load from Keras models
-    # agent_0_model = "Models/classic/full_agent_player_0_ep1000_avgR-3.25_20251201_120000.keras"
-    # agent_2_model = "Models/classic/full_agent_player_2_ep1000_avgR-3.25_20251201_120000.keras"
+    # agent_0_model = "Models/dueling/full_agent_player_0_ep600_avgR-2.73_20251203_120008.keras"
+    # agent_2_model = "Models/dueling/full_agent_player_2_ep600_avgR-2.73_20251203_120008.keras"
     
     # Continue training
     continue_trainer = ContinueTraining(
         agent_0_path=agent_0_weights,
         agent_2_path=agent_2_weights,
         path_type='weights',  # Use 'keras' for full models
-        starting_episode=1000,
+        starting_episode=500,
         num_additional_games=2000,
-        epsilon=0.3,  # Lower epsilon since agents are already trained
+        epsilon=0.9,
         use_double_dqn=True,
         early_stopping_patience=150
     )
