@@ -206,19 +206,23 @@ class ContinueEmbeddedTraining:
 
 def main():
     """Example usage of continue embedded training."""
+    # IMPORTANT: Make sure your saved models are compatible with the current architecture
+    # The current EmbeddedDQNAgent uses card embeddings and prioritized replay
+    
     # Example: Load from weights and continue training
-    agent_0_weights = "Weights/embedded_agent_player_0_ep1000_avgR-3.25.weights.h5"
-    agent_2_weights = "Weights/embedded_agent_player_2_ep1000_avgR-3.25.weights.h5"
+    # Update these paths to your actual model files
+    agent_0_weights = "Weights/embedded/embedded_agent_player_0_ep1000_avgR-3.25_20251201_120000.weights.h5"
+    agent_2_weights = "Weights/embedded/embedded_agent_player_2_ep1000_avgR-3.25_20251201_120000.weights.h5"
     
     # Or load from Keras models
-    # agent_0_model = "Models/embedded_full_agent_player_0_ep1000_avgR-3.25.keras"
-    # agent_2_model = "Models/embedded_full_agent_player_2_ep1000_avgR-3.25.keras"
+    # agent_0_model = "Models/embedded/embedded_full_agent_player_0_ep1000_avgR-3.25_20251201_120000.keras"
+    # agent_2_model = "Models/embedded/embedded_full_agent_player_2_ep1000_avgR-3.25_20251201_120000.keras"
     
     # Continue training
     continue_trainer = ContinueEmbeddedTraining(
         agent_0_path=agent_0_weights,
         agent_2_path=agent_2_weights,
-        path_type='weights',
+        path_type='weights',  # Use 'keras' for full models
         embedding_dim=8,
         starting_episode=1000,
         num_additional_games=2000,
@@ -234,4 +238,15 @@ def main():
 
 
 if __name__ == "__main__":
+    print("="*60)
+    print("CONTINUE EMBEDDED TRAINING SCRIPT")
+    print("="*60)
+    print("\nIMPORTANT NOTES:")
+    print("1. Update the model paths in main() to match your saved models")
+    print("2. Models must be compatible with current EmbeddedDQNAgent architecture")
+    print("3. Current architecture uses card embeddings")
+    print("4. Prioritized replay is now enabled by default")
+    print("="*60)
+    print()
+    
     main()

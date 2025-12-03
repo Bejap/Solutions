@@ -82,8 +82,9 @@ def load_agent_from_keras(model_path: str, gamma: float, agent_id: int = 0,
     # Load the Keras model
     loaded_model = tf.keras.models.load_model(model_path)
     
-    # Create agent and assign loaded model
-    input_size = loaded_model.input_shape[0][1]  # Get input size from model
+    # Create agent with proper input size for current architecture
+    # The current architecture uses multiple inputs, so we use the total size
+    input_size = (ARRAY_LENGTH * 7) + 4 + 4
     agent = DQNAgent(input_size, gamma, agent_id=agent_id, use_double_dqn=use_double_dqn)
     
     # Replace model with loaded one
@@ -91,6 +92,7 @@ def load_agent_from_keras(model_path: str, gamma: float, agent_id: int = 0,
     agent.target_model.set_weights(agent.model.get_weights())
     
     print(f"Agent {agent_id} loaded successfully from Keras model")
+    print(f"  Model architecture: {len(loaded_model.inputs)} inputs, {len(loaded_model.outputs)} outputs")
     return agent
 
 
@@ -195,19 +197,23 @@ class ContinueTraining:
 
 def main():
     """Example usage of continue training."""
+    # IMPORTANT: Make sure your saved models are compatible with the current architecture
+    # The current DQNAgent uses multiple inputs (game, player, tracking, score)
+    
     # Example: Load from weights and continue training
-    agent_0_weights = "Weights/agent_player_0_ep1000_avgR-3.25.weights.h5"
-    agent_2_weights = "Weights/agent_player_2_ep1000_avgR-3.25.weights.h5"
+    # Update these paths to your actual model files
+    agent_0_weights = "Weights/classic/agent_player_0_ep1000_avgR-3.25_20251201_120000.weights.h5"
+    agent_2_weights = "Weights/classic/agent_player_2_ep1000_avgR-3.25_20251201_120000.weights.h5"
     
     # Or load from Keras models
-    # agent_0_model = "Models/full_agent_player_0_ep1000_avgR-3.25.keras"
-    # agent_2_model = "Models/full_agent_player_2_ep1000_avgR-3.25.keras"
+    # agent_0_model = "Models/classic/full_agent_player_0_ep1000_avgR-3.25_20251201_120000.keras"
+    # agent_2_model = "Models/classic/full_agent_player_2_ep1000_avgR-3.25_20251201_120000.keras"
     
     # Continue training
     continue_trainer = ContinueTraining(
         agent_0_path=agent_0_weights,
         agent_2_path=agent_2_weights,
-        path_type='weights',
+        path_type='weights',  # Use 'keras' for full models
         starting_episode=1000,
         num_additional_games=2000,
         epsilon=0.3,  # Lower epsilon since agents are already trained
@@ -223,4 +229,15 @@ def main():
 
 
 if __name__ == "__main__":
+    print("="*60)
+    print("CONTINUE TRAINING SCRIPT")
+    print("="*60)
+    print("\nIMPORTANT NOTES:")
+    print("1. Update the model paths in main() to match your saved models")
+    print("2. Models must be compatible with current DQNAgent architecture")
+    print("3. Current architecture uses multi-input (game/player/tracking/score)")
+    print("4. Prioritized replay is now enabled by default")
+    print("="*60)
+    print()
+    
     main()
