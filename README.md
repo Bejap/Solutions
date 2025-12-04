@@ -25,13 +25,8 @@ Solutions/
 │   │   ├── advanced_dqn.py        # Dueling DQN and advanced features
 │   │   └── ew_strategy.py         # East-West strategy player
 │   │
-│   ├── training/                   # Training scripts (organized by approach)
-│   │   ├── classic/               # Classic DQN training
-│   │   │   ├── model_training.py
-│   │   │   ├── training_logic.py
-│   │   │   ├── loading_and_continue_training.py
-│   │   │   └── README.md
-│   │   ├── embedded/              # Embedded DQN training
+│   ├── training/                   # Training scripts
+│   │   ├── embedded/              # Embedded DQN training (primary approach)
 │   │   │   ├── model_training_embedded.py
 │   │   │   ├── training_embedded.py
 │   │   │   ├── loading_and_continue_training_embedded.py
@@ -72,14 +67,10 @@ Solutions/
 │   └── ...
 │
 ├── Models/                         # Saved full models (*.keras)
-│   ├── classic/                   # Classic DQN models
-│   ├── embedded/                  # Embedded DQN models
-│   └── dueling/                   # Dueling DQN models
+│   └── embedded/                  # Embedded DQN models
 │
 ├── Weights/                        # Saved model weights (*.h5)
-│   ├── classic/                   # Classic DQN weights
-│   ├── embedded/                  # Embedded DQN weights
-│   └── dueling/                   # Dueling DQN weights
+│   └── embedded/                  # Embedded DQN weights
 │
 ├── plots/                          # Training plots and visualizations
 ├── game_logs/                      # Regular training game logs
@@ -98,10 +89,9 @@ Solutions/
 - Configurable via `USE_PRIORITIZED_REPLAY` constant (default: True)
 
 ### Organized Training Structure 📂
-- **Separate folders** for each training approach:
-  - `Whist/training/classic/` - Classic DQN training files
-  - `Whist/training/embedded/` - Embedded DQN training files
-  - `Whist/training/common/` - Shared utilities
+- **Focused embedded DQN approach** for clean, single-purpose system
+- **Training folder**: `Whist/training/embedded/` - Embedded DQN training files
+- **Common utilities**: `Whist/training/common/` - Shared reward systems
 - **Organized model storage**:
   - `Models/classic/`, `Models/embedded/`, `Models/dueling/`
   - `Weights/classic/`, `Weights/embedded/`, `Weights/dueling/`
