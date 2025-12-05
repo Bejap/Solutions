@@ -159,28 +159,35 @@ class EmbeddedWhistTrainer:
 
                     # Only use agent for North (0) and South (2)
                     if agent is not None:
-                        # During exploration phase, always use epsilon=1.0 (pure random)
-                        current_epsilon = 1.0 if in_exploration else self.epsilon
-                        
-                        action, is_exploration, q_value = choose_embedded_agent_action(
-                            agent, current_state, current_epsilon, valid_actions, return_info=True
-                        )
-                        # Set decision_type based on whether agent explored or exploited
-                        if is_exploration:
-                            decision_type = 'random'
-                            certainty = None
+                        # Optimization: If only one valid action (last card), skip neural network inference
+                        if len(valid_actions) == 1:
+                            action = valid_actions[0]
+                            decision_type = 'forced'  # Only one card left
+                            certainty = 1.0  # Certain because it's the only option
+                            per_card_reward = 0  # No decision reward for forced moves
                         else:
-                            decision_type = 'agent'
-                            certainty = q_value
-                        
-                        # Only calculate per-card reward during training phase (not during exploration)
-                        if not in_exploration:
-                            per_card_reward = self.game.calculate_per_card_reward(
-                                current_player_index, action, valid_actions
+                            # During exploration phase, always use epsilon=1.0 (pure random)
+                            current_epsilon = 1.0 if in_exploration else self.epsilon
+                            
+                            action, is_exploration, q_value = choose_embedded_agent_action(
+                                agent, current_state, current_epsilon, valid_actions, return_info=True
                             )
-                            episode_rewards[current_player_index] += per_card_reward
-                        else:
-                            per_card_reward = 0
+                            # Set decision_type based on whether agent explored or exploited
+                            if is_exploration:
+                                decision_type = 'random'
+                                certainty = None
+                            else:
+                                decision_type = 'agent'
+                                certainty = q_value
+                            
+                            # Only calculate per-card reward during training phase (not during exploration)
+                            if not in_exploration:
+                                per_card_reward = self.game.calculate_per_card_reward(
+                                    current_player_index, action, valid_actions
+                                )
+                                episode_rewards[current_player_index] += per_card_reward
+                            else:
+                                per_card_reward = 0
                     else:
                         # Use strategic play for East (1) and West (3)
                         ew_strategy = self.ew_strategies[current_player_index]
