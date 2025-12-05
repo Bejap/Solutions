@@ -67,7 +67,7 @@ class CurrentRewardSystem(BaseRewardSystem):
         """Current system: Fixed trick rewards."""
         trick_rewards = {
             'agent_wins': +1.0,
-            'partner_wins': +0.8,
+            'partner_wins': +0.9,
             'opponent_wins': -1.0
         }
         return trick_rewards.get(outcome, 0.0)
