@@ -224,9 +224,9 @@ class ContinueEmbeddedTraining:
         
         # Convert paths to absolute paths if they're relative
         if not os.path.isabs(agent_0_path):
-            agent_0_path = os.path.join(PROJECT_ROOT, agent_0_path)
+            agent_0_path = os.path.join(project_root, agent_0_path)
         if not os.path.isabs(agent_2_path):
-            agent_2_path = os.path.join(PROJECT_ROOT, agent_2_path)
+            agent_2_path = os.path.join(project_root, agent_2_path)
         
         # Verify files exist before trying to load
         if path_type == 'weights':
