@@ -189,22 +189,25 @@ def test_reward_stats_tracking():
     initial_per_card_rewards = game.reward_stats['per_card_rewards']
     assert initial_per_card_rewards == 0, "Initial per-card rewards should be 0"
     
-    # Find an agent to test with
-    tested = False
-    for player_idx in [0, 2]:  # Both agent positions
-        current_player = game.players[player_idx]
-        valid_actions = game.get_valid_actions(current_player)
-        
-        if valid_actions:
-            # Calculate a per-card reward
-            reward = game.calculate_per_card_reward(player_idx, valid_actions[0], valid_actions)
+    def try_calculate_reward():
+        """Helper to try calculating reward for agent positions."""
+        for player_idx in [0, 2]:  # Both agent positions
+            current_player = game.players[player_idx]
+            valid_actions = game.get_valid_actions(current_player)
             
-            # Stats should be updated if reward is non-zero
-            if reward != 0:
-                assert game.reward_stats['per_card_rewards'] != 0, "Per-card rewards should be tracked"
-                print(f"Per-card rewards tracked: {game.reward_stats['per_card_rewards']}")
-                tested = True
-                break
+            if valid_actions:
+                # Calculate a per-card reward
+                reward = game.calculate_per_card_reward(player_idx, valid_actions[0], valid_actions)
+                
+                # Stats should be updated if reward is non-zero
+                if reward != 0:
+                    assert game.reward_stats['per_card_rewards'] != 0, "Per-card rewards should be tracked"
+                    print(f"Per-card rewards tracked: {game.reward_stats['per_card_rewards']}")
+                    return True
+        return False
+    
+    # Try with initial state
+    tested = try_calculate_reward()
     
     if not tested:
         # If we couldn't test with initial state, play a card and try again
@@ -213,18 +216,7 @@ def test_reward_stats_tracking():
         valid_actions = game.get_valid_actions(current_player)
         if valid_actions:
             game.step(valid_actions[0])
-            
-            # Now try with an agent
-            for player_idx in [0, 2]:
-                current_player = game.players[player_idx]
-                valid_actions = game.get_valid_actions(current_player)
-                if valid_actions:
-                    reward = game.calculate_per_card_reward(player_idx, valid_actions[0], valid_actions)
-                    if reward != 0:
-                        assert game.reward_stats['per_card_rewards'] != 0, "Per-card rewards should be tracked"
-                        print(f"Per-card rewards tracked: {game.reward_stats['per_card_rewards']}")
-                        tested = True
-                        break
+            tested = try_calculate_reward()
     
     if tested:
         # Test reset
