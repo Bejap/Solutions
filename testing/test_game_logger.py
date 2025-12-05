@@ -64,6 +64,10 @@ def test_game_logger():
             game.step(0)
             
             if len(game.round_list) == 0:  # Trick complete
+                # Get the trick winner and log it
+                if game.trick_winner:
+                    winner_idx = game.players.index(game.trick_winner)
+                    logger.complete_trick(winner_idx)
                 break
     
     print(f"✓ Logged {tricks_to_play} tricks")
