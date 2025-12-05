@@ -10,7 +10,7 @@ https://arxiv.org/abs/1511.05952
 """
 
 import numpy as np
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 from collections import namedtuple
 
 
