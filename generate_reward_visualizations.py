@@ -31,9 +31,9 @@ def calculate_total_game_reward(agent_tricks, partner_tricks):
     # Trick-level rewards (assuming rest are split between partner and opponents)
     opponent_tricks = MAX_TRICKS - (agent_tricks + partner_tricks)
     
-    trick_level_reward = agent_tricks * 1.0  # +1 for each trick agent wins
-    trick_level_reward += partner_tricks * 0.8  # +0.8 for each trick partner wins
-    trick_level_reward += opponent_tricks * (-1.0)  # -1 for each trick opponents win
+    trick_level_reward = agent_tricks * 1.0  # reward for each trick agent wins
+    trick_level_reward += partner_tricks * 0.9  # reward for each trick partner wins
+    trick_level_reward += opponent_tricks * (-1.0)  # punishment for each trick opponents win
     
     # End-game reward
     team_total = agent_tricks + partner_tricks
