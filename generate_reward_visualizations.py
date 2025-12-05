@@ -16,13 +16,17 @@ os.makedirs('docs/reward_visualizations', exist_ok=True)
 CARDS_PER_PLAYER = 13
 MAX_TRICKS = CARDS_PER_PLAYER
 TEAM_WIN_THRESHOLD = 7  # Team needs 7+ tricks to win
+AGENT_TRICK_LEVEL_REWARDS = 1.0
+PARTNER_TRICK_LEVEL_REWARDS = 0.9
+OPPONENT_TRICK_LEVEL_PENALTY = -1.1
+
 
 def calculate_end_game_reward(agent_tricks, partner_tricks, team_won):
     """
     Calculate end-game reward using the current formula:
     (tricks_won - max_tricks) × (1 - tricks_won / max_tricks) + team_bonus
     """
-    base_reward = (agent_tricks - MAX_TRICKS) * (1 - agent_tricks / MAX_TRICKS)
+    base_reward = ((13 + (agent_tricks - MAX_TRICKS)) / 10) ** (1 + (agent_tricks / MAX_TRICKS))
     team_bonus = 2.0 if team_won else 0.0
     return base_reward + team_bonus
 
@@ -31,14 +35,15 @@ def calculate_total_game_reward(agent_tricks, partner_tricks):
     # Trick-level rewards (assuming rest are split between partner and opponents)
     opponent_tricks = MAX_TRICKS - (agent_tricks + partner_tricks)
     
-    trick_level_reward = agent_tricks * 1.0  # reward for each trick agent wins
-    trick_level_reward += partner_tricks * 0.9  # reward for each trick partner wins
-    trick_level_reward += opponent_tricks * (-1.0)  # punishment for each trick opponents win
+    trick_level_reward = agent_tricks * AGENT_TRICK_LEVEL_REWARDS  # reward for each trick agent wins
+    trick_level_reward += partner_tricks * PARTNER_TRICK_LEVEL_REWARDS  # reward for each trick partner wins
+    trick_level_reward += opponent_tricks * OPPONENT_TRICK_LEVEL_PENALTY  # punishment for each trick opponents win
     
     # End-game reward
     team_total = agent_tricks + partner_tricks
     team_won = team_total >= TEAM_WIN_THRESHOLD
     end_game_reward = calculate_end_game_reward(agent_tricks, partner_tricks, team_won)
+    
     
     return trick_level_reward, end_game_reward, trick_level_reward + end_game_reward
 
@@ -186,9 +191,12 @@ for i, partner_tricks in enumerate(partner_tricks_grid):
             reward_matrix[i, j] = total
         else:
             reward_matrix[i, j] = np.nan  # Invalid combinations
+        
+
+
 
 # Create heatmap
-im = ax.imshow(reward_matrix, cmap='RdYlGn', aspect='auto', origin='lower', vmin=-15, vmax=10)
+im = ax.imshow(reward_matrix, cmap='RdYlGn', aspect='auto', origin='lower', vmin=-15, vmax=16.9)
 
 # Add colorbar
 cbar = plt.colorbar(im, ax=ax)
@@ -365,9 +373,9 @@ ax.grid(True, alpha=0.3, axis='x')
 # Add legend
 from matplotlib.patches import Patch
 legend_elements = [
-    Patch(facecolor='green', alpha=0.6, label='Agent Wins (+1.0)'),
-    Patch(facecolor='lightgreen', alpha=0.6, label='Partner Wins (+0.8)'),
-    Patch(facecolor='red', alpha=0.6, label='Opponent Wins (-1.0)'),
+    Patch(facecolor='green', alpha=0.6, label=f'Agent Wins ({AGENT_TRICK_LEVEL_REWARDS})'),
+    Patch(facecolor='lightgreen', alpha=0.6, label=f'Partner Wins ({PARTNER_TRICK_LEVEL_REWARDS})'),
+    Patch(facecolor='red', alpha=0.6, label=f'Opponent Wins ({OPPONENT_TRICK_LEVEL_PENALTY})'),
 ]
 ax.legend(handles=legend_elements, loc='upper left')
 ax2.legend(loc='upper right')
