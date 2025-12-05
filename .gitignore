@@ -134,8 +134,20 @@ logs/
 # Model files in Weights and Models folders (but keep the folders)
 Weights/*.h5
 Weights/*.weights.h5
+Weights/classic/*.h5
+Weights/classic/*.weights.h5
+Weights/embedded/*.h5
+Weights/embedded/*.weights.h5
+Weights/dueling/*.h5
+Weights/dueling/*.weights.h5
 Models/*.keras
 Models/*.h5
+Models/classic/*.keras
+Models/classic/*.h5
+Models/embedded/*.keras
+Models/embedded/*.h5
+Models/dueling/*.keras
+Models/dueling/*.h5
 
 # IDEs
 .vscode/
@@ -151,6 +163,7 @@ Thumbs.db
 # Game logs
 game_logs/
 game_logs_embedded/
+test_game_logs/
 
 # Plots (keep folder with .gitkeep, ignore generated plots)
 plots/*.png

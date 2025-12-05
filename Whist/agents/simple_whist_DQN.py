@@ -6,6 +6,7 @@ from typing import List, Optional, Any, Tuple
 from Whist.utils.base_classes import BaseAgent
 from Whist.utils.constants import (
     DEFAULT_GAMMA,
+    INITIAL_LEARNING_RATE,
     REPLAY_MEMORY_SIZE,
     MIN_REPLAY_MEMORY_SIZE,
     MINIBATCH_SIZE,
@@ -26,15 +27,22 @@ from Whist.utils.constants import (
     USE_GPU,
     GPU_MEMORY_GROWTH,
     GPU_MEMORY_LIMIT_MB,
-    USE_MIXED_PRECISION
+    USE_MIXED_PRECISION,
+    USE_PRIORITIZED_REPLAY,
+    PER_ALPHA,
+    PER_BETA_START,
+    PER_BETA_FRAMES,
+    PER_EPSILON
 )
 from Whist.utils.device_config import configure_device, enable_mixed_precision
+from Whist.utils.prioritized_replay import PrioritizedReplayMemory, convert_to_standard_format
 
 class DQNAgent(BaseAgent):
-    def __init__(self, input_size: int, gamma, agent_id: int = 0, use_double_dqn: bool = True):
+    def __init__(self, input_size: int, gamma, agent_id: int = 0, use_double_dqn: bool = True, use_prioritized_replay: bool = USE_PRIORITIZED_REPLAY):
         super().__init__(agent_id)
         self.input_shape = input_size
         self.use_double_dqn = use_double_dqn
+        self.use_prioritized_replay = use_prioritized_replay
         
         # Configure GPU/NPU if requested (only once per process)
         if USE_GPU and not hasattr(DQNAgent, '_device_configured'):
@@ -47,13 +55,26 @@ class DQNAgent(BaseAgent):
                 enable_mixed_precision()
             DQNAgent._device_configured = True
         
-        self.model = self.create_model()
+        self.models = self.create_model()
+        self.model, self.critic = self.models
         self.gamma = gamma
 
-        self.target_model = self.create_model()
+        self.target_models = self.create_model()
+        self.target_model, self.target_critic = self.target_models
         self.target_model.set_weights(self.model.get_weights())
+        self.target_critic.set_weights(self.critic.get_weights())
 
-        self.replay_memory = deque(maxlen=100000)
+        # Use prioritized or standard replay memory
+        if use_prioritized_replay:
+            self.replay_memory = PrioritizedReplayMemory(
+                capacity=REPLAY_MEMORY_SIZE,
+                alpha=PER_ALPHA,
+                beta_start=PER_BETA_START,
+                beta_frames=PER_BETA_FRAMES,
+                epsilon=PER_EPSILON
+            )
+        else:
+            self.replay_memory = deque(maxlen=REPLAY_MEMORY_SIZE)
 
         self.target_update_counter = 0
 
@@ -79,6 +100,7 @@ class DQNAgent(BaseAgent):
 
         # Output layer for Q-values
         output = tf.keras.layers.Dense(ACTION_SIZE, activation='linear')(dropout3)  # ACTION_SIZE card actions
+        value = tf.keras.layers.Dense(1, activation='linear')(dropout3)  # State value
 
         # Create model with multiple inputs
         model = tf.keras.Model(
@@ -87,7 +109,14 @@ class DQNAgent(BaseAgent):
         )
 
         model.compile(optimizer='adam', loss='mse', jit_compile=False)
-        return model
+
+        critic = tf.keras.Model(
+            inputs=[game_input, player_input, tracking_input, score_input],
+            outputs=value
+        )
+        critic.compile(optimizer=tf.keras.optimizers.RMSprop(learning_rate=INITIAL_LEARNING_RATE), loss='categorical_crossentropy', jit_compile=False)
+
+        return model, critic
 
     def update_replay_memory(self, transition):
         state, action, reward, next_state, done = transition
@@ -96,10 +125,17 @@ class DQNAgent(BaseAgent):
 
     def train(self, terminal_state, step):
         # Your existing training code, but modified to handle multiple inputs
-        if len(self.replay_memory) < MIN_REPLAY_MEMORY_SIZE:
-            return
-
-        minibatch = random.sample(self.replay_memory, MINIBATCH_SIZE)
+        if self.use_prioritized_replay:
+            if not self.replay_memory.is_ready(MIN_REPLAY_MEMORY_SIZE):
+                return
+            # Sample from prioritized replay
+            experiences, indices, importance_weights = self.replay_memory.sample(MINIBATCH_SIZE)
+            minibatch = convert_to_standard_format(experiences)
+        else:
+            if len(self.replay_memory) < MIN_REPLAY_MEMORY_SIZE:
+                return
+            minibatch = random.sample(self.replay_memory, MINIBATCH_SIZE)
+            importance_weights = np.ones(MINIBATCH_SIZE)  # Uniform weights for standard replay
 
         # Process all states in batch
         current_game_data = []
@@ -171,6 +207,7 @@ class DQNAgent(BaseAgent):
         X_tracking = []
         X_score = []
         y = []
+        td_errors = []  # Track TD errors for priority updates
 
         for index, (state, action, reward, next_state, done) in enumerate(minibatch):
             if not done:
@@ -187,7 +224,12 @@ class DQNAgent(BaseAgent):
 
             # Update Q value for given state
             current_qs = np.array(current_qs_list[index])
+            old_q = current_qs[action]
             current_qs[action] = new_q
+            
+            # Compute TD error for prioritized replay
+            td_error = new_q - old_q
+            td_errors.append(td_error)
 
             # And append to training data
             X_game.append(current_game_data[index])
@@ -196,14 +238,22 @@ class DQNAgent(BaseAgent):
             X_score.append(current_score_data[index])
             y.append(current_qs)
 
+        # Apply importance sampling weights to loss
+        sample_weights = importance_weights if self.use_prioritized_replay else None
+
         # Fit on all samples as one batch
         self.model.fit(
             [np.array(X_game), np.array(X_player), np.array(X_tracking), np.array(X_score)],
             np.array(y),
+            sample_weight=sample_weights,
             batch_size=MINIBATCH_SIZE,
             verbose=0,
             shuffle=False if terminal_state else None
         )
+        
+        # Update priorities in prioritized replay
+        if self.use_prioritized_replay:
+            self.replay_memory.update_priorities(indices, np.array(td_errors))
 
         # Update target network if needed
         if terminal_state:

@@ -20,23 +20,30 @@ Solutions/
 │   │   └── game.py                # Simple game initialization
 │   │
 │   ├── agents/                     # AI agents
-│   │   ├── simple_whist_DQN.py    # DQN agent implementation
+│   │   ├── simple_whist_DQN.py    # DQN agent with prioritized replay
 │   │   ├── embedded_dqn_agent.py  # Embedding-based DQN agent
+│   │   ├── advanced_dqn.py        # Dueling DQN and advanced features
 │   │   └── ew_strategy.py         # East-West strategy player
 │   │
 │   ├── training/                   # Training scripts
-│   │   ├── training_logic.py      # WhistTrainer class
-│   │   ├── training_embedded.py   # EmbeddedWhistTrainer class
-│   │   ├── model_training.py      # Original training entry point
-│   │   ├── model_training_embedded.py  # Embedded training entry point
-│   │   └── loading_model.py       # Model loading utilities
+│   │   ├── embedded/              # Embedded DQN training (primary approach)
+│   │   │   ├── model_training_embedded.py
+│   │   │   ├── training_embedded.py
+│   │   │   ├── loading_and_continue_training_embedded.py
+│   │   │   └── README.md
+│   │   └── common/                # Shared utilities
+│   │       ├── reward_systems.py
+│   │       ├── reward_comparison.py
+│   │       └── README.md
 │   │
 │   ├── embedding/                  # Card embedding system
 │   │   └── card_embedding.py      # CardEmbedding class
 │   │
 │   ├── utils/                      # Utilities and constants
 │   │   ├── constants.py           # Centralized constants
-│   │   └── base_classes.py        # Abstract base classes
+│   │   ├── base_classes.py        # Abstract base classes
+│   │   ├── device_config.py       # GPU/NPU configuration
+│   │   └── prioritized_replay.py  # Prioritized experience replay
 │   │
 │   ├── logger/                     # Logging and visualization
 │   │   ├── game_logger.py         # Game logging
@@ -60,7 +67,11 @@ Solutions/
 │   └── ...
 │
 ├── Models/                         # Saved full models (*.keras)
+│   └── embedded/                  # Embedded DQN models
+│
 ├── Weights/                        # Saved model weights (*.h5)
+│   └── embedded/                  # Embedded DQN weights
+│
 ├── plots/                          # Training plots and visualizations
 ├── game_logs/                      # Regular training game logs
 ├── game_logs_embedded/             # Embedded training game logs
@@ -69,16 +80,34 @@ Solutions/
 
 ## 🆕 Recent Major Updates
 
+### Prioritized Experience Replay 🎯
+- **Intelligent sampling** of important experiences for faster learning
+- **SumTree data structure** for O(log n) efficient sampling
+- **TD-error based prioritization** to focus on surprising transitions
+- **Importance sampling weights** to correct sampling bias
+- **Beta annealing** from 0.4 to 1.0 over training
+- Configurable via `USE_PRIORITIZED_REPLAY` constant (default: True)
+
+### Organized Training Structure 📂
+- **Focused embedded DQN approach** for clean, single-purpose system
+- **Training folder**: `Whist/training/embedded/` - Embedded DQN training files
+- **Common utilities**: `Whist/training/common/` - Shared reward systems
+- **Organized model storage**:
+  - `Models/classic/`, `Models/embedded/`, `Models/dueling/`
+  - `Weights/classic/`, `Weights/embedded/`, `Weights/dueling/`
+
+### Model Naming with Timestamps ⏰
+- **Timestamped filenames** for easy identification
+- **Average reward tracking** in filenames
+- Format: `agent_player_0_ep1000_avgR-3.45_20251201_132505.weights.h5`
+- Makes model comparison and tracking much easier
+
 ### GPU/NPU Acceleration ⚡
 - **Automatic GPU detection** and configuration for faster training
 - **Memory management** with growth control and limits
 - **Mixed precision training** support (experimental)
 - **Multi-GPU support** for distributed training
 - See [GPU_NPU_GUIDE.md](docs/GPU_NPU_GUIDE.md) for details
-
-### Model Saving Improvements
-- **Average reward in filenames** for easy performance tracking
-- Format: `embedded_agent_player_0_ep1000_avgR-3.45.keras`
 
 ### Folder Reorganization
 - **Whist/**: Main package with clear subfolders (core, agents, training, embedding, utils, logger, demos)
@@ -92,7 +121,7 @@ Solutions/
 ### Card Embedding System
 - **Fixed 64-dim state** independent of card count
 - **Same model works** for 9, 11, or 13 cards per player
-- Run: `python -m Whist.training.model_training_embedded`
+- Run: `python -m Whist.training.embedded.model_training_embedded`
 
 📖 **Documentation in docs/**:
 - [GPU_NPU_GUIDE.md](docs/GPU_NPU_GUIDE.md) - GPU/NPU acceleration guide
@@ -187,17 +216,37 @@ pip install -r requirements.txt
 
 ## Usage
 
-### Training with Original Agent (One-Hot)
+### Training with Classic DQN Agent (One-Hot)
 
 ```bash
-python -m Whist.training.model_training
+python -m Whist.training.classic.model_training
 ```
+
+Models are saved to `Models/classic/` and `Weights/classic/` with timestamps and average reward.
 
 ### Training with Embedded Agent (Recommended)
 
 ```bash
-python -m Whist.training.model_training_embedded
+python -m Whist.training.embedded.model_training_embedded
 ```
+
+Models are saved to `Models/embedded/` and `Weights/embedded/` with timestamps and average reward.
+
+### Training with Dueling DQN
+
+To use Dueling DQN, set `use_dueling_dqn=True` when creating the trainer:
+
+```python
+from Whist.training.classic.training_logic import WhistTrainer
+
+trainer = WhistTrainer(
+    num_games=2000,
+    use_dueling_dqn=True  # Enable Dueling DQN
+)
+trainer.train()
+```
+
+Models are saved to `Models/dueling/` and `Weights/dueling/`.
 
 ### Running Tests
 
@@ -213,8 +262,11 @@ python -m testing.test_trump_system
 from Whist.core.whist import Whist
 from Whist.agents.simple_whist_DQN import DQNAgent
 from Whist.agents.embedded_dqn_agent import EmbeddedDQNAgent
+from Whist.agents.advanced_dqn import DuelingDQNAgent
 from Whist.utils.constants import CARDS_PER_PLAYER, STATE_SIZE
-from Whist.training.training_embedded import EmbeddedWhistTrainer
+from Whist.training.classic.training_logic import WhistTrainer
+from Whist.training.embedded.training_embedded import EmbeddedWhistTrainer
+from Whist.utils.prioritized_replay import PrioritizedReplayMemory
 ```
 
 ## Configuration
@@ -229,7 +281,7 @@ All project constants are centralized in `Whist/utils/constants.py`, including:
 To customize training behavior:
 
 ```python
-from Whist.training.training_embedded import EmbeddedWhistTrainer
+from Whist.training.embedded.training_embedded import EmbeddedWhistTrainer
 
 trainer = EmbeddedWhistTrainer(
     embedding_dim=8,       # Card embedding dimensions
@@ -244,6 +296,35 @@ trainer.train()
 # Generate and save plots to 'plots/' folder
 trainer.plot_results(plot_dir='plots')
 ```
+
+### Prioritized Experience Replay
+
+Both DQN and Embedded agents support prioritized experience replay by default:
+
+```python
+from Whist.agents.simple_whist_DQN import DQNAgent
+
+# Prioritized replay is enabled by default
+agent = DQNAgent(
+    input_size=372, 
+    gamma=0.99,
+    use_prioritized_replay=True  # Default: True from constants
+)
+
+# To disable prioritized replay
+agent = DQNAgent(
+    input_size=372,
+    gamma=0.99,
+    use_prioritized_replay=False
+)
+```
+
+Configure prioritized replay parameters in `Whist/utils/constants.py`:
+- `USE_PRIORITIZED_REPLAY = True` - Enable/disable globally
+- `PER_ALPHA = 0.6` - Prioritization exponent
+- `PER_BETA_START = 0.4` - Initial importance sampling exponent
+- `PER_BETA_FRAMES = 100000` - Frames to anneal beta to 1.0
+- `PER_EPSILON = 0.01` - Small constant for non-zero priorities
 
 ### Output Folders
 

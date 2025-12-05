@@ -9,8 +9,8 @@ import time
 import numpy as np
 from typing import Dict, List, Any
 from dataclasses import dataclass
-from Whist.training.reward_systems import get_reward_system, REWARD_SYSTEMS
-from Whist.training.training_logic import WhistTrainer
+from Whist.training.common.reward_systems import get_reward_system, REWARD_SYSTEMS
+from Whist.training.classic.training_logic import WhistTrainer
 from Whist.core.whist import Whist
 from Whist.agents.ew_strategy import EWStrategy
 from Whist.utils.constants import (

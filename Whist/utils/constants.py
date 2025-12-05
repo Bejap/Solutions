@@ -87,6 +87,13 @@ EPSILON_DECAY_TYPE = 'exponential'  # Options: 'exponential', 'linear', 'step'
 EPSILON_STEP_DECAY_EPISODES = [300, 600, 900]  # Episodes to decay epsilon (for step decay)
 EPSILON_STEP_DECAY_VALUES = [0.5, 0.2, 0.05]  # Values at each step (for step decay)
 
+# Prioritized Experience Replay configuration
+USE_PRIORITIZED_REPLAY = True  # Enable prioritized experience replay
+PER_ALPHA = 0.6  # Prioritization exponent (0 = uniform, 1 = full prioritization)
+PER_BETA_START = 0.4  # Initial importance sampling exponent
+PER_BETA_FRAMES = 100000  # Number of frames to anneal beta to 1.0
+PER_EPSILON = 0.01  # Small constant to ensure non-zero priorities
+
 # Model configuration
 MODEL_NAME = 'smalle'
 MIN_REWARD = -200  # Minimum reward threshold for model save

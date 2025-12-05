@@ -11,15 +11,15 @@ Usage:
     python model_training_embedded.py
     
     OR from project root:
-    python -m Whist.training.model_training_embedded
+    python -m Whist.training.embedded.model_training_embedded
 """
 
 # Add project root to path for direct script execution
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
-from Whist.training.training_embedded import EmbeddedWhistTrainer
+from Whist.training.embedded.training_embedded import EmbeddedWhistTrainer
 from Whist.utils.constants import (
     DEFAULT_NUM_GAMES,
     DEFAULT_EPSILON,
@@ -85,8 +85,8 @@ if __name__ == "__main__":
     print("=" * 70)
     print()
     print("Models saved to:")
-    print("  - Weights/embedded_agent_player_*_avgR*.weights.h5")
-    print("  - Models/embedded_agent_player_*_avgR*.keras")
+    print("  - Weights/embedded/agent_player_*_avgR*_<timestamp>.weights.h5")
+    print("  - Models/embedded/full_agent_player_*_avgR*_<timestamp>.keras")
     print()
     print("To change game size:")
     print("  1. Edit constants.py: CARDS_PER_PLAYER = 11")
