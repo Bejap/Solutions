@@ -621,30 +621,30 @@ class Whist(BaseGame):
             for i in agent_positions:
                 if i == winner_index:
                     # Agent wins the trick: +1
-                    reward[i] = 1
+                    reward[i] = 1.0
                     # Update monitoring stats
                     if i == 0:
                         self.reward_stats['agent_0_wins'] += 1
-                        self.reward_stats['agent_0_total'] += 1
+                        self.reward_stats['agent_0_total'] += 1.0
                     else:  # i == 2
                         self.reward_stats['agent_2_wins'] += 1
-                        self.reward_stats['agent_2_total'] += 1
+                        self.reward_stats['agent_2_total'] += 1.0
                 elif winner_index in agent_positions:
-                    # Partner wins the trick: +0.8
-                    reward[i] = 0.8
+                    # Partner wins the trick: +0.9
+                    reward[i] = 0.9
                     # Update monitoring stats
                     if i == 0:
-                        self.reward_stats['agent_0_total'] += 0.8
+                        self.reward_stats['agent_0_total'] += 0.9
                     else:  # i == 2
-                        self.reward_stats['agent_2_total'] += 0.8
+                        self.reward_stats['agent_2_total'] += 0.9
                 else:
-                    # Opponent (non-agent) wins the trick: -1
-                    reward[i] = -1
+                    # Opponent (non-agent) wins the trick: -1.1
+                    reward[i] = -1.1
                     # Update monitoring stats
                     if i == 0:
-                        self.reward_stats['agent_0_total'] -= 1
+                        self.reward_stats['agent_0_total'] -= 1.1
                     else:  # i == 2
-                        self.reward_stats['agent_2_total'] -= 1
+                        self.reward_stats['agent_2_total'] -= 1.1
             
             self.reward_stats['tricks_completed'] += 1
             

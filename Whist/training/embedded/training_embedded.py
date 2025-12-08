@@ -263,6 +263,12 @@ class EmbeddedWhistTrainer:
                 for agent_idx, agent_obj in enumerate(self.agents):
                     if agent_obj is not None:
                         agent_obj.train(True, trick_count)
+            
+            # Display average reward every 50th game
+            if episode % 50 == 0:
+                recent_window = min(50, len(self.all_episode_rewards))
+                avg_reward_50 = np.mean(self.all_episode_rewards[-recent_window:])
+                print(f"\nEpisode {episode}: Average reward over last {recent_window} games: {avg_reward_50:.2f}")
 
             # Only save model if average reward is above threshold
             # Check every MODEL_SAVE_CHECK_EVERY games after MODEL_SAVE_MIN_GAMES

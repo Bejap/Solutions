@@ -175,16 +175,16 @@ North and South agents learn to cooperate as partners on the same team. East and
 The game uses a sophisticated reward structure to train the agents:
 
 ### Trick-Level Rewards
-- **+1** for winning a trick
-- **+0.8** for partner winning a trick  
-- **-1** for losing a trick
+- **+1.0** for winning a trick
+- **+0.9** for partner winning a trick  
+- **-1.1** for losing a trick
 
 ### End-Game Rewards (New)
-The end-game reward uses the formula: `(tricks_won - max_tricks) × (1 - tricks_won / 13) + team_bonus`
+The end-game reward uses the formula: `((13 + (tricks_won - 13)) / 10) ** (1 + (tricks_won / 13)) + team_bonus`
 
-- **Score multiplier**: Each agent's reward is multiplied by `(1 - tricks_won / 13)`
+- **Base reward**: Uses a power function that rewards winning tricks and penalizes losing tricks
 - **Team bonus**: +2 if the team (agents combined) wins 7 or more tricks (wins the game)
-- Example: Agent wins 5 tricks, team total 9: `(5-13) × (1-5/13) + 2 = -8 × 0.615 + 2 ≈ -2.9`
+- Example: Agent wins 5 tricks, team total 9: `((13 + (5-13)) / 10) ** (1 + (5/13)) + 2 ≈ 2.0`
 
 ### Per-Card Rewards (New, Configurable)
 Agents receive a reward when their card choice matches what the EW strategy would play:
