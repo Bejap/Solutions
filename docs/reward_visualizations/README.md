@@ -81,7 +81,8 @@ An example game played trick-by-trick showing:
 ### End-Game Reward Formula
 
 ```python
-base_reward = ((13 + (agent_tricks - 13)) / 10) ** (1 + (agent_tricks / 13))
+max_tricks = 13  # CARDS_PER_PLAYER
+base_reward = ((max_tricks + (agent_tricks - max_tricks)) / 10) ** (1 + (agent_tricks / max_tricks))
 team_bonus = +2.0 if team_total >= 7 else 0.0
 end_game_reward = base_reward + team_bonus
 ```
