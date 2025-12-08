@@ -48,8 +48,7 @@ def test_reward_distribution():
             agent = agents[current_player_index]
             current_state = game.get_init_state()
             
-            valid_actions = [i for i, value in enumerate(game.player_hand(current_player)) if value != 0]
-            action_space = len(current_player.hand)
+            valid_actions = game.get_valid_actions(current_player)
             
             if agent is not None:
                 # For testing, just pick random valid action
