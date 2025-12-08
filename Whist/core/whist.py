@@ -549,15 +549,15 @@ class Whist(BaseGame):
             team_2_score = self.score_array[1] + self.score_array[3]  # Opponents' team
             
             # Base reward is (tricks_won - max_tricks) * multiplier
-            agent_0_end_reward = (agent_0_tricks - max_tricks) * END_GAME_REWARD_MULTIPLIER
-            agent_2_end_reward = (agent_2_tricks - max_tricks) * END_GAME_REWARD_MULTIPLIER
+            agent_0_end_reward = ((max_tricks + (agent_0_tricks - max_tricks)) / 10) ** (1 + (agent_0_tricks / max_tricks))
+            agent_2_end_reward = ((max_tricks + (agent_2_tricks - max_tricks)) / 10) ** (1 + (agent_2_tricks / max_tricks))
             
             # Apply score multiplier: (1 - amount_of_tricks / 13)
             # This reduces reward as more tricks are won (encouraging efficiency)
-            agent_0_multiplier = 1 - (agent_0_tricks / max_tricks)
-            agent_2_multiplier = 1 - (agent_2_tricks / max_tricks)
-            agent_0_end_reward *= agent_0_multiplier
-            agent_2_end_reward *= agent_2_multiplier
+            # agent_0_multiplier = 1 - (agent_0_tricks / max_tricks)
+            # agent_2_multiplier = 1 - (agent_2_tricks / max_tricks)
+            # agent_0_end_reward *= agent_0_multiplier
+            # agent_2_end_reward *= agent_2_multiplier
             
             # Team bonus: +2 if team wins 7 or more tricks (wins the game)
             if team_1_score >= 7:
