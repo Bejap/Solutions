@@ -25,17 +25,17 @@ The original issue was: "Please fix my reward system, it doesn't give rewards pr
 - Monitoring in training loop every 100 episodes
 
 ### 3. ✅ New Reward Structure
-**Requirement**: "+1 for winning the trick, +0.8 for partner to win, -1 for losing a trick: +10 for winning game, -20 for losing a game."
+**Updated Reward System**: Matches the suggested formula in generate_reward_visualizations.py
 
 **Solution**:
 - **Trick-level rewards**:
-  - +1 when agent wins the trick
-  - +0.8 when agent's partner wins the trick
-  - -1 when opponent wins the trick
-- **Game-level rewards** (added to final trick rewards):
-  - +10 for each agent when Team 1 wins the game
-  - -20 for each agent when Team 1 loses the game
-  - 0 for tie games
+  - +1.0 when agent wins the trick
+  - +0.9 when agent's partner wins the trick
+  - -1.1 when opponent wins the trick
+- **Game-level rewards** (end-game formula):
+  - Formula: `((13 + (agent_tricks - 13)) / 10) ** (1 + (agent_tricks / 13)) + team_bonus`
+  - Team bonus: +2 if team wins (≥7 tricks), 0 otherwise
+  - Applied to each agent independently based on their trick count
 
 ### 4. ✅ Create Folders
 **Requirement**: "add a 'Weights' folder and a 'Models' folder as well."

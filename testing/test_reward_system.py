@@ -1,11 +1,9 @@
 """Test script to verify the reward system only gives rewards to agents at positions 0 and 2.
 
 New Reward Structure:
-- +1 for winning the trick
-- +0.8 for partner winning the trick (Team 1 = positions 0 and 2)
-- -1 for losing a trick (opponent wins)
-- +10 for winning the game
-- -20 for losing the game
+- +1.0 for winning the trick
+- +0.9 for partner winning the trick (Team 1 = positions 0 and 2)
+- -1.1 for losing a trick (opponent wins)
 """
 
 from Whist.core.whist import Whist

@@ -11,8 +11,8 @@ The current reward system uses a **sparse + shaped hybrid approach** with multip
 
 **Per-Trick Rewards** (immediate):
 - Agent wins trick: `+1.0`
-- Partner wins trick: `+0.8`
-- Opponent wins trick: `-1.0`
+- Partner wins trick: `+0.9`
+- Opponent wins trick: `-1.1`
 
 **Trump Penalties** (immediate):
 - Not using trump when optimal: `TRUMP_NOT_USED_PENALTY`
@@ -23,14 +23,14 @@ The current reward system uses a **sparse + shaped hybrid approach** with multip
 - Matching EW strategy: `PER_CARD_EW_STRATEGY_REWARD`
 
 **End-Game Rewards** (terminal):
-- Formula: `(tricks_won - max_tricks) × (1 - tricks_won / max_tricks) + team_bonus`
-- Scaled by: `END_GAME_REWARD_MULTIPLIER`
+- Formula: `((13 + (tricks_won - 13)) / 10) ** (1 + (tricks_won / 13)) + team_bonus`
+- Team bonus: +2 if team wins (≥7 tricks), 0 otherwise
 
 ### Rating: 7.5/10
 
 **Strengths:**
 1. ✅ **Clear immediate feedback**: Per-trick rewards provide quick learning signals
-2. ✅ **Partner coordination**: Rewards partner tricks (0.8) encourages teamwork
+2. ✅ **Partner coordination**: Rewards partner tricks (0.9) encourages teamwork
 3. ✅ **Strategic guidance**: Trump penalties teach optimal trump usage
 4. ✅ **Balanced**: Combines immediate and delayed rewards
 5. ✅ **Configurable**: Many tunable parameters for different training strategies
@@ -39,11 +39,9 @@ The current reward system uses a **sparse + shaped hybrid approach** with multip
 1. ❌ **Potential credit assignment issues**: Multiple reward sources can create conflicting signals
    - Example: Agent might get +1 for winning a trick but -5 for trump overplay, net negative despite "winning"
 2. ❌ **Reward scaling inconsistency**: Trump penalties (-5 to -8) dwarf per-trick rewards (±1), potentially overwhelming the primary learning signal
-3. ❌ **Partner reward asymmetry**: +0.8 for partner winning is close to +1.0 for self-winning, may not sufficiently differentiate these scenarios
-4. ❌ **Dense reward complexity**: Many reward components may slow convergence as agent tries to optimize multiple objectives simultaneously
-5. ❌ **EW imitation risk**: Per-card rewards for matching EW strategy could limit exploration and prevent discovering superior strategies
-6. ❌ **End-game reward complexity**: The diminishing multiplier formula `(1 - tricks/max_tricks)` may send confusing signals about optimal trick distribution
-7. ❌ **No explicit communication penalty**: Agents might develop strategies that work but don't generalize well to team play
+3. ❌ **Dense reward complexity**: Many reward components may slow convergence as agent tries to optimize multiple objectives simultaneously
+4. ❌ **EW imitation risk**: Per-card rewards for matching EW strategy could limit exploration and prevent discovering superior strategies
+5. ❌ **No explicit communication penalty**: Agents might develop strategies that work but don't generalize well to team play
 
 ### Key Concerns:
 - **Magnitude imbalance**: A single trump penalty can erase 5-8 trick wins worth of positive reward
@@ -465,7 +463,7 @@ reward_agent_2 = team_reward + contribution_agent_2
 ### For Your Current System:
 
 **Keep (Good decisions):**
-1. Per-trick rewards structure (±1.0, 0.8)
+1. Per-trick rewards structure (±1.0, 0.9, -1.1)
 2. Configurable reward system with constants
 3. Optional per-card rewards for bootstrapping
 4. End-game rewards for final performance
@@ -482,10 +480,10 @@ reward_agent_2 = team_reward + contribution_agent_2
    - Gradually reduce penalty magnitude as training progresses
    - Allows fast learning without long-term distortion
 
-3. **Simplify partner reward** (Medium Priority)
-   - Current: +0.8 for partner winning
-   - Consider: +0.5 to create clearer distinction
-   - Alternative: Use +1.0 for both (pure team reward)
+3. **Note on partner reward** (Informational)
+   - Current: +0.9 for partner winning
+   - The value of 0.9 (vs 1.0 for self) creates a slight preference for winning tricks directly
+   - This balance encourages both teamwork and individual initiative
 
 4. **Add reward normalization** (Medium Priority)
    ```python

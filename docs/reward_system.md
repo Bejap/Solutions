@@ -21,14 +21,14 @@ When a trick is completed (4 cards played):
 
 | Outcome | Reward | Description |
 |---------|--------|-------------|
-| Agent wins trick | **+1** | The agent played the winning card |
-| Partner wins trick | **+0.8** | The agent's partner (other agent) won the trick |
-| Opponent wins trick | **-1** | A non-agent player (East or West) won the trick |
+| Agent wins trick | **+1.0** | The agent played the winning card |
+| Partner wins trick | **+0.9** | The agent's partner (other agent) won the trick |
+| Opponent wins trick | **-1.1** | A non-agent player (East or West) won the trick |
 
 This reward structure encourages:
-- Winning tricks directly (+1)
-- Supporting the partner to win (+0.8)
-- Avoiding letting opponents win (-1)
+- Winning tricks directly (+1.0)
+- Supporting the partner to win (+0.9)
+- Avoiding letting opponents win (-1.1)
 
 ### Trump Play Penalties (New)
 
@@ -97,21 +97,22 @@ This feature:
 
 When the game ends (all cards played), reward is calculated using:
 
-**Formula**: `(tricks_won - max_tricks) × (1 - tricks_won / max_tricks) + team_bonus`
+**Formula**: `((13 + (tricks_won - 13)) / 10) ** (1 + (tricks_won / 13)) + team_bonus`
 
 Where:
-- `max_tricks = CARDS_PER_PLAYER` (number of cards each player has)
-- `team_bonus` applied if team total tricks meets winning threshold, otherwise 0
+- `max_tricks = CARDS_PER_PLAYER` (number of cards each player has, typically 13)
+- `team_bonus` = +2 if team total tricks meets winning threshold (≥7 tricks), otherwise 0
 
 **Example reward progression** (assuming 13 cards per player and team bonus of +2 for winning):
 
-| Agent Tricks Won | Multiplier | Base Reward | With Team Bonus (if applicable) |
-|------------------|------------|-------------|--------------------------------|
-| max_tricks | 0.00 | **0** | +bonus (team wins) |
-| ~77% of max | ~0.23 | negative | +bonus (team wins) |
-| ~54% of max | ~0.46 | negative | depends on team total |
-| ~23% of max | ~0.77 | very negative | depends on team total |
-| 0 | 1.00 | most negative | likely loses |
+| Agent Tricks Won | Base Reward | With Team Bonus (≥7 team tricks) |
+|------------------|-------------|----------------------------------|
+| 0 | 0.50 | 2.50 (if team wins) |
+| 3 | 0.65 | 2.65 (if team wins) |
+| 5 | 0.76 | 2.76 (if team wins) |
+| 7 | 0.91 | 2.91 (if team wins) |
+| 10 | 1.21 | 3.21 (if team wins) |
+| 13 | 2.00 | 4.00 (if team wins) |
 
 This reward structure:
 - Provides granular feedback about individual agent performance
