@@ -75,7 +75,7 @@ class EmbeddedWhistTrainer:
             log_every: Log detailed game info every N episodes (default: 100)
             log_dir: Directory for game logs (default: 'game_logs_embedded')
             enable_per_card_reward: Enable per-card reward based on EW strategy (default: True)
-            model_save_threshold: Only save model if average reward > this value (default: -5.5)
+            model_save_threshold: Only save model if average reward > this value (default: 2.2)
             exploration_games: Number of games with pure random exploration (default: 200)
         """
         self.embedding_dim = embedding_dim
@@ -286,23 +286,9 @@ class EmbeddedWhistTrainer:
                 # Generate timestamp for unique filenames
                 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                 
-                # Save agent 0 if its performance is above threshold
-                if avg_reward_agent_0 > self.model_save_threshold:
-                    agent_0_reward_str = f"avgR{avg_reward_agent_0:.2f}"
-                    self.agents[0].save_agent(f"Weights/embedded/agent_player_0_ep{episode}_{agent_0_reward_str}_{timestamp}.weights.h5")
-                    self.agents[0].save_full_agent(f"Models/embedded/full_agent_player_0_ep{episode}_{agent_0_reward_str}_{timestamp}.keras")
-                    print(f"\nEpisode {episode}: Saved Agent 0 (avg reward: {avg_reward_agent_0:.2f} > {self.model_save_threshold})")
-                else:
-                    print(f"\nEpisode {episode}: Skipped saving Agent 0 (avg reward: {avg_reward_agent_0:.2f} <= {self.model_save_threshold})")
-                
-                # Save agent 2 if its performance is above threshold
-                if avg_reward_agent_2 > self.model_save_threshold:
-                    agent_2_reward_str = f"avgR{avg_reward_agent_2:.2f}"
-                    self.agents[2].save_agent(f"Weights/embedded/agent_player_2_ep{episode}_{agent_2_reward_str}_{timestamp}.weights.h5")
-                    self.agents[2].save_full_agent(f"Models/embedded/full_agent_player_2_ep{episode}_{agent_2_reward_str}_{timestamp}.keras")
-                    print(f"\nEpisode {episode}: Saved Agent 2 (avg reward: {avg_reward_agent_2:.2f} > {self.model_save_threshold})")
-                else:
-                    print(f"\nEpisode {episode}: Skipped saving Agent 2 (avg reward: {avg_reward_agent_2:.2f} <= {self.model_save_threshold})")
+                # Save each agent independently if their performance is above threshold
+                self._save_agent_if_above_threshold(0, avg_reward_agent_0, episode, timestamp)
+                self._save_agent_if_above_threshold(2, avg_reward_agent_2, episode, timestamp)
     
     def _get_last_trick_winner(self):
         """Determine who won the last trick."""
@@ -310,6 +296,28 @@ class EmbeddedWhistTrainer:
         if self.game.trick_winner is not None:
             return self.game.players.index(self.game.trick_winner)
         return 0  # Default to first player if no winner set
+    
+    def _save_agent_if_above_threshold(self, agent_idx, avg_reward, episode, timestamp):
+        """
+        Save an agent's model if its average reward is above the threshold.
+        
+        Args:
+            agent_idx: Agent index (0 or 2)
+            avg_reward: Average reward for this agent
+            episode: Current episode number
+            timestamp: Timestamp string for filename
+        """
+        if avg_reward > self.model_save_threshold:
+            agent_reward_str = f"avgR{avg_reward:.2f}"
+            self.agents[agent_idx].save_agent(
+                f"Weights/embedded/agent_player_{agent_idx}_ep{episode}_{agent_reward_str}_{timestamp}.weights.h5"
+            )
+            self.agents[agent_idx].save_full_agent(
+                f"Models/embedded/full_agent_player_{agent_idx}_ep{episode}_{agent_reward_str}_{timestamp}.keras"
+            )
+            print(f"\nEpisode {episode}: Saved Agent {agent_idx} (avg reward: {avg_reward:.2f} > {self.model_save_threshold})")
+        else:
+            print(f"\nEpisode {episode}: Skipped saving Agent {agent_idx} (avg reward: {avg_reward:.2f} <= {self.model_save_threshold})")
     
     def plot_results(self, plot_dir='plots'):
         """Plot and save the training results.
