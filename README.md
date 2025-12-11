@@ -194,7 +194,7 @@ Agents receive a reward when their card choice matches what the EW strategy woul
 This feature can be disabled by setting `enable_per_card_reward=False` in the trainer or `ENABLE_PER_CARD_REWARD=False` in constants.
 
 ### Model Save Threshold
-Each agent's model is saved independently based on its own performance. An agent is only saved if its average reward over the last 100 episodes is above **2.2**. The check is performed every 25 games, but only after 200 games have been played. This allows agents to develop different strategies and prevents saving poorly performing models.
+Each agent's model is saved independently based on its own performance. An agent is only saved if its average reward over the last 100 episodes is above **2.2**. The check is performed every 75 games, but only after 400 games have been played. This allows agents to develop different strategies and prevents saving poorly performing models.
 
 The two DQN agents (positions 0 and 2) are tracked separately, allowing them to learn independently and potentially develop different playing styles. The system includes comprehensive monitoring and statistics tracking. See `docs/reward_system.md` for complete details.
 
