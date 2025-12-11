@@ -114,7 +114,9 @@ class EmbeddedWhistTrainer:
         # Set EW strategies on game for per-card reward calculation
         self.game.set_ew_strategies(self.ew_strategies)
         
-        self.all_episode_rewards = []
+        # Track rewards separately for each agent
+        self.agent_0_episode_rewards = []
+        self.agent_2_episode_rewards = []
     
     def train(self):
         """Run the training loop with embedded representations."""
@@ -252,7 +254,9 @@ class EmbeddedWhistTrainer:
             if should_log:
                 self.logger.end_game(episode, self.game.score_array)
                         
-            self.all_episode_rewards.append(np.mean(episode_rewards))
+            # Track rewards separately for each agent (positions 0 and 2)
+            self.agent_0_episode_rewards.append(episode_rewards[0])
+            self.agent_2_episode_rewards.append(episode_rewards[2])
             
             # Only decay epsilon after exploration phase
             if not in_exploration:
@@ -266,29 +270,39 @@ class EmbeddedWhistTrainer:
             
             # Display average reward every 50th game
             if episode % 50 == 0:
-                recent_window = min(50, len(self.all_episode_rewards))
-                avg_reward_50 = np.mean(self.all_episode_rewards[-recent_window:])
-                print(f"\nEpisode {episode}: Average reward over last {recent_window} games: {avg_reward_50:.2f}")
+                recent_window = min(50, len(self.agent_0_episode_rewards))
+                avg_reward_agent_0 = np.mean(self.agent_0_episode_rewards[-recent_window:])
+                avg_reward_agent_2 = np.mean(self.agent_2_episode_rewards[-recent_window:])
+                print(f"\nEpisode {episode}: Avg rewards (last {recent_window} games) - Agent 0: {avg_reward_agent_0:.2f}, Agent 2: {avg_reward_agent_2:.2f}")
 
             # Only save model if average reward is above threshold
             # Check every MODEL_SAVE_CHECK_EVERY games after MODEL_SAVE_MIN_GAMES
             if episode >= MODEL_SAVE_MIN_GAMES and episode % MODEL_SAVE_CHECK_EVERY == 0:
-                # Calculate average reward over recent episodes
-                recent_window = min(100, len(self.all_episode_rewards))
-                avg_reward = np.mean(self.all_episode_rewards[-recent_window:])
+                # Calculate average reward over recent episodes for each agent separately
+                recent_window = min(100, len(self.agent_0_episode_rewards))
+                avg_reward_agent_0 = np.mean(self.agent_0_episode_rewards[-recent_window:])
+                avg_reward_agent_2 = np.mean(self.agent_2_episode_rewards[-recent_window:])
                 
-                if avg_reward > self.model_save_threshold:
-                    # Format avg_reward for filename (e.g., -3.45 -> "avgR-3.45")
-                    avg_reward_str = f"avgR{avg_reward:.2f}"
-                    # Generate timestamp for unique filenames
-                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                    for i, agent_obj in enumerate(self.agents):
-                        if agent_obj is not None:
-                            agent_obj.save_agent(f"Weights/embedded/agent_player_{i}_ep{episode}_{avg_reward_str}_{timestamp}.weights.h5")
-                            agent_obj.save_full_agent(f"Models/embedded/full_agent_player_{i}_ep{episode}_{avg_reward_str}_{timestamp}.keras")
-                    print(f"\nEpisode {episode}: Saved models to embedded/ (avg reward: {avg_reward:.2f} > {self.model_save_threshold})")
+                # Generate timestamp for unique filenames
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                
+                # Save agent 0 if its performance is above threshold
+                if avg_reward_agent_0 > self.model_save_threshold:
+                    agent_0_reward_str = f"avgR{avg_reward_agent_0:.2f}"
+                    self.agents[0].save_agent(f"Weights/embedded/agent_player_0_ep{episode}_{agent_0_reward_str}_{timestamp}.weights.h5")
+                    self.agents[0].save_full_agent(f"Models/embedded/full_agent_player_0_ep{episode}_{agent_0_reward_str}_{timestamp}.keras")
+                    print(f"\nEpisode {episode}: Saved Agent 0 (avg reward: {avg_reward_agent_0:.2f} > {self.model_save_threshold})")
                 else:
-                    print(f"\nEpisode {episode}: Skipped saving (avg reward: {avg_reward:.2f} <= {self.model_save_threshold})")
+                    print(f"\nEpisode {episode}: Skipped saving Agent 0 (avg reward: {avg_reward_agent_0:.2f} <= {self.model_save_threshold})")
+                
+                # Save agent 2 if its performance is above threshold
+                if avg_reward_agent_2 > self.model_save_threshold:
+                    agent_2_reward_str = f"avgR{avg_reward_agent_2:.2f}"
+                    self.agents[2].save_agent(f"Weights/embedded/agent_player_2_ep{episode}_{agent_2_reward_str}_{timestamp}.weights.h5")
+                    self.agents[2].save_full_agent(f"Models/embedded/full_agent_player_2_ep{episode}_{agent_2_reward_str}_{timestamp}.keras")
+                    print(f"\nEpisode {episode}: Saved Agent 2 (avg reward: {avg_reward_agent_2:.2f} > {self.model_save_threshold})")
+                else:
+                    print(f"\nEpisode {episode}: Skipped saving Agent 2 (avg reward: {avg_reward_agent_2:.2f} <= {self.model_save_threshold})")
     
     def _get_last_trick_winner(self):
         """Determine who won the last trick."""
@@ -312,19 +326,23 @@ class EmbeddedWhistTrainer:
         # Generate timestamp for unique filenames
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         
-        # Plot 1: Average reward over episodes
+        # Plot 1: Average reward over episodes (both agents)
         plt.figure(figsize=(12, 6))
-        plt.plot(self.all_episode_rewards, alpha=0.7, label='Episode Reward')
+        plt.plot(self.agent_0_episode_rewards, alpha=0.7, label='Agent 0 (North)')
+        plt.plot(self.agent_2_episode_rewards, alpha=0.7, label='Agent 2 (South)')
         
         # Add rolling average
-        if len(self.all_episode_rewards) >= 100:
-            rolling_avg = np.convolve(self.all_episode_rewards, np.ones(100)/100, mode='valid')
-            plt.plot(range(99, len(self.all_episode_rewards)), rolling_avg, 
-                    color='red', linewidth=2, label='100-Episode Rolling Avg')
+        if len(self.agent_0_episode_rewards) >= 100:
+            rolling_avg_0 = np.convolve(self.agent_0_episode_rewards, np.ones(100)/100, mode='valid')
+            rolling_avg_2 = np.convolve(self.agent_2_episode_rewards, np.ones(100)/100, mode='valid')
+            plt.plot(range(99, len(self.agent_0_episode_rewards)), rolling_avg_0, 
+                    linewidth=2, label='Agent 0 100-Ep Avg')
+            plt.plot(range(99, len(self.agent_2_episode_rewards)), rolling_avg_2, 
+                    linewidth=2, label='Agent 2 100-Ep Avg')
         
         plt.xlabel("Episode")
-        plt.ylabel("Average Reward")
-        plt.title("Embedded DQN Agent Learning Over Time")
+        plt.ylabel("Reward")
+        plt.title("Embedded DQN Agents Learning Over Time")
         plt.legend()
         plt.grid(True)
         
@@ -333,14 +351,17 @@ class EmbeddedWhistTrainer:
         print(f"Saved: {filename}")
         plt.close()
         
-        # Plot 2: Reward distribution histogram
-        plt.figure(figsize=(10, 6))
-        plt.hist(self.all_episode_rewards, bins=50, edgecolor='black', alpha=0.7)
-        plt.xlabel("Average Reward")
+        # Plot 2: Reward distribution histogram (both agents)
+        plt.figure(figsize=(12, 6))
+        plt.hist(self.agent_0_episode_rewards, bins=50, edgecolor='black', alpha=0.5, label='Agent 0')
+        plt.hist(self.agent_2_episode_rewards, bins=50, edgecolor='black', alpha=0.5, label='Agent 2')
+        plt.xlabel("Reward")
         plt.ylabel("Frequency")
-        plt.title("Embedded Agent Reward Distribution")
-        plt.axvline(np.mean(self.all_episode_rewards), color='red', linestyle='--', 
-                   label=f'Mean: {np.mean(self.all_episode_rewards):.2f}')
+        plt.title("Embedded Agents Reward Distribution")
+        plt.axvline(np.mean(self.agent_0_episode_rewards), color='blue', linestyle='--', 
+                   label=f'Agent 0 Mean: {np.mean(self.agent_0_episode_rewards):.2f}')
+        plt.axvline(np.mean(self.agent_2_episode_rewards), color='orange', linestyle='--', 
+                   label=f'Agent 2 Mean: {np.mean(self.agent_2_episode_rewards):.2f}')
         plt.legend()
         plt.grid(True, alpha=0.3)
         
@@ -349,13 +370,16 @@ class EmbeddedWhistTrainer:
         print(f"Saved: {filename}")
         plt.close()
         
-        # Plot 3: Cumulative reward
+        # Plot 3: Cumulative reward (both agents)
         plt.figure(figsize=(12, 6))
-        cumulative_rewards = np.cumsum(self.all_episode_rewards)
-        plt.plot(cumulative_rewards)
+        cumulative_rewards_0 = np.cumsum(self.agent_0_episode_rewards)
+        cumulative_rewards_2 = np.cumsum(self.agent_2_episode_rewards)
+        plt.plot(cumulative_rewards_0, label='Agent 0 (North)')
+        plt.plot(cumulative_rewards_2, label='Agent 2 (South)')
         plt.xlabel("Episode")
         plt.ylabel("Cumulative Reward")
-        plt.title("Embedded Agent Cumulative Reward Over Training")
+        plt.title("Embedded Agents Cumulative Reward Over Training")
+        plt.legend()
         plt.grid(True)
         
         filename = os.path.join(plot_dir, f'embedded_cumulative_reward_{timestamp}.png')
