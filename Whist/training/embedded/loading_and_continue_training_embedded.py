@@ -333,8 +333,8 @@ def main():
     
     # Example: Load from weights and continue training
     # Update these paths to your actual model files
-    agent_0_weights = "Weights/embedded/embedded_agent_player_0_ep1000_avgR-3.25_20251201_120000.weights.h5"
-    agent_2_weights = "Weights/embedded/embedded_agent_player_2_ep1000_avgR-3.25_20251201_120000.weights.h5"
+    agent_0_weights = "Weights/embedded/agent_player_0_ep1800_avgR-1.94_20251209_145308.weights.h5"
+    agent_2_weights = "Weights/embedded/agent_player_2_ep1800_avgR-1.94_20251209_145308.weights.h5"
     
     # Or load from Keras models
     # agent_0_model = "Models/embedded/embedded_full_agent_player_0_ep1000_avgR-3.25_20251201_120000.keras"

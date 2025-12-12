@@ -22,7 +22,7 @@ Shows 4 key scenarios with reward component breakdown:
 
 **Key Insights**:
 - Winning more tricks individually is better, BUT team winning adds significant bonus
-- Partner winning tricks still benefits the agent (+0.8 per trick)
+- Partner winning tricks still benefits the agent (+0.9 per trick)
 - Team bonus of +2 can turn a mediocre individual performance into positive reward
 
 ### 2. Reward Heatmap (`reward_heatmap.png`)
@@ -75,13 +75,14 @@ An example game played trick-by-trick showing:
 | Outcome | Reward | Meaning |
 |---------|--------|---------|
 | Agent wins trick | **+1.0** | Direct win |
-| Partner wins trick | **+0.8** | Team win (slightly less to encourage agent to win when possible) |
-| Opponent wins trick | **-1.0** | Loss (need to improve strategy) |
+| Partner wins trick | **+0.9** | Team win (slightly less to encourage agent to win when possible) |
+| Opponent wins trick | **-1.1** | Loss (need to improve strategy) |
 
 ### End-Game Reward Formula
 
 ```python
-base_reward = (agent_tricks - max_tricks) × (1 - agent_tricks / max_tricks)
+max_tricks = 13  # CARDS_PER_PLAYER
+base_reward = ((max_tricks + (agent_tricks - max_tricks)) / 10) ** (1 + (agent_tricks / max_tricks))
 team_bonus = +2.0 if team_total >= 7 else 0.0
 end_game_reward = base_reward + team_bonus
 ```
